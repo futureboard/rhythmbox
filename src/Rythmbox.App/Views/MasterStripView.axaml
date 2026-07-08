@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             xmlns:structs="using:SoundFlow.Structs"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="60"
+             x:Class="Rythmbox.App.Views.MasterStripView"
+             x:DataType="vm:MasterStripViewModel">
+    <Border Classes="masterStrip">
+        <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto" VerticalAlignment="Center">
+
+            <TextBlock Grid.Column="0" Text="MASTER" Classes="panelHeader" VerticalAlignment="Center" Margin="0,0,16,0" />
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <TextBlock Text="VOL" Classes="dim" VerticalAlignment="Center" />
+                <Slider Minimum="0" Maximum="1.5" Value="{Binding MasterVolume}" Width="120" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" Margin="20,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="RMS" Classes="dim" VerticalAlignment="Center" />
+                <ProgressBar Minimum="0" Maximum="1" Value="{Binding RmsLevel}" Width="120" Height="10" Classes="vuMeter" />
+                <TextBlock Text="PEAK" Classes="dim" VerticalAlignment="Center" Margin="14,0,0,0" />
+                <ProgressBar Minimum="0" Maximum="1" Value="{Binding PeakLevel}" Width="120" Height="10" Classes="vuMeterPeak" />
+            </StackPanel>
+
+            <ComboBox Grid.Column="4" ItemsSource="{Binding OutputDevices}" SelectedItem="{Binding SelectedOutputDevice}" Width="240" Margin="0,0,8,0">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="structs:DeviceInfo">
+                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Grid.Column="5" Content="&#8635;" Command="{Binding RefreshDevicesCommand}" ToolTip.Tip="Refresh output devices" />
+
+        </Grid>
+    </Border>
+</UserControl>

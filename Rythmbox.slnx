@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Rythmbox.App/Rythmbox.App.csproj" />
+    <Project Path="src/Rythmbox.Core/Rythmbox.Core.csproj" />
+  </Folder>
+</Solution>

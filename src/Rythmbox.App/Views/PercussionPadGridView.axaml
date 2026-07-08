@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="320"
+             x:Class="Rythmbox.App.Views.PercussionPadGridView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="panel">
+        <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                <TextBlock Text="PERCUSSION PADS" Classes="panelHeader" VerticalAlignment="Center" />
+                <TextBlock Text="GM DRUM MAP (19 VOICES)" Classes="dim" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <ItemsControl ItemsSource="{Binding PadGrid.Pads}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PadViewModel">
+                        <Button Command="{Binding HitCommand}" Margin="4" Padding="0" HorizontalContentAlignment="Stretch"
+                                Classes="pad" Classes.used="{Binding IsUsedInLoop}">
+                            <Grid RowDefinitions="Auto,*" Height="58">
+                                <TextBlock Grid.Row="0" Text="{Binding Number}" Classes="padNumber" Margin="6,4,0,0" />
+                                <TextBlock Grid.Row="1" Text="{Binding Label}" Classes="padLabel" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DockPanel>
+    </Border>
+</UserControl>

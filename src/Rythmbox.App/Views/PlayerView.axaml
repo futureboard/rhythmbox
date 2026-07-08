@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="300"
+             x:Class="Rythmbox.App.Views.PlayerView"
+             x:DataType="vm:PlayerViewModel">
+    <Border Classes="panel">
+        <DockPanel LastChildFill="True">
+
+            <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,10">
+                <TextBlock Text="CHANNEL MIXER" Classes="panelHeader" />
+                <TextBlock Text="{Binding LoadedFileName, FallbackValue='No loop loaded'}" Classes="dim" TextTrimming="CharacterEllipsis" />
+
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <TextBlock Grid.Column="0" Text="{Binding PositionText}" VerticalAlignment="Center" Margin="0,0,8,0" Classes="mono" />
+                    <Slider Grid.Column="1" Minimum="0" Maximum="{Binding DurationSeconds}" Value="{Binding PositionSeconds}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{Binding DurationText}" VerticalAlignment="Center" Margin="8,0,0,0" Classes="mono" />
+                </Grid>
+
+                <Grid ColumnDefinitions="30,*,32,32,90" Margin="4,4,4,0">
+                    <TextBlock Grid.Column="0" Text="Ch" Classes="dim" />
+                    <TextBlock Grid.Column="1" Text="Name" Classes="dim" />
+                    <TextBlock Grid.Column="2" Text="M" Classes="dim" HorizontalAlignment="Center" />
+                    <TextBlock Grid.Column="3" Text="S" Classes="dim" HorizontalAlignment="Center" />
+                    <TextBlock Grid.Column="4" Text="Volume" Classes="dim" HorizontalAlignment="Center" />
+                </Grid>
+            </StackPanel>
+
+            <ListBox ItemsSource="{Binding Tracks}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:TrackChannelViewModel">
+                        <Grid ColumnDefinitions="30,*,32,32,90" Margin="0,3">
+                            <TextBlock Grid.Column="0" Text="{Binding Channel}" Classes="dim" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                            <ToggleButton Grid.Column="2" Content="M" IsChecked="{Binding IsMuted}" Width="28" Padding="0" />
+                            <ToggleButton Grid.Column="3" Content="S" IsChecked="{Binding IsSoloed}" Width="28" Padding="0" />
+                            <Slider Grid.Column="4" Minimum="0" Maximum="1" Value="{Binding Volume}" Width="86" VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+        </DockPanel>
+    </Border>
+</UserControl>

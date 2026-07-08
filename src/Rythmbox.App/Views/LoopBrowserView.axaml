@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="220"
+             x:Class="Rythmbox.App.Views.LoopBrowserView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="panel">
+        <DockPanel LastChildFill="True">
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                    <TextBlock Classes="panelHeader">
+                        <Run Text="MIDI LOOP BROWSER" />
+                        <Run Text=" - " />
+                        <Run Text="{Binding LoopBrowser.FolderLabel}" />
+                    </TextBlock>
+                    <TextBlock Classes="dim">
+                        <Run Text="(" /><Run Text="{Binding LoopBrowser.TotalCount}" /><Run Text=" loops)" />
+                    </TextBlock>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Browse Folder..." Click="OnBrowseFolderClick" />
+            </Grid>
+
+            <ListBox ItemsSource="{Binding LoopBrowser.Loops}" SelectedItem="{Binding LoopBrowser.SelectedLoop}" Classes="loopList">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:LoopEntryViewModel">
+                        <Grid ColumnDefinitions="*,80,80,90">
+                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding HitsLabel}" Classes="dim" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{Binding DurationLabel}" Classes="dim" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="3" Text="{Binding BpmLabel}" Classes="dim" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+    </Border>
+</UserControl>

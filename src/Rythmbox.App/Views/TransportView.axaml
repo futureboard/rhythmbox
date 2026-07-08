@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="320" d:DesignHeight="220"
+             x:Class="Rythmbox.App.Views.TransportView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="panel">
+        <StackPanel Spacing="8">
+            <TextBlock Text="TRANSPORT" Classes="panelHeader" />
+
+            <Button Command="{Binding Player.PlayPauseCommand}" HorizontalAlignment="Stretch" Height="52" Classes="transportStop">
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                    <Border Width="16" Height="16" Background="White" CornerRadius="2" />
+                    <TextBlock Text="{Binding Player.PlayPauseLabel}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+
+            <Grid ColumnDefinitions="*,*" >
+                <ToggleButton Grid.Column="0" Content="SUB" IsChecked="{Binding Player.IsLooping}" Margin="0,0,4,0" HorizontalAlignment="Stretch"
+                              ToolTip.Tip="Loop the current file (SUB)" />
+                <ToggleButton Grid.Column="1" Content="MIXER" IsChecked="{Binding IsMixerOpen}" Margin="4,0,0,0" HorizontalAlignment="Stretch" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*">
+                <Button Grid.Column="0" Content="RESCAN" Command="{Binding LoopBrowser.RescanCommand}" Margin="0,0,4,0" HorizontalAlignment="Stretch" />
+                <Button Grid.Column="1" Content="QUIT" Command="{Binding QuitCommand}" Margin="4,0,0,0" HorizontalAlignment="Stretch" Classes="danger" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding Player.Bpm, StringFormat='{}{0:0.0} BPM'}" Classes="mono" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Content="{Binding SoundFontBrowser.ConnectLabel}" Command="{Binding SoundFontBrowser.ToggleMidiConnectionCommand}"
+                        ToolTip.Tip="Connect a physical MIDI keyboard to play the loaded SoundFont live" />
+            </Grid>
+        </StackPanel>
+    </Border>
+</UserControl>

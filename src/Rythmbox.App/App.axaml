@@ -1,0 +1,16 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Rythmbox.App.App"
+             xmlns:local="using:Rythmbox.App"
+             RequestedThemeVariant="Dark">
+             <!-- Rythmbox is dark-only, styled after hardware rack units like the Boss DR-880. -->
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+  
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://Rythmbox.App/Styles/Theme.axaml" />
+    </Application.Styles>
+</Application>

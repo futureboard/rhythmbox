@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Rythmbox.App.ViewModels"
+        xmlns:views="using:Rythmbox.App.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="720"
+        x:Class="Rythmbox.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Rythmbox"
+        Width="1150" Height="720" MinWidth="920" MinHeight="600"
+        Background="{DynamicResource RythmboxBackgroundBrush}">
+
+    <DockPanel LastChildFill="True">
+        <views:MasterStripView DockPanel.Dock="Bottom" DataContext="{Binding MasterStrip}" />
+
+        <Grid ColumnDefinitions="340,*" Margin="14">
+            <views:SoundFontBrowserView Grid.Column="0" DataContext="{Binding SoundFontBrowser}" Margin="0,0,7,0" />
+            <views:PlayerView Grid.Column="1" DataContext="{Binding Player}" Margin="7,0,0,0" />
+        </Grid>
+    </DockPanel>
+</Window>
