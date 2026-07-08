@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  CONFIGURATION: Release
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }} / ${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: macos-latest
+            rid: osx-arm64
+          - os: ubuntu-latest
+            rid: linux-x64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libice6 libsm6 libfontconfig1 libx11-6 libxrandr2 libxext6 libgl1
+
+      - name: Restore
+        run: dotnet restore Rythmbox.slnx
+
+      - name: Build
+        run: dotnet build Rythmbox.slnx -c ${{ env.CONFIGURATION }} --no-restore
+
+      - name: Test
+        run: dotnet test src/Rythmbox.Core.Tests/Rythmbox.Core.Tests.csproj -c ${{ env.CONFIGURATION }} --no-build --verbosity normal
+
+      - name: Publish
+        shell: bash
+        run: ./build/publish.sh "${{ matrix.rid }}"
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: echo "value=$(grep -oP '(?<=<Version>)[^<]+' Directory.Build.props | head -n1)" >> "$GITHUB_OUTPUT"
+
+      - name: Package artifact (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.value }}"
+          $archive = "out/dist/Rythmbox-$version-${{ matrix.rid }}.zip"
+          New-Item -ItemType Directory -Path out/dist -Force | Out-Null
+          Compress-Archive -Path "out/publish/${{ matrix.rid }}/*" -DestinationPath $archive -Force
+
+      - name: Package artifact (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          version="${{ steps.version.outputs.value }}"
+          mkdir -p out/dist
+          tar -czf "out/dist/Rythmbox-${version}-${{ matrix.rid }}.tar.gz" -C "out/publish/${{ matrix.rid }}" .
+
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rythmbox-${{ matrix.rid }}
+          path: out/dist/*
+          if-no-files-found: error
+
+  windows-installer:
+    name: Windows installer
+    runs-on: windows-latest
+    needs: build
+    if: github.event_name != 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish
+        shell: pwsh
+        run: ./build/publish.ps1 -Runtime win-x64 -Configuration ${{ env.CONFIGURATION }}
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Build installer
+        shell: pwsh
+        run: ./build/installer.ps1 -Runtime win-x64 -Configuration ${{ env.CONFIGURATION }}
+
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          $version = (Select-Xml -Path Directory.Build.props -XPath '//Version').Node.InnerText.Trim()
+          "value=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: rythmbox-win-x64-setup
+          path: out/installer/Rythmbox-${{ steps.version.outputs.value }}-win-x64-setup.exe
+          if-no-files-found: error
