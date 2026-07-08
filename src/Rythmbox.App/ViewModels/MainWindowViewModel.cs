@@ -18,6 +18,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly PadMappingService _padMapping;
     private readonly PadMidiRouter _padRouter;
     private readonly MidiInputService _midiInput;
+    private readonly MidiFootSwitchController _footSwitch;
     private readonly MidiFilePlayer _midiFilePlayer;
     private readonly LoopLibraryService _loopLibrary;
     private readonly SubLoopService _subLoopService;
@@ -44,6 +45,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _padMapping = new PadMappingService();
         _padRouter = new PadMidiRouter(_kitPlayer, _padMapping);
         _midiInput = new MidiInputService(_engine);
+        _footSwitch = new MidiFootSwitchController();
         _midiFilePlayer = new MidiFilePlayer(_engine, _kitPlayer);
         _loopLibrary = new LoopLibraryService();
         _subLoopService = new SubLoopService();
@@ -67,7 +69,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         NowPlaying = new NowPlayingViewModel(LoopBrowser, Player);
         PadMixer = new PadMixerViewModel(_kitPlayer);
         BusMixer = new BusMixerViewModel(_kitPlayer);
-        Settings = new SettingsViewModel(_padMapping, _padRouter, _midiInput, Status, _localization);
+        Settings = new SettingsViewModel(_padMapping, _padRouter, _midiInput, _footSwitch, _arranger, Status, _localization);
         Tempo = new TempoViewModel(_tempoPresets, Player, Status, _localization);
         SubLoops = new SubLoopViewModel(_subLoopService, Player, Status);
         BeatLeds = new BeatLedViewModel(Player);
@@ -81,6 +83,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
             _paths,
             _localization,
             Tempo);
+
+        // Foot switch: MIDI CC -> momentary time-signature switch. CC arrives on the MIDI thread,
+        // so marshal the state change onto the UI thread before touching the arranger view models.
+        _padRouter.ControlChangeReceived += (cc, value) => _footSwitch.ProcessControlChange(cc, value);
+        _footSwitch.Pressed += () => Dispatcher.UIThread.Post(Machine.RequestTimeSignatureSwitch);
 
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clockTimer.Tick += (_, _) => ClockText = DateTime.Now.ToString("HH:mm:ss");

@@ -44,6 +44,22 @@
                                 <Button Content="{Binding Localization.SettingsPrevPort}" Command="{Binding Settings.PreviousPortCommand}" />
                                 <Button Content="{Binding Localization.SettingsNextPort}" Command="{Binding Settings.NextPortCommand}" />
                             </StackPanel>
+
+                            <Border BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,1,0,0" Padding="0,10,0,0" Margin="0,4,0,0">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{Binding Localization.SettingsFootSwitch}" FontWeight="Bold" />
+                                    <TextBlock Text="{Binding Localization.SettingsFootSwitchHelp}" Classes="dim" TextWrapping="Wrap" />
+                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                        <TextBlock Text="{Binding Settings.FootSwitchCcLabel}" Classes="mono" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Settings.FootSwitchSignatureLabel}" Classes="mono" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <Button Content="{Binding Localization.SettingsFootSwitchCcPrev}" Command="{Binding Settings.FootSwitchCcPrevCommand}" />
+                                        <Button Content="{Binding Localization.SettingsFootSwitchCcNext}" Command="{Binding Settings.FootSwitchCcNextCommand}" />
+                                        <Button Content="{Binding Localization.SettingsFootSwitchCycleSig}" Command="{Binding Settings.CycleFootSwitchSignatureCommand}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </Border>
 

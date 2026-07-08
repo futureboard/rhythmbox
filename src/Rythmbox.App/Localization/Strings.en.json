@@ -23,6 +23,7 @@
   "transport.scan": "Scan",
   "transport.quit": "QUIT",
   "transport.tapTempo": "Tap",
+  "transport.timeSig": "SIG",
 
   "header.tapTempo": "Tap",
 
@@ -76,6 +77,13 @@
   "settings.keyNext": "Key next",
   "settings.keyLabel": "Key: {0}",
   "settings.midiLabel": "MIDI: {0}",
+  "settings.footSwitch": "FOOT SWITCH (CC)",
+  "settings.footSwitchHelp": "Momentary time-signature switch (e.g. a 2/4 bar) triggered by a MIDI CC foot switch, then back to the base groove.",
+  "settings.footSwitchCc": "CC: {0}",
+  "settings.footSwitchSig": "Bar: {0}",
+  "settings.footSwitchCcPrev": "CC −",
+  "settings.footSwitchCcNext": "CC +",
+  "settings.footSwitchCycleSig": "Signature",
 
   "machine.noStyle": "No Style Selected",
   "machine.notLoaded": "Not Loaded",

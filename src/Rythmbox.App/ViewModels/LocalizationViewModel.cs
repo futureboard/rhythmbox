@@ -45,6 +45,7 @@ public sealed partial class LocalizationViewModel : ViewModelBase
     [ObservableProperty] private string _transportScan = string.Empty;
     [ObservableProperty] private string _transportQuit = string.Empty;
     [ObservableProperty] private string _transportTapTempo = string.Empty;
+    [ObservableProperty] private string _transportTimeSig = string.Empty;
 
     [ObservableProperty] private string _headerTapTempo = string.Empty;
 
@@ -91,6 +92,11 @@ public sealed partial class LocalizationViewModel : ViewModelBase
     [ObservableProperty] private string _settingsSwitchMode = string.Empty;
     [ObservableProperty] private string _settingsLearn = string.Empty;
     [ObservableProperty] private string _settingsKeyNext = string.Empty;
+    [ObservableProperty] private string _settingsFootSwitch = string.Empty;
+    [ObservableProperty] private string _settingsFootSwitchHelp = string.Empty;
+    [ObservableProperty] private string _settingsFootSwitchCcPrev = string.Empty;
+    [ObservableProperty] private string _settingsFootSwitchCcNext = string.Empty;
+    [ObservableProperty] private string _settingsFootSwitchCycleSig = string.Empty;
 
     [ObservableProperty] private string _machineExportMidi = string.Empty;
 
@@ -138,6 +144,7 @@ public sealed partial class LocalizationViewModel : ViewModelBase
         TransportScan = _i18n["transport.scan"];
         TransportQuit = _i18n["transport.quit"];
         TransportTapTempo = _i18n["transport.tapTempo"];
+        TransportTimeSig = _i18n["transport.timeSig"];
 
         HeaderTapTempo = _i18n["header.tapTempo"];
 
@@ -184,6 +191,11 @@ public sealed partial class LocalizationViewModel : ViewModelBase
         SettingsSwitchMode = _i18n["settings.switchMode"];
         SettingsLearn = _i18n["settings.learn"];
         SettingsKeyNext = _i18n["settings.keyNext"];
+        SettingsFootSwitch = _i18n["settings.footSwitch"];
+        SettingsFootSwitchHelp = _i18n["settings.footSwitchHelp"];
+        SettingsFootSwitchCcPrev = _i18n["settings.footSwitchCcPrev"];
+        SettingsFootSwitchCcNext = _i18n["settings.footSwitchCcNext"];
+        SettingsFootSwitchCycleSig = _i18n["settings.footSwitchCycleSig"];
 
         MachineExportMidi = _i18n["machine.exportMidi"];
     }

@@ -23,6 +23,7 @@
   "transport.scan": "สแกน",
   "transport.quit": "ออก",
   "transport.tapTempo": "แตะ",
+  "transport.timeSig": "จังหวะ",
 
   "header.tapTempo": "แตะ",
 
@@ -76,6 +77,13 @@
   "settings.keyNext": "คีย์ถัดไป",
   "settings.keyLabel": "คีย์: {0}",
   "settings.midiLabel": "MIDI: {0}",
+  "settings.footSwitch": "ฟุตสวิตช์ (CC)",
+  "settings.footSwitchHelp": "สลับจังหวะชั่วคราว (เช่น ห้อง 2/4) ด้วยฟุตสวิตช์ MIDI CC แล้วกลับสู่จังหวะหลัก",
+  "settings.footSwitchCc": "CC: {0}",
+  "settings.footSwitchSig": "ห้อง: {0}",
+  "settings.footSwitchCcPrev": "CC −",
+  "settings.footSwitchCcNext": "CC +",
+  "settings.footSwitchCycleSig": "จังหวะ",
 
   "machine.noStyle": "ยังไม่ได้เลือกสไตล์",
   "machine.notLoaded": "ยังไม่โหลด",
