@@ -3,13 +3,17 @@
 
     <Styles.Resources>
         <ResourceDictionary>
-            <SolidColorBrush x:Key="RythmboxBackgroundBrush" Color="#17181C" />
-            <SolidColorBrush x:Key="RythmboxPanelBrush" Color="#212227" />
-            <SolidColorBrush x:Key="RythmboxPanelBorderBrush" Color="#33343B" />
+            <SolidColorBrush x:Key="RythmboxBackgroundBrush" Color="#101014" />
+            <SolidColorBrush x:Key="RythmboxPanelBrush" Color="#1B1C22" />
+            <SolidColorBrush x:Key="RythmboxPanelBorderBrush" Color="#2E2F38" />
             <SolidColorBrush x:Key="RythmboxAccentBrush" Color="#FF8C1A" />
             <SolidColorBrush x:Key="RythmboxAccentHoverBrush" Color="#FFA542" />
-            <SolidColorBrush x:Key="RythmboxTextBrush" Color="#F0EFEA" />
-            <SolidColorBrush x:Key="RythmboxDimTextBrush" Color="#8C8D96" />
+            <SolidColorBrush x:Key="RythmboxTextBrush" Color="#EDEDEF" />
+            <SolidColorBrush x:Key="RythmboxDimTextBrush" Color="#82838D" />
+            <SolidColorBrush x:Key="RythmboxRedBrush" Color="#E5453B" />
+            <SolidColorBrush x:Key="RythmboxRedHoverBrush" Color="#F0685F" />
+            <SolidColorBrush x:Key="RythmboxGreenBrush" Color="#35D07F" />
+            <SolidColorBrush x:Key="RythmboxPadBrush" Color="#26272E" />
         </ResourceDictionary>
     </Styles.Resources>
 
@@ -25,14 +29,15 @@
     <Style Selector="Border.masterStrip">
         <Setter Property="Background" Value="{DynamicResource RythmboxPanelBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
-        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Padding" Value="16,10" />
     </Style>
 
     <Style Selector="TextBlock.panelHeader">
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Foreground" Value="{DynamicResource RythmboxAccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxTextBrush}" />
         <Setter Property="LetterSpacing" Value="1" />
     </Style>
 
@@ -56,6 +61,16 @@
         <Setter Property="Background" Value="{DynamicResource RythmboxAccentHoverBrush}" />
     </Style>
 
+    <Style Selector="Button.danger">
+        <Setter Property="Background" Value="#3A2325" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxRedBrush}" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#4A2B2D" />
+    </Style>
+
     <Style Selector="ProgressBar.vuMeter">
         <Setter Property="Foreground" Value="#3DDC84" />
         <Setter Property="Background" Value="#2A2B31" />
@@ -66,6 +81,213 @@
         <Setter Property="Foreground" Value="{DynamicResource RythmboxAccentBrush}" />
         <Setter Property="Background" Value="#2A2B31" />
         <Setter Property="CornerRadius" Value="3" />
+    </Style>
+
+    <!-- Header bar -->
+    <Style Selector="Border.headerBar">
+        <Setter Property="Background" Value="{DynamicResource RythmboxPanelBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Padding" Value="16,8" />
+    </Style>
+
+    <Style Selector="Border.badge">
+        <Setter Property="Background" Value="#25201A" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="8,3" />
+    </Style>
+
+    <Style Selector="Border.badge TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxAccentBrush}" />
+    </Style>
+
+    <!-- Footer shortcut bar -->
+    <Style Selector="Border.footerBar">
+        <Setter Property="Background" Value="{DynamicResource RythmboxPanelBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="Padding" Value="16,5" />
+    </Style>
+
+    <!-- Now playing box -->
+    <Style Selector="Border.nowPlaying">
+        <Setter Property="Background" Value="#132018" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxGreenBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="16,12" />
+    </Style>
+
+    <Style Selector="TextBlock.nowPlayingDim">
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxGreenBrush}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style Selector="ProgressBar.nowPlayingProgress">
+        <Setter Property="Height" Value="6" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxGreenBrush}" />
+        <Setter Property="Background" Value="#1F2C24" />
+        <Setter Property="CornerRadius" Value="3" />
+    </Style>
+
+    <!-- Big transport stop/play button -->
+    <Style Selector="Button.transportStop">
+        <Setter Property="Background" Value="{DynamicResource RythmboxRedBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="CornerRadius" Value="6" />
+    </Style>
+
+    <Style Selector="Button.transportStop:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxRedHoverBrush}" />
+    </Style>
+
+    <!-- Percussion pads -->
+    <Style Selector="Button.pad">
+        <Setter Property="Background" Value="{DynamicResource RythmboxPadBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+    </Style>
+
+    <Style Selector="Button.pad:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#32333C" />
+    </Style>
+
+    <Style Selector="Button.pad.used">
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxRedBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="Background" Value="#3A2325" />
+    </Style>
+
+    <Style Selector="TextBlock.padNumber">
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxDimTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.padLabel">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxTextBrush}" />
+        <Setter Property="LetterSpacing" Value="0.5" />
+    </Style>
+
+    <!-- Kit mixer channel strips -->
+    <Style Selector="Border.mixerChannel">
+        <Setter Property="Background" Value="#1F2027" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="4,8" />
+        <Setter Property="Margin" Value="2,0" />
+        <Setter Property="MinHeight" Value="320" />
+    </Style>
+
+    <Style Selector="TextBlock.mixerChannelLabel">
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxTextBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style Selector="TextBlock.mixerChannelDb">
+        <Setter Property="FontFamily" Value="Consolas,Menlo,monospace" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxGreenBrush}" />
+    </Style>
+
+    <Style Selector="Slider.mixerFader">
+        <Setter Property="Width" Value="36" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerMute, ToggleButton.mixerSolo">
+        <Setter Property="FontSize" Value="9" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Padding" Value="0,3" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerMute:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxRedBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerMute:checked">
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerSolo:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="#E5B93B" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerSolo:checked">
+        <Setter Property="Foreground" Value="#1A1A1A" />
+    </Style>
+
+    <Style Selector="Border.categoryTag">
+        <Setter Property="Background" Value="#2D5FE0" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Padding" Value="0,3" />
+    </Style>
+
+    <Style Selector="Border.categoryTag TextBlock">
+        <Setter Property="FontSize" Value="9" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <Style Selector="Border.categoryTag.perc">
+        <Setter Property="Background" Value="#D97B2E" />
+    </Style>
+
+    <!-- Loop browser list -->
+    <Style Selector="ListBox.loopList">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="ListBox.loopList ListBoxItem">
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Margin" Value="0,2" />
+    </Style>
+
+    <Style Selector="ListBox.loopList ListBoxItem:selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxRedBrush}" />
+    </Style>
+
+    <Style Selector="ListBox.loopList ListBoxItem:selected TextBlock">
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <!-- Lucide-style vector icons (see Icons.axaml for the geometry resources) -->
+    <Style Selector="Path.icon">
+        <Setter Property="Stretch" Value="Uniform" />
+        <Setter Property="Fill" Value="Transparent" />
+        <Setter Property="Stroke" Value="{DynamicResource RythmboxTextBrush}" />
+        <Setter Property="StrokeThickness" Value="2" />
+        <Setter Property="StrokeLineCap" Value="Round" />
+        <Setter Property="StrokeJoin" Value="Round" />
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+    </Style>
+
+    <Style Selector="Path.icon.dim">
+        <Setter Property="Stroke" Value="{DynamicResource RythmboxDimTextBrush}" />
+    </Style>
+
+    <Style Selector="Path.icon.accent">
+        <Setter Property="Stroke" Value="{DynamicResource RythmboxAccentBrush}" />
+    </Style>
+
+    <Style Selector="Path.icon.danger">
+        <Setter Property="Stroke" Value="{DynamicResource RythmboxRedBrush}" />
+    </Style>
+
+    <Style Selector="Path.icon.small">
+        <Setter Property="Width" Value="13" />
+        <Setter Property="Height" Value="13" />
     </Style>
 
 </Styles>

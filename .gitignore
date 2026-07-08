@@ -16,3 +16,8 @@ Thumbs.db
 
 # Soundfonts and MIDI test assets (large / not part of source)
 *.sf2
+
+# Raw upstream Lucide icon repo (source-only; used by scripts/convert-icons.ps1 to
+# generate src/Rythmbox.App/Styles/Icons.axaml, which is what the app actually ships with).
+
+*.log

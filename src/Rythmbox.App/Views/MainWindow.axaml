@@ -9,15 +9,31 @@
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
         Title="Rythmbox"
-        Width="1150" Height="720" MinWidth="920" MinHeight="600"
-        Background="{DynamicResource RythmboxBackgroundBrush}">
+        Width="1150" Height="720" MinWidth="980" MinHeight="640"
+        Background="{DynamicResource RythmboxBackgroundBrush}"
+        Focusable="True"
+        KeyDown="OnWindowKeyDown"
+        KeyUp="OnWindowKeyUp">
 
     <DockPanel LastChildFill="True">
-        <views:MasterStripView DockPanel.Dock="Bottom" DataContext="{Binding MasterStrip}" />
+        <views:HeaderView DockPanel.Dock="Top" />
+        <views:FooterView DockPanel.Dock="Bottom" />
 
-        <Grid ColumnDefinitions="340,*" Margin="14">
-            <views:SoundFontBrowserView Grid.Column="0" DataContext="{Binding SoundFontBrowser}" Margin="0,0,7,0" />
-            <views:PlayerView Grid.Column="1" DataContext="{Binding Player}" Margin="7,0,0,0" />
-        </Grid>
+        <Panel>
+            <Grid RowDefinitions="*,220" Margin="14" RowSpacing="14" IsVisible="{Binding !IsMixerOpen}">
+                <Grid Grid.Row="0" ColumnDefinitions="320,*" ColumnSpacing="14">
+                    <StackPanel Grid.Column="0" Spacing="14">
+                        <views:NowPlayingView />
+                        <views:TransportView />
+                    </StackPanel>
+
+                    <views:PercussionPadGridView Grid.Column="1" />
+                </Grid>
+
+                <views:LoopBrowserView Grid.Row="1" />
+            </Grid>
+
+            <views:MixerPageView Margin="14" IsVisible="{Binding IsMixerOpen}" />
+        </Panel>
     </DockPanel>
 </Window>

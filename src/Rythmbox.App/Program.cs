@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Media;
 using System;
 
 namespace Rythmbox.App;
@@ -32,6 +33,9 @@ sealed class Program
 #if DEBUG
             .WithDeveloperTools()
 #endif
-            .WithInterFont()
+            .With(new FontManagerOptions
+            {
+                DefaultFamilyName = "avares://Rythmbox.App/Assets/Fonts#Barlow",
+            })
             .LogToTrace();
 }

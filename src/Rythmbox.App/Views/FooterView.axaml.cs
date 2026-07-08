@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace Rythmbox.App.Views;
 
-public partial class MixerOverlayView : UserControl
+public partial class FooterView : UserControl
 {
-    public MixerOverlayView()
+    public FooterView()
     {
         InitializeComponent();
     }

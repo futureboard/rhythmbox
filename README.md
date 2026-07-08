@@ -1,8 +1,9 @@
 # Rythmbox
 
 A cross-platform desktop **MIDI file player** and **SoundFont (.sf2) instrument player** built with
-.NET and [Avalonia UI](https://avaloniaui.net/), styled after hardware rack workstations like the
-Boss DR-880.
+.NET and [Avalonia UI](https://avaloniaui.net/). The UI is styled after hardware drum-machine
+workstations like the Boss DR-880: a "DrumStage" layout with a live clock, a big now-playing box,
+a General MIDI percussion pad grid, and a MIDI loop browser.
 
 This is **Phase 1** of the project: a solid player. A DR-880-style step sequencer / rhythm
 workstation (patterns, songs, kits, effects) is planned as a later phase — see
@@ -10,13 +11,37 @@ workstation (patterns, songs, kits, effects) is planned as a later phase — see
 
 ## Features
 
-- Load a SoundFont (`.sf2`) bank and browse/search its presets.
-- Audition presets with an on-screen piano keyboard, or connect a physical MIDI keyboard
-  (cross-platform, via PortMidi) and play it live through the loaded SoundFont.
-- Load and play Standard MIDI Files (`.mid`) through the SoundFont synthesizer, with
-  play/pause/stop, seek, and loop.
-- Per-channel "track" panel with mute, solo, and volume for the loaded MIDI file.
-- Master strip: master volume, RMS/Peak level meter, and output device selection.
+- **Header**: live clock, an AUDIO status badge, a one-click SoundFont loader, and the current
+  loop's tempo readout.
+- **Now Playing**: loop position in the browser (e.g. `01/03`), PLAYING/STOPPED status, loop name,
+  big BPM readout, and a playback progress bar, with next/previous loop buttons.
+- **Percussion pad grid**: 19 pads mapped to the standard General MIDI percussion note numbers
+  (Kick, Snare, hats, cymbals, toms, congas, cowbell, tambourine, etc.) — works with any
+  GM-compatible SoundFont. Click a pad (or press `1`-`8` on the keyboard) to trigger it live. Pads
+  actually used by the currently loaded loop are highlighted with a red border.
+- **MIDI Loop Browser**: point it at a folder of `.mid`/`.midi` files; each loop is listed with its
+  hit count, duration, and detected BPM. Selecting a loop loads and plays it immediately.
+- **Transport**: a big STOP/PLAY button, SUB (loop toggle), MIXER (opens the mixer overlay),
+  RESCAN, QUIT, and a MIDI-input connect button.
+- **Mixer overlay** (via the MIXER button): SoundFont preset browser with search and an on-screen
+  piano keyboard for auditioning melodic instruments, live MIDI input device selection, a
+  per-channel mixer (mute/solo/volume) for the loaded loop, and the master strip (master volume,
+  RMS/Peak level meter, output device selection).
+- Connect a physical MIDI keyboard (cross-platform, via PortMidi) and play it live through the
+  loaded SoundFont.
+
+### Keyboard shortcuts
+
+| Key | Action |
+| --- | --- |
+| `Space` | Play / pause the current loop |
+| `1`-`8` | Trigger percussion pads 1-8 |
+| `Esc` | Quit |
+
+> The reference DrumStage layout also has section (`A`/`B`/`C`/`D`), intro/ending (`I`/`E`), and
+> "full" (`` ` ``) shortcuts. Those depend on pattern/section data that a plain Standard MIDI File
+> doesn't carry, so they aren't implemented in this MIDI-file-based player — they're natural fits
+> for the Phase 2 pattern/song sequencer (see [Roadmap](#roadmap)).
 
 ## Tech stack
 
@@ -32,7 +57,7 @@ workstation (patterns, songs, kits, effects) is planned as a later phase — see
 Rythmbox.slnx
 src/
   Rythmbox.Core/     Engine layer (no UI dependency): PlaybackEngine, SoundFontPlayer,
-                     MidiFilePlayer, MidiInputService.
+                     MidiFilePlayer, MidiInputService, LoopLibraryService, GmPercussionMap.
   Rythmbox.App/      Avalonia application: Views, ViewModels, styling.
 ```
 
@@ -54,7 +79,15 @@ or copyrighted. To try Rythmbox out, download a free General MIDI SoundFont, for
 - [FluidR3_GM.sf2](https://member.keymusician.com/Member/FluidR3_GM/index.html)
 - [GeneralUser GS](https://schristiancollins.com/generaluser.php)
 
-Then use **Load SoundFont (.sf2)...** in the app to open it.
+Then use **Load SoundFont...** in the header to open it. Rythmbox automatically arms the standard
+GM drum kit (bank 128, program 0) on the percussion channel so the pad grid sounds correct right
+away.
+
+## Getting MIDI loops
+
+Use **Browse Folder...** in the MIDI Loop Browser to point Rythmbox at a folder of `.mid`/`.midi`
+drum loops. Each file is scanned for its note-hit count, duration, and tempo, and listed for
+one-click playback.
 
 ## Roadmap
 
@@ -63,7 +96,7 @@ Planned for a later phase, not part of this initial player release:
 - DR-880-style step sequencer: 16-step pattern grid per drum voice, with drum kits mapped from
   the SoundFont's percussion bank.
 - Pattern bank and song chaining (arrange patterns into a full song), swing/tempo controls,
-  intro/ending and fill buttons.
+  section (A/B/C/D), intro/ending, and fill buttons.
 - Real-time pattern recording and quantization from the already-wired live MIDI input.
 - Per-track effects (reverb/chorus/EQ, via SoundFlow's effects components) and a fuller mixer view.
 - Saving/loading Rythmbox projects (patterns, songs, mixer state).

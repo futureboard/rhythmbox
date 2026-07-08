@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1120" d:DesignHeight="380"
+             x:Class="Rythmbox.App.Views.PadMixerView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="panel" Padding="14,12">
+        <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                <TextBlock Text="KIT MIXER" Classes="panelHeader" VerticalAlignment="Center" />
+                <TextBlock Text="19 CHANNELS · SCROLL FOR MORE" Classes="dim" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding PadMixer.Channels}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="2" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PadMixerChannelViewModel">
+                            <Border Classes="mixerChannel">
+                                <Grid RowDefinitions="Auto,*,Auto,Auto,Auto,Auto" Width="68">
+                                    <TextBlock Grid.Row="0" Text="{Binding Label}" Classes="mixerChannelLabel" />
+
+                                    <Slider Grid.Row="1" Orientation="Vertical" Minimum="0" Maximum="1.2"
+                                            Value="{Binding Volume}" Classes="mixerFader"
+                                            HorizontalAlignment="Center" Margin="0,8" />
+
+                                    <TextBlock Grid.Row="2" Text="{Binding VolumeLabel}" Classes="mixerChannelDb" HorizontalAlignment="Center" />
+
+                                    <ToggleButton Grid.Row="3" Content="MUTE" IsChecked="{Binding IsMuted}"
+                                                  Classes="mixerMute" Margin="0,4,0,2" HorizontalAlignment="Stretch" />
+
+                                    <ToggleButton Grid.Row="4" Content="SOLO" IsChecked="{Binding IsSoloed}"
+                                                  Classes="mixerSolo" Margin="0,0,0,4" HorizontalAlignment="Stretch" />
+
+                                    <Border Grid.Row="5" Classes="categoryTag" Classes.perc="{Binding IsPerc}">
+                                        <TextBlock Text="{Binding CategoryLabel}" HorizontalAlignment="Center" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
+</UserControl>

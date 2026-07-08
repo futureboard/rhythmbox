@@ -1,4 +1,5 @@
 using Rythmbox.Core.Models;
+using SoundFlow.Midi.Enums;
 using SoundFlow.Midi.Interfaces;
 using SoundFlow.Midi.Structs;
 using SoundFlow.Synthesis;
@@ -12,13 +13,23 @@ namespace Rythmbox.Core.Engine;
 /// </summary>
 public sealed class SoundFontPlayer : IMidiControllable, IDisposable
 {
+    private sealed class PadMixState
+    {
+        public bool IsMuted;
+        public bool IsSoloed;
+        public float Volume = 1f;
+    }
+
     private readonly PlaybackEngine _engine;
+    private readonly Dictionary<int, PadMixState> _padMix;
     private SoundFontBank? _bank;
     private Synthesizer? _synth;
+    private bool _anyPadSoloed;
 
     public SoundFontPlayer(PlaybackEngine engine)
     {
         _engine = engine;
+        _padMix = GmPercussionMap.Pads.ToDictionary(pad => pad.Note, _ => new PadMixState());
     }
 
     public string? LoadedSoundFontPath { get; private set; }
@@ -81,7 +92,61 @@ public sealed class SoundFontPlayer : IMidiControllable, IDisposable
         }
     }
 
-    public void ProcessMidiMessage(MidiMessage message) => _synth?.ProcessMidiMessage(message);
+    /// <summary>Mutes/unmutes a percussion pad's channel strip. Applies to both live pad hits and loop playback.</summary>
+    public void SetPadMute(int note, bool mute)
+    {
+        if (_padMix.TryGetValue(note, out var state))
+        {
+            state.IsMuted = mute;
+        }
+    }
+
+    /// <summary>Solos a percussion pad's channel strip; while any pad is soloed, non-soloed pads are silenced.</summary>
+    public void SetPadSolo(int note, bool solo)
+    {
+        if (!_padMix.TryGetValue(note, out var state))
+        {
+            return;
+        }
+
+        state.IsSoloed = solo;
+        _anyPadSoloed = _padMix.Values.Any(s => s.IsSoloed);
+    }
+
+    /// <summary>Sets a percussion pad's channel volume (0..1, scales note-on velocity).</summary>
+    public void SetPadVolume(int note, float volume)
+    {
+        if (_padMix.TryGetValue(note, out var state))
+        {
+            state.Volume = Math.Clamp(volume, 0f, 1f);
+        }
+    }
+
+    public void ProcessMidiMessage(MidiMessage message)
+    {
+        if (message.Channel == GmPercussionMap.PercussionChannel &&
+            _padMix.TryGetValue(message.NoteNumber, out var padState))
+        {
+            var isNoteOn = message.Command == MidiCommand.NoteOn && message.Velocity > 0;
+
+            if (isNoteOn)
+            {
+                var blocked = padState.IsMuted || (_anyPadSoloed && !padState.IsSoloed);
+                if (blocked)
+                {
+                    return;
+                }
+
+                if (padState.Volume < 1f)
+                {
+                    var scaledVelocity = (byte)Math.Clamp(message.Velocity * padState.Volume, 0, 127);
+                    message = new MidiMessage(message.StatusByte, (byte)message.NoteNumber, scaledVelocity, message.Timestamp);
+                }
+            }
+        }
+
+        _synth?.ProcessMidiMessage(message);
+    }
 
     private void Unload()
     {

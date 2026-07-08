@@ -36,6 +36,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         LoopBrowser = new LoopBrowserViewModel(_loopLibrary, Player);
         PadGrid = new PercussionPadGridViewModel(_soundFontPlayer, Player);
         NowPlaying = new NowPlayingViewModel(LoopBrowser, Player);
+        PadMixer = new PadMixerViewModel(_soundFontPlayer);
 
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clockTimer.Tick += (_, _) => ClockText = DateTime.Now.ToString("HH:mm:ss");
@@ -54,6 +55,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
     public PercussionPadGridViewModel PadGrid { get; }
 
     public NowPlayingViewModel NowPlaying { get; }
+
+    public PadMixerViewModel PadMixer { get; }
 
     [ObservableProperty]
     private string _clockText = string.Empty;

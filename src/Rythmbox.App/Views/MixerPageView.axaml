@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             xmlns:views="using:Rythmbox.App.Views"
+             mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="650"
+             x:Class="Rythmbox.App.Views.MixerPageView"
+             x:DataType="vm:MainWindowViewModel">
+    <DockPanel LastChildFill="True">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,14">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                <Path Data="{StaticResource IconSlidersHorizontal}" Classes="icon accent" />
+                <TextBlock Text="MIXER" Classes="panelHeader" FontSize="18" VerticalAlignment="Center" />
+            </StackPanel>
+            <Button Grid.Column="1" Command="{Binding ToggleMixerCommand}" Classes="accent">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Path Data="{StaticResource IconChevronLeft}" Classes="icon small" Stroke="#1A1A1A" />
+                    <TextBlock Text="Back to Drum Stage" Foreground="#1A1A1A" FontWeight="Bold" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <views:MasterStripView DockPanel.Dock="Top" DataContext="{Binding MasterStrip}" Margin="0,0,0,14" />
+
+        <views:PadMixerView DockPanel.Dock="Top" Height="360" Margin="0,0,0,14" />
+
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+            <views:SoundFontBrowserView Grid.Column="0" DataContext="{Binding SoundFontBrowser}" />
+            <views:PlayerView Grid.Column="1" DataContext="{Binding Player}" />
+        </Grid>
+    </DockPanel>
+</UserControl>

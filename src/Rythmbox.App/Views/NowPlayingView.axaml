@@ -13,9 +13,13 @@
             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding NowPlaying.StatusLabel}" Classes="nowPlayingDim" FontWeight="Bold" />
 
             <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="8" Margin="0,4">
-                <Button Content="&#8722;" Width="26" Height="26" Padding="0" Command="{Binding NowPlaying.PreviousCommand}" />
+                <Button Width="26" Height="26" Padding="0" Command="{Binding NowPlaying.PreviousCommand}">
+                    <Path Data="{StaticResource IconChevronLeft}" Classes="icon small" />
+                </Button>
                 <TextBlock Text="{Binding NowPlaying.LoopName}" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Foreground="White" />
-                <Button Content="+" Width="26" Height="26" Padding="0" Command="{Binding NowPlaying.NextCommand}" />
+                <Button Width="26" Height="26" Padding="0" Command="{Binding NowPlaying.NextCommand}">
+                    <Path Data="{StaticResource IconChevronRight}" Classes="icon small" />
+                </Button>
             </StackPanel>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding NowPlaying.BpmLabel}"

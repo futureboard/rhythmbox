@@ -1,0 +1,10 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="26"
+             x:Class="Rythmbox.App.Views.FooterView">
+    <Border Classes="footerBar">
+        <TextBlock Text="SPACE play/pause  |  1-8 audition pads  |  ESC quit" Classes="dim" FontSize="11" />
+    </Border>
+</UserControl>

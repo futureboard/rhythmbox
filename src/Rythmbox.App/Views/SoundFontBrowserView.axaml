@@ -15,7 +15,11 @@
             <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,10">
                 <TextBlock Text="SOUNDFONT PRESETS" Classes="panelHeader" />
                 <TextBlock Text="{Binding LoadedSoundFontName, FallbackValue='No SoundFont loaded'}" Classes="dim" TextTrimming="CharacterEllipsis" />
-                <TextBox PlaceholderText="Search presets..." Text="{Binding SearchText}" />
+                <TextBox PlaceholderText="Search presets..." Text="{Binding SearchText}">
+                    <TextBox.InnerLeftContent>
+                        <Path Data="{StaticResource IconSearch}" Classes="icon dim small" Margin="8,0,0,0" />
+                    </TextBox.InnerLeftContent>
+                </TextBox>
             </StackPanel>
 
             <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,10,0,0">
@@ -29,9 +33,16 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <Button Grid.Column="1" Content="&#8635;" Command="{Binding RefreshMidiInputsCommand}" Margin="4,0,0,0" ToolTip.Tip="Refresh MIDI devices" />
+                    <Button Grid.Column="1" Margin="4,0,0,0" Command="{Binding RefreshMidiInputsCommand}" ToolTip.Tip="Refresh MIDI devices">
+                        <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
+                    </Button>
                 </Grid>
-                <Button Content="{Binding ConnectLabel}" Command="{Binding ToggleMidiConnectionCommand}" HorizontalAlignment="Stretch" />
+                <Button Command="{Binding ToggleMidiConnectionCommand}" HorizontalAlignment="Stretch">
+                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                        <Path Data="{StaticResource IconPlug}" Classes="icon small" />
+                        <TextBlock Text="{Binding ConnectLabel}" />
+                    </StackPanel>
+                </Button>
 
                 <TextBlock Text="AUDITION" Classes="panelHeader" Margin="0,6,0,0" />
                 <views:PianoKeyboardControl x:Name="Keyboard" Height="130" HorizontalAlignment="Left" />

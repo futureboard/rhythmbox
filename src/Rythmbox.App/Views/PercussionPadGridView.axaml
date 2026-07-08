@@ -13,17 +13,29 @@
                 <TextBlock Text="GM DRUM MAP (19 VOICES)" Classes="dim" VerticalAlignment="Center" />
             </StackPanel>
 
-            <ItemsControl ItemsSource="{Binding PadGrid.Pads}">
+            <ItemsControl ItemsSource="{Binding PadGrid.Pads}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Columns="4" />
+                        <UniformGrid Columns="4" Rows="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerTheme>
+                    <ControlTheme TargetType="ContentPresenter">
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="VerticalAlignment" Value="Stretch" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    </ControlTheme>
+                </ItemsControl.ItemContainerTheme>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:PadViewModel">
-                        <Button Command="{Binding HitCommand}" Margin="4" Padding="0" HorizontalContentAlignment="Stretch"
+                        <Button Command="{Binding HitCommand}" Margin="4" Padding="0"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                MinHeight="52"
                                 Classes="pad" Classes.used="{Binding IsUsedInLoop}">
-                            <Grid RowDefinitions="Auto,*" Height="58">
+                            <Grid RowDefinitions="Auto,*">
                                 <TextBlock Grid.Row="0" Text="{Binding Number}" Classes="padNumber" Margin="6,4,0,0" />
                                 <TextBlock Grid.Row="1" Text="{Binding Label}" Classes="padLabel" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Grid>

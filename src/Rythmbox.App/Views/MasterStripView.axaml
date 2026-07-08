@@ -13,7 +13,7 @@
             <TextBlock Grid.Column="0" Text="MASTER" Classes="panelHeader" VerticalAlignment="Center" Margin="0,0,16,0" />
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                <TextBlock Text="VOL" Classes="dim" VerticalAlignment="Center" />
+                <Path Data="{StaticResource IconVolume2}" Classes="icon dim small" />
                 <Slider Minimum="0" Maximum="1.5" Value="{Binding MasterVolume}" Width="120" VerticalAlignment="Center" />
             </StackPanel>
 
@@ -31,7 +31,9 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button Grid.Column="5" Content="&#8635;" Command="{Binding RefreshDevicesCommand}" ToolTip.Tip="Refresh output devices" />
+            <Button Grid.Column="5" Command="{Binding RefreshDevicesCommand}" ToolTip.Tip="Refresh output devices">
+                <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
+            </Button>
 
         </Grid>
     </Border>
