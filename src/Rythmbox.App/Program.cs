@@ -35,7 +35,7 @@ sealed class Program
 #endif
             .With(new FontManagerOptions
             {
-                DefaultFamilyName = "avares://Rythmbox.App/Assets/Fonts#Barlow",
+                DefaultFamilyName = Localization.LocalizationService.BarlowAnuphanFont,
             })
             .LogToTrace();
 }

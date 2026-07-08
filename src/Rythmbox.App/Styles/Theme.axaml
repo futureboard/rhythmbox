@@ -3,6 +3,8 @@
 
     <Styles.Resources>
         <ResourceDictionary>
+            <FontFamily x:Key="RythmboxUIFont">avares://Rythmbox.App/Assets/Fonts#Barlow, avares://Rythmbox.App/Assets/Fonts#Anuphan</FontFamily>
+            <FontFamily x:Key="RythmboxUIInter">avares://Rythmbox.App/Assets/Fonts#Inter</FontFamily>
             <SolidColorBrush x:Key="RythmboxBackgroundBrush" Color="#1B1C22" />
             <SolidColorBrush x:Key="RythmboxPanelBrush" Color="#1B1C22" />
             <SolidColorBrush x:Key="RythmboxPanelBorderBrush" Color="#2E2F38" />
@@ -16,6 +18,26 @@
             <SolidColorBrush x:Key="RythmboxPadBrush" Color="#26272E" />
         </ResourceDictionary>
     </Styles.Resources>
+
+    <Style Selector="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource RythmboxUIFont}" />
+    </Style>
+
+    <Style Selector="Button">
+        <Setter Property="FontFamily" Value="{StaticResource RythmboxUIFont}" />
+    </Style>
+
+    <Style Selector="ToggleButton">
+        <Setter Property="FontFamily" Value="{StaticResource RythmboxUIFont}" />
+    </Style>
+
+    <Style Selector="ComboBox">
+        <Setter Property="FontFamily" Value="{StaticResource RythmboxUIFont}" />
+    </Style>
+
+    <Style Selector="TextBox">
+        <Setter Property="FontFamily" Value="{StaticResource RythmboxUIFont}" />
+    </Style>
 
     <!-- Global: square corners everywhere -->
     <Style Selector="Button">
@@ -88,7 +110,6 @@
     </Style>
 
     <Style Selector="TextBlock.mono">
-        <Setter Property="FontFamily" Value="Consolas,Menlo,monospace" />
         <Setter Property="Foreground" Value="{DynamicResource RythmboxTextBrush}" />
     </Style>
 
@@ -270,6 +291,225 @@
         <Setter Property="LetterSpacing" Value="0.5" />
     </Style>
 
+    <!-- Mixer surface (ported from Futureboard SphereUIComponents) -->
+    <Style Selector="Border.mixerPageHeader">
+        <Setter Property="Background" Value="{DynamicResource RythmboxPanelBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="Border.mixerCountBadge">
+        <Setter Property="Background" Value="#25262E" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Padding" Value="5,1" />
+    </Style>
+
+    <Style Selector="Border.mixerSurfaceCanvas">
+        <Setter Property="Background" Value="#181920" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,0" />
+    </Style>
+
+    <Style Selector="Border.mixerStrip">
+        <Setter Property="Background" Value="#1F2027" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="MinHeight" Value="320" />
+    </Style>
+
+    <Style Selector="Border.mixerStrip:pointerover">
+        <Setter Property="Background" Value="#23242C" />
+    </Style>
+
+    <Style Selector="Border.mixerStrip.selected">
+        <Setter Property="Background" Value="#252A35" />
+        <Setter Property="BorderBrush" Value="#4A7FD4" />
+    </Style>
+
+    <Style Selector="Border.mixerStrip.master">
+        <Setter Property="Background" Value="#22232B" />
+        <Setter Property="BorderThickness" Value="1,0,0,0" />
+    </Style>
+
+    <Style Selector="Border.mixerStrip.group">
+        <Setter Property="Background" Value="#21222A" />
+    </Style>
+
+    <Style Selector="Border.mixerStripHeader">
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="Border.mixerStripFooter">
+        <Setter Property="Background" Value="#1A1B22" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1,0,0,0" />
+    </Style>
+
+    <Style Selector="Border.mixerStripAccent">
+        <Setter Property="Background" Value="#4A7FD4" />
+    </Style>
+
+    <Style Selector="Border.mixerStripAccent.drum">
+        <Setter Property="Background" Value="#4A7FD4" />
+    </Style>
+
+    <Style Selector="Border.mixerStripAccent.perc">
+        <Setter Property="Background" Value="#D97B2E" />
+    </Style>
+
+    <Style Selector="Border.mixerStripAccent.cym">
+        <Setter Property="Background" Value="#7B6BB8" />
+    </Style>
+
+    <Style Selector="Border.mixerStripAccent.master">
+        <Setter Property="Background" Value="#5A8FD4" />
+    </Style>
+
+    <Style Selector="Border.mixerStripAccentBar">
+        <Setter Property="Background" Value="#4A7FD4" />
+    </Style>
+
+    <Style Selector="Border.mixerStripAccentBar.drum">
+        <Setter Property="Background" Value="#4A7FD4" />
+    </Style>
+
+    <Style Selector="Border.mixerStripAccentBar.perc">
+        <Setter Property="Background" Value="#D97B2E" />
+    </Style>
+
+    <Style Selector="Border.mixerStripAccentBar.cym">
+        <Setter Property="Background" Value="#7B6BB8" />
+    </Style>
+
+    <Style Selector="Border.mixerStripAccentBar.master">
+        <Setter Property="Background" Value="#5A8FD4" />
+    </Style>
+
+    <Style Selector="TextBlock.mixerStripName">
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.mixerStripMeta">
+        <Setter Property="FontSize" Value="7.5" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxDimTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.mixerStripRoute">
+        <Setter Property="FontSize" Value="9" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxDimTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.mixerScaleMark">
+        <Setter Property="FontSize" Value="7" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxDimTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.mixerMeterHint">
+        <Setter Property="FontSize" Value="7" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxDimTextBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="MaxWidth" Value="48" />
+        <Setter Property="TextAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.mixerDbPill">
+        <Setter Property="Background" Value="#25262E" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="MinWidth" Value="46" />
+    </Style>
+
+    <Style Selector="Border.mixerDbPill.selected">
+        <Setter Property="BorderBrush" Value="#4A7FD4" />
+    </Style>
+
+    <Style Selector="TextBlock.mixerDbPillValue">
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxTextBrush}" />
+    </Style>
+
+    <Style Selector="TextBlock.mixerDbPillUnit">
+        <Setter Property="FontSize" Value="7.5" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxDimTextBrush}" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="Margin" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="TextBlock.mixerDbPillText">
+        <Setter Property="FontSize" Value="8" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxGreenBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Border.mixerMeterTrack">
+        <Setter Property="Background" Value="#14151A" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="1" />
+        <Setter Property="ClipToBounds" Value="True" />
+        <Setter Property="MinHeight" Value="108" />
+        <Setter Property="MinWidth" Value="8" />
+    </Style>
+
+    <Style Selector="Border.mixerMeterFill">
+        <Setter Property="Background" Value="#3D8B5A" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="MinHeight" Value="2" />
+    </Style>
+
+    <Style Selector="Border.mixerMeterFill.clip">
+        <Setter Property="Background" Value="{DynamicResource RythmboxRedBrush}" />
+    </Style>
+
+    <Style Selector="Slider.mixerFaderV">
+        <Setter Property="Width" Value="24" />
+        <Setter Property="MinHeight" Value="120" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerMsBtn">
+        <Setter Property="FontSize" Value="9" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Padding" Value="0,4" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Background" Value="#25262E" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxDimTextBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerMsBtn:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#32333C" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerMsBtn.mute:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxRedBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerMsBtn.mute:checked">
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerMsBtn.solo:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="#E5B93B" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerMsBtn.solo:checked">
+        <Setter Property="Foreground" Value="#1A1A1A" />
+    </Style>
+
+    <!-- Legacy mixer styles kept for old views if referenced -->
     <Style Selector="Border.mixerChannel">
         <Setter Property="Background" Value="#1F2027" />
         <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
@@ -290,7 +530,6 @@
     </Style>
 
     <Style Selector="TextBlock.mixerChannelDb">
-        <Setter Property="FontFamily" Value="Consolas,Menlo,monospace" />
         <Setter Property="FontSize" Value="10" />
         <Setter Property="Foreground" Value="{DynamicResource RythmboxGreenBrush}" />
     </Style>
@@ -502,6 +741,81 @@
     </Style>
 
     <Style Selector="Button.stepCell.playing /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxGreenBrush}" />
+    </Style>
+
+    <Style Selector="Border.pianoRollToolbar">
+        <Setter Property="Background" Value="#1A1B20" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="Border.pianoRollCorner">
+        <Setter Property="Background" Value="#16171C" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,1,1" />
+        <Setter Property="MinHeight" Value="24" />
+    </Style>
+
+    <Style Selector="Border.pianoRollRuler">
+        <Setter Property="Background" Value="#1A1B20" />
+        <Setter Property="BorderBrush" Value="#2A2B33" />
+        <Setter Property="BorderThickness" Value="0,0,1,1" />
+    </Style>
+
+    <Style Selector="Border.pianoRollRuler.bar">
+        <Setter Property="BorderBrush" Value="#4A4B56" />
+        <Setter Property="Background" Value="#1E1F26" />
+    </Style>
+
+    <Style Selector="Border.pianoRollRuler.beat">
+        <Setter Property="BorderBrush" Value="#35363F" />
+    </Style>
+
+    <Style Selector="Grid.pianoRollLane">
+        <Setter Property="Background" Value="#1B1C22" />
+    </Style>
+
+    <Style Selector="Grid.pianoRollLane.alt">
+        <Setter Property="Background" Value="#17181E" />
+    </Style>
+
+    <Style Selector="Border.pianoRollLaneHeader">
+        <Setter Property="Background" Value="#22232A" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,1,1" />
+        <Setter Property="MinHeight" Value="24" />
+    </Style>
+
+    <Style Selector="Border.pianoRollLaneHeader.perc">
+        <Setter Property="Background" Value="#25221C" />
+    </Style>
+
+    <Style Selector="Button.pianoRollNote">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="#2A2B33" />
+        <Setter Property="BorderThickness" Value="0,0,1,1" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <Style Selector="Button.pianoRollNote.bar">
+        <Setter Property="BorderBrush" Value="#4A4B56" />
+    </Style>
+
+    <Style Selector="Button.pianoRollNote.beat">
+        <Setter Property="BorderBrush" Value="#35363F" />
+    </Style>
+
+    <Style Selector="Button.pianoRollNote:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#2A2B33" />
+    </Style>
+
+    <Style Selector="Button.pianoRollNote.active /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxAccentBrush}" />
+    </Style>
+
+    <Style Selector="Button.pianoRollNote.playing /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource RythmboxGreenBrush}" />
     </Style>
 

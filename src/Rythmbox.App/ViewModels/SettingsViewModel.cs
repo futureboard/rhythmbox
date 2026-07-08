@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Rythmbox.App.Localization;
 using Rythmbox.Core.Engine;
 using Rythmbox.Core.Models;
 
@@ -9,13 +10,20 @@ namespace Rythmbox.App.ViewModels;
 public sealed partial class PadMappingEntryViewModel : ViewModelBase
 {
     private readonly PadMappingService _mapping;
+    private readonly LocalizationService _i18n;
     private readonly Action _refreshParent;
 
-    public PadMappingEntryViewModel(int padIndex, string label, PadMappingService mapping, Action refreshParent)
+    public PadMappingEntryViewModel(
+        int padIndex,
+        string label,
+        PadMappingService mapping,
+        LocalizationService i18n,
+        Action refreshParent)
     {
         PadIndex = padIndex;
         Label = label;
         _mapping = mapping;
+        _i18n = i18n;
         _refreshParent = refreshParent;
     }
 
@@ -23,9 +31,13 @@ public sealed partial class PadMappingEntryViewModel : ViewModelBase
 
     public string Label { get; }
 
-    public string KeyboardKey => _mapping.GetKeyboardKeyName(PadIndex);
+    public string KeyboardKeyLabel => _i18n.Format("settings.keyLabel", _mapping.GetKeyboardKeyName(PadIndex));
 
-    public string MidiNoteLabel => _mapping.GetMidiNote(PadIndex).ToString();
+    public string MidiNoteLabel => _i18n.Format("settings.midiLabel", _mapping.GetMidiNote(PadIndex));
+
+    public string LearnLabel => _i18n["settings.learn"];
+
+    public string KeyNextLabel => _i18n["settings.keyNext"];
 
     public bool IsLearning => _mapping.LearnPadIndex == PadIndex;
 
@@ -56,6 +68,15 @@ public sealed partial class PadMappingEntryViewModel : ViewModelBase
         _mapping.CycleKeyboardKey(PadIndex);
         _refreshParent();
     }
+
+    public void RefreshLabels()
+    {
+        OnPropertyChanged(nameof(KeyboardKeyLabel));
+        OnPropertyChanged(nameof(MidiNoteLabel));
+        OnPropertyChanged(nameof(LearnLabel));
+        OnPropertyChanged(nameof(KeyNextLabel));
+        OnPropertyChanged(nameof(IsLearning));
+    }
 }
 
 public sealed partial class SettingsViewModel : ViewModelBase
@@ -64,22 +85,27 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private readonly PadMidiRouter _padRouter;
     private readonly MidiInputService _midiInput;
     private readonly StatusViewModel _status;
+    private readonly LocalizationService _i18n;
 
     public SettingsViewModel(
         PadMappingService mapping,
         PadMidiRouter padRouter,
         MidiInputService midiInput,
-        StatusViewModel status)
+        StatusViewModel status,
+        LocalizationService i18n)
     {
         _mapping = mapping;
         _padRouter = padRouter;
         _midiInput = midiInput;
         _status = status;
+        _i18n = i18n;
+
+        _i18n.LanguageChanged += (_, _) => RefreshLocalizedLabels();
 
         RefreshMappings();
         _padRouter.PadLearnCompleted += (_, note) =>
         {
-            _status.Show($"MIDI note {note} learned");
+            _status.Show(_i18n.Format("status.midiLearned", note));
             RefreshMappings();
         };
     }
@@ -97,21 +123,23 @@ public sealed partial class SettingsViewModel : ViewModelBase
         }
     }
 
-    public string MidiEnabledLabel => MidiEnabled ? "Input: enabled" : "Input: disabled";
+    public string MidiEnabledLabel => MidiEnabled
+        ? _i18n["status.inputEnabled"]
+        : _i18n["status.inputDisabled"];
 
     public string MidiPortLabel => _midiInput.IsConnected
-        ? $"Port: {_midiInput.ConnectedDevice?.Name ?? "Connected"}"
-        : "Port: None";
+        ? _i18n.Format("status.portConnected", _midiInput.ConnectedDevice?.Name ?? "Connected")
+        : _i18n["status.portNone"];
 
     public string KeyboardModeLabel => _mapping.UseHomeRowMapping
-        ? "Pad mode: QWERTY home row"
-        : "Pad mode: Number row 1-8+";
+        ? _i18n["status.padModeHome"]
+        : _i18n["status.padModeNumbers"];
 
     [RelayCommand]
     private void ToggleMidi()
     {
         MidiEnabled = !MidiEnabled;
-        _status.Show(MidiEnabled ? "MIDI input enabled" : "MIDI input disabled");
+        _status.Show(MidiEnabled ? _i18n["status.midiEnabled"] : _i18n["status.midiDisabled"]);
     }
 
     [RelayCommand]
@@ -119,12 +147,12 @@ public sealed partial class SettingsViewModel : ViewModelBase
     {
         if (_midiInput.ConnectPrevious(_padRouter))
         {
-            OnPropertyChanged(nameof(MidiPortLabel));
-            _status.Show($"MIDI port: {_midiInput.ConnectedDevice?.Name}");
+            RefreshLocalizedLabels();
+            _status.Show(_i18n.Format("status.portConnected", _midiInput.ConnectedDevice?.Name));
         }
         else
         {
-            _status.Show("No MIDI input ports found");
+            _status.Show(_i18n["status.noMidiPorts"]);
         }
     }
 
@@ -133,12 +161,12 @@ public sealed partial class SettingsViewModel : ViewModelBase
     {
         if (_midiInput.ConnectNext(_padRouter))
         {
-            OnPropertyChanged(nameof(MidiPortLabel));
-            _status.Show($"MIDI port: {_midiInput.ConnectedDevice?.Name}");
+            RefreshLocalizedLabels();
+            _status.Show(_i18n.Format("status.portConnected", _midiInput.ConnectedDevice?.Name));
         }
         else
         {
-            _status.Show("No MIDI input ports found");
+            _status.Show(_i18n["status.noMidiPorts"]);
         }
     }
 
@@ -146,9 +174,9 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private void ToggleKeyboardMode()
     {
         _mapping.ToggleKeyboardMapping();
-        OnPropertyChanged(nameof(KeyboardModeLabel));
+        RefreshLocalizedLabels();
         RefreshMappings();
-        _status.Show("Keyboard pad mapping updated");
+        _status.Show(_i18n["status.keyboardUpdated"]);
     }
 
     public void RefreshMappings()
@@ -156,7 +184,18 @@ public sealed partial class SettingsViewModel : ViewModelBase
         Mappings.Clear();
         foreach (var pad in GmPercussionMap.Pads)
         {
-            Mappings.Add(new PadMappingEntryViewModel(pad.Index, pad.Label, _mapping, RefreshMappings));
+            Mappings.Add(new PadMappingEntryViewModel(pad.Index, pad.Label, _mapping, _i18n, RefreshMappings));
+        }
+    }
+
+    private void RefreshLocalizedLabels()
+    {
+        OnPropertyChanged(nameof(MidiEnabledLabel));
+        OnPropertyChanged(nameof(MidiPortLabel));
+        OnPropertyChanged(nameof(KeyboardModeLabel));
+        foreach (var mapping in Mappings)
+        {
+            mapping.RefreshLabels();
         }
     }
 }

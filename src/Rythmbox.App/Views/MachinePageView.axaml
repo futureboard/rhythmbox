@@ -10,10 +10,7 @@
             <views:ArrangerLeftPanelView Grid.Row="0" />
             <views:TransportView Grid.Row="1" />
         </Grid>
-        <views:PatternPadGridView Grid.Row="0" Grid.Column="1" />
-        <Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ColumnDefinitions="*,*">
-            <views:StyleBankView Grid.Column="0" />
-            <views:LoopBrowserView Grid.Column="1" />
-        </Grid>
+        <views:PercussionPadGridView Grid.Row="0" Grid.Column="1" />
+        <views:StyleBankView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" />
     </Grid>
 </UserControl>

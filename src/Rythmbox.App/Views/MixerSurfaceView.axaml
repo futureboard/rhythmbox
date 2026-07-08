@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             xmlns:views="using:Rythmbox.App.Views"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="340"
+             x:Class="Rythmbox.App.Views.MixerSurfaceView"
+             x:DataType="vm:MixerViewModel">
+    <Grid ColumnDefinitions="*,Auto">
+        <Border Grid.Column="0" Classes="mixerSurfaceCanvas">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled"
+                          Classes="mixerSurfaceScroll">
+                <ItemsControl ItemsSource="{Binding Channels}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="0" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:MixerChannelStripViewModel">
+                            <views:MixerChannelStripView />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <views:MixerChannelStripView Grid.Column="1"
+                                     DataContext="{Binding MasterChannel}"
+                                     Margin="0" />
+    </Grid>
+</UserControl>

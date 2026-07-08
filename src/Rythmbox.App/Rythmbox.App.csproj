@@ -11,6 +11,7 @@
   <ItemGroup>
     <Folder Include="Models\" />
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="Localization\**\*.json" />
     <AvaloniaResource Include="..\Assets\Fonts\**" Link="Assets\Fonts\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 

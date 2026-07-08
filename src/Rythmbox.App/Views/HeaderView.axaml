@@ -1,79 +1,79 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:Rythmbox.App.ViewModels"
-             xmlns:views="using:Rythmbox.App.Views"
-             mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="44"
-             x:Class="Rythmbox.App.Views.HeaderView"
-             x:DataType="vm:MainWindowViewModel">
-    <Border Classes="headerBar">
-        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
-
-            <views:LogoView Grid.Column="0" />
-
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="12,0,0,0" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="Style:" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.StyleLabel}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" MaxWidth="140" TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="Pattern:" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.PatternLabel}" FontSize="11" VerticalAlignment="Center" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="Kit:" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.KitLabel}" FontSize="11" VerticalAlignment="Center" />
-                </StackPanel>
-            </StackPanel>
-
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="{Binding ClockText}" Classes="mono" FontSize="12" VerticalAlignment="Center" />
-                </StackPanel>
-                <Button Command="{Binding Tempo.TogglePickerCommand}" Padding="8,4">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <TextBlock Text="Tempo:" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding Tempo.TempoLabel}" Classes="mono" FontSize="12" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                    <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led0}" />
-                    <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led1}" />
-                    <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led2}" />
-                    <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led3}" />
-                </StackPanel>
-            </StackPanel>
-
-            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="8,0">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="Backend:" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.BackendLabel}" FontSize="11" VerticalAlignment="Center" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="4" MaxWidth="160">
-                    <TextBlock Text="Device:" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.DeviceLabel}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-            </StackPanel>
-
-            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0" VerticalAlignment="Center">
-                <Button Command="{Binding LoopBrowser.RescanCommand}" Padding="8,4" ToolTip.Tip="Scan loop library">
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
-                        <TextBlock Text="Scan" FontSize="11" />
-                    </StackPanel>
-                </Button>
-                <Button Click="OnLoadKitClick" MaxWidth="180" Padding="8,4">
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
-                        <TextBlock Text="{Binding KitBrowser.LoadButtonLabel}" TextTrimming="CharacterEllipsis" FontSize="11" />
-                    </StackPanel>
-                </Button>
-                <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}" Padding="8,4" ToolTip.Tip="Settings">
-                    <Path Data="{StaticResource IconSlidersHorizontal}" Classes="icon small" />
-                </Button>
-            </StackPanel>
-
-        </Grid>
-    </Border>
-</UserControl>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             xmlns:views="using:Rythmbox.App.Views"
+             mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="44"
+             x:Class="Rythmbox.App.Views.HeaderView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="headerBar">
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+
+            <views:LogoView Grid.Column="0" />
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="12,0,0,0" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="{Binding Localization.HeaderStyle}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Machine.StyleLabel}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" MaxWidth="140" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="{Binding Localization.HeaderPattern}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Machine.PatternLabel}" FontSize="11" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="{Binding Localization.HeaderKit}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Machine.KitLabel}" FontSize="11" VerticalAlignment="Center" />
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="{Binding ClockText}" Classes="mono" FontSize="12" VerticalAlignment="Center" />
+                </StackPanel>
+                <Button Command="{Binding Tempo.TogglePickerCommand}" Padding="8,4">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="{Binding Localization.HeaderTempo}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Tempo.TempoLabel}" Classes="mono" FontSize="12" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led0}" />
+                    <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led1}" />
+                    <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led2}" />
+                    <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led3}" />
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="8,0">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="{Binding Localization.HeaderBackend}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Machine.BackendLabel}" FontSize="11" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="4" MaxWidth="160">
+                    <TextBlock Text="{Binding Localization.HeaderDevice}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Machine.DeviceLabel}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0" VerticalAlignment="Center">
+                <Button Command="{Binding Machine.StyleBank.RescanCommand}" Padding="8,4" ToolTip.Tip="Rescan style library">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
+                        <TextBlock Text="{Binding Localization.HeaderScan}" FontSize="11" />
+                    </StackPanel>
+                </Button>
+                <Button Click="OnLoadKitClick" MaxWidth="180" Padding="8,4">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
+                        <TextBlock Text="{Binding KitBrowser.LoadButtonLabel}" TextTrimming="CharacterEllipsis" FontSize="11" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}" Padding="8,4" ToolTip.Tip="{Binding Localization.HeaderSettingsTip}">
+                    <Path Data="{StaticResource IconSlidersHorizontal}" Classes="icon small" />
+                </Button>
+            </StackPanel>
+
+        </Grid>
+    </Border>
+</UserControl>

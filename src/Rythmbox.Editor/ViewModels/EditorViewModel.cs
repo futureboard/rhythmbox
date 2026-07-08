@@ -81,7 +81,13 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
     public void ToggleCell(int pad, int step)
     {
         Pattern.ToggleHit(pad, step);
-        Lanes.First(l => l.PadIndex == pad).Notes[step].IsActive = Pattern.HasHit(pad, step);
+        var lane = Lanes.FirstOrDefault(l => l.PadIndex == pad);
+        if (lane is null)
+        {
+            return;
+        }
+
+        lane.Notes[step].IsActive = Pattern.HasHit(pad, step);
         StatusText = $"{Pattern.Hits.Count} notes";
     }
 
@@ -176,7 +182,7 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
 
     private void TryLoadDefaultKit()
     {
-        if (_paths.PresetDir is null)
+        if (!Directory.Exists(_paths.PresetDir))
         {
             _kitPlayer.LoadProceduralGmKit();
             IsKitLoaded = true;
@@ -310,7 +316,10 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
 
             foreach (var lane in Lanes)
             {
-                lane.Notes[step].IsPlaying = true;
+                if (step < lane.Notes.Count)
+                {
+                    lane.Notes[step].IsPlaying = true;
+                }
             }
         });
     }

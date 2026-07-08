@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace Rythmbox.Editor.Views;
 
-public partial class StepGridView : UserControl
+public partial class PianoRollView : UserControl
 {
-    public StepGridView()
+    public PianoRollView()
     {
         InitializeComponent();
     }

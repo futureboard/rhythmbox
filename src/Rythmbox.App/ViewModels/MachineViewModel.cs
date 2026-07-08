@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Rythmbox.App.Localization;
 using Rythmbox.Core.Audio;
 using Rythmbox.Core.Engine;
 using Rythmbox.Core.Models.Styles;
@@ -16,6 +17,7 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
     private readonly PlayerViewModel _player;
     private readonly KitBrowserViewModel _kitBrowser;
     private readonly IAudioBackend _audioBackend;
+    private readonly LocalizationService _i18n;
     private readonly DispatcherTimer _syncTimer;
     private readonly List<DateTime> _tapTimes = [];
     private bool _syncingMacros;
@@ -27,15 +29,18 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
         KitBrowserViewModel kitBrowser,
         IAudioBackend audioBackend,
         StyleBankService styleBank,
-        AppPaths paths)
+        AppPaths paths,
+        LocalizationService i18n)
     {
         _arranger = arranger;
         _midiPlayer = midiPlayer;
         _player = player;
         _kitBrowser = kitBrowser;
         _audioBackend = audioBackend;
+        _i18n = i18n;
+        _i18n.LanguageChanged += OnLanguageChanged;
 
-        StyleBank = new StyleBankViewModel(styleBank, SelectStyle);
+        StyleBank = new StyleBankViewModel(styleBank, SelectStyle, _i18n);
         PatternPads = new ObservableCollection<PatternPadViewModel>(
             PatternPadLayout.Slots.Select(s => new PatternPadViewModel(s, OnPatternPadTriggered)));
 
@@ -67,13 +72,16 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
     public ObservableCollection<PatternPadViewModel> PatternPads { get; }
 
     [ObservableProperty]
-    private string _styleLabel = "No Style Selected";
+    private string _styleLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _styleDetail = string.Empty;
 
     [ObservableProperty]
     private string _patternLabel = "—";
 
     [ObservableProperty]
-    private string _kitLabel = "Not Loaded";
+    private string _kitLabel = string.Empty;
 
     [ObservableProperty]
     private string _backendLabel = PlatformAudioBackend.PreferredBackendId;
@@ -98,9 +106,6 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     private bool _hasStyleSelected;
-
-    [ObservableProperty]
-    private bool _showEmptyStylePrompt = true;
 
     [ObservableProperty]
     private string? _lastError;
@@ -146,11 +151,7 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
 
     public PlayerViewModel Player => _player;
 
-    [RelayCommand]
-    private void BrowseStyles()
-    {
-        StyleBank.SelectedCategory ??= StyleBank.Categories.FirstOrDefault();
-    }
+    public string PatternCurrentLabel => _i18n.Format("patternPads.current", PatternLabel);
 
     [RelayCommand]
     private void ExportMidi()
@@ -164,6 +165,7 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
         _player.UserTempo = style.DefaultTempo;
         _player.Bpm = style.DefaultTempo;
         SyncFromSession();
+        StyleBank.SyncFromSession(_arranger.Session);
     }
 
     private void OnPatternPadTriggered(PatternPadViewModel pad)
@@ -229,8 +231,11 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
         var s = _arranger.Session;
 
         HasStyleSelected = s.SelectedStyle is not null;
-        ShowEmptyStylePrompt = !HasStyleSelected;
-        StyleLabel = s.SelectedStyle?.Name ?? "No Style Selected";
+        StyleLabel = s.SelectedStyle?.Name ?? _i18n["machine.noStyle"];
+        StyleDetail = s.SelectedStyle is { } style
+            ? $"{style.DefaultTempo:0} BPM · {style.TimeSignature}"
+            : string.Empty;
+        StyleBank.SyncFromSession(s);
         PatternLabel = s.SelectedPatternId is { } pid
             ? s.GetPattern(pid)?.Name ?? pid
             : "—";
@@ -250,24 +255,37 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
         }
 
         ExportMidiEnabled = s.GetPattern(s.SelectedPatternId)?.HasMidiFile == true;
+        OnPropertyChanged(nameof(PatternCurrentLabel));
     }
 
     private void UpdateKitLabel()
     {
         var name = _kitBrowser.LoadedKitName;
-        KitLabel = string.IsNullOrWhiteSpace(name) ? "Not Loaded" : name;
+        KitLabel = string.IsNullOrWhiteSpace(name) ? _i18n["machine.notLoaded"] : name;
         _arranger.SetKitDisplay(null, KitLabel);
     }
 
     public void RefreshAudioStatus()
     {
         BackendLabel = _audioBackend.PlatformBackendId;
-        DeviceLabel = _audioBackend.CurrentDeviceName ?? "No device";
+        DeviceLabel = _audioBackend.CurrentDeviceName ?? _i18n["machine.noDevice"];
     }
+
+    private void RefreshLocalizedLabels()
+    {
+        SyncFromSession();
+        UpdateKitLabel();
+        RefreshAudioStatus();
+        StyleBank.RefreshLocalizedLabels();
+        OnPropertyChanged(nameof(PatternCurrentLabel));
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e) => RefreshLocalizedLabels();
 
     public void Dispose()
     {
         _syncTimer.Stop();
+        _i18n.LanguageChanged -= OnLanguageChanged;
         _arranger.SessionChanged -= SyncFromSession;
     }
 }

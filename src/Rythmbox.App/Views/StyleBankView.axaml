@@ -11,19 +11,19 @@
             <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,6" Margin="0,0,0,6">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="STYLE BANK" Classes="panelHeader" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Localization.StyleBankTitle}" Classes="panelHeader" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding Machine.StyleBank.EmptyMessage}" Classes="dim" VerticalAlignment="Center" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
-                        <TextBox PlaceholderText="Search styles…" Text="{Binding Machine.StyleBank.SearchText}" Width="160" FontSize="11" />
+                        <TextBox PlaceholderText="{Binding Localization.StyleBankSearch}" Text="{Binding Machine.StyleBank.SearchText}" Width="160" FontSize="11" />
                         <Button Command="{Binding Machine.StyleBank.RescanCommand}" Padding="8,4" ToolTip.Tip="Rescan style library">
-                            <TextBlock Text="Rescan Styles" FontSize="11" />
+                            <TextBlock Text="{Binding Localization.StyleBankRescan}" FontSize="11" />
                         </Button>
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <Grid ColumnDefinitions="120,*,160">
+            <Grid ColumnDefinitions="120,*,240">
                 <Border Grid.Column="0" Classes="bankList">
                     <ListBox ItemsSource="{Binding Machine.StyleBank.Categories}"
                              SelectedItem="{Binding Machine.StyleBank.SelectedCategory}" />
@@ -34,29 +34,53 @@
                          Classes="loopList">
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="vm:StyleListItemViewModel">
-                            <Grid ColumnDefinitions="*,Auto,Auto">
+                            <Grid ColumnDefinitions="*,Auto">
                                 <StackPanel Grid.Column="0" Spacing="2">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
                                     <TextBlock Text="{Binding Detail}" Classes="dim" FontSize="10" />
                                 </StackPanel>
                                 <TextBlock Grid.Column="1" Text="{Binding StatusLabel}" Classes="dim" FontSize="10" VerticalAlignment="Center" Margin="8,0" />
-                                <TextBlock Grid.Column="2" Text="★" Foreground="{DynamicResource RythmboxAccentBrush}" IsVisible="{Binding IsFavorite}" VerticalAlignment="Center" />
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
 
-                <Border Grid.Column="2" Classes="bankList" BorderThickness="1,0,0,0">
-                    <StackPanel Spacing="4" Margin="8">
-                        <TextBlock Text="RECENT" Classes="dim" FontSize="10" />
-                        <ItemsControl ItemsSource="{Binding Machine.StyleBank.RecentStyles}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="vm:StyleListItemViewModel">
-                                    <TextBlock Text="{Binding Name}" FontSize="11" Margin="0,2" />
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
+                <Border Grid.Column="2" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="1,0,0,0" Padding="4,0,0,0">
+                    <ItemsControl ItemsSource="{Binding Machine.StyleBank.StylePads}"
+                                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="3" Rows="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemContainerTheme>
+                            <ControlTheme TargetType="ContentPresenter">
+                                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                <Setter Property="VerticalAlignment" Value="Stretch" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                            </ControlTheme>
+                        </ItemsControl.ItemContainerTheme>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:StyleBankPadViewModel">
+                                <Button Command="{Binding SelectCommand}"
+                                        IsEnabled="{Binding IsEnabled}"
+                                        ToolTip.Tip="{Binding ToolTipText}"
+                                        Padding="4,2"
+                                        MinHeight="44"
+                                        HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                        HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                        Classes="patternPad"
+                                        Classes.selected="{Binding IsSelectedState}"
+                                        Classes.missing="{Binding IsMissingState}">
+                                    <StackPanel Spacing="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Label}" Classes="patternPadLabel" FontSize="10" TextTrimming="CharacterEllipsis" MaxWidth="68" />
+                                        <TextBlock Text="{Binding SubLabel}" Classes="dim" FontSize="9" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </Border>
             </Grid>
         </DockPanel>

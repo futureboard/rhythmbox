@@ -54,7 +54,7 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,20,0">
-                    <TextBlock Text="STEPS" Classes="dim" VerticalAlignment="Center" />
+                    <TextBlock Text="GRID" Classes="dim" VerticalAlignment="Center" ToolTip.Tip="Steps per bar (16 = 16th notes)" />
                     <NumericUpDown Minimum="4" Maximum="32" Increment="4" Value="{Binding StepsPerBar}" Width="70" />
                 </StackPanel>
 
@@ -78,6 +78,6 @@
             <TextBlock Text="{Binding StatusText}" Classes="dim" FontSize="11" />
         </Border>
 
-        <views:StepGridView Margin="14" />
+        <views:PianoRollView Margin="14" />
     </DockPanel>
 </Window>

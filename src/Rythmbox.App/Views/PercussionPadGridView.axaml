@@ -1,50 +1,50 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:Rythmbox.App.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="320"
-             x:Class="Rythmbox.App.Views.PercussionPadGridView"
-             x:DataType="vm:MainWindowViewModel">
-    <Border Classes="region regionFill">
-        <DockPanel LastChildFill="True">
-            <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,6" Margin="0,0,0,6">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBlock Text="GM DRUM MAP" Classes="panelHeader" VerticalAlignment="Center" />
-                    <TextBlock Text="19 voices · channel 10" Classes="dim" VerticalAlignment="Center" />
-                </StackPanel>
-            </Border>
-
-            <ItemsControl ItemsSource="{Binding PadGrid.Pads}"
-                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="4" Rows="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemContainerTheme>
-                    <ControlTheme TargetType="ContentPresenter">
-                        <Setter Property="HorizontalAlignment" Value="Stretch" />
-                        <Setter Property="VerticalAlignment" Value="Stretch" />
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
-                    </ControlTheme>
-                </ItemsControl.ItemContainerTheme>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:PadViewModel">
-                        <Button Command="{Binding HitCommand}" Padding="0"
-                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                                MinHeight="0"
-                                Classes="pad" Classes.used="{Binding IsUsedInLoop}">
-                            <StackPanel Spacing="2" VerticalAlignment="Center" Margin="6,8">
-                                <TextBlock Text="{Binding Label}" Classes="padLabel" HorizontalAlignment="Center" />
-                                <TextBlock Text="{Binding NoteDetail}" Classes="padNumber" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </DockPanel>
-    </Border>
-</UserControl>
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="320"
+             x:Class="Rythmbox.App.Views.PercussionPadGridView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="region regionFill">
+        <DockPanel LastChildFill="True">
+            <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,6" Margin="0,0,0,6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="{Binding Localization.DrumPadsTitle}" Classes="panelHeader" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Localization.DrumPadsVoices}" Classes="dim" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <ItemsControl ItemsSource="{Binding PadGrid.Pads}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" Rows="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerTheme>
+                    <ControlTheme TargetType="ContentPresenter">
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="VerticalAlignment" Value="Stretch" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    </ControlTheme>
+                </ItemsControl.ItemContainerTheme>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PadViewModel">
+                        <Button Command="{Binding HitCommand}" Padding="0"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                MinHeight="0"
+                                Classes="pad" Classes.used="{Binding IsUsedInLoop}">
+                            <StackPanel Spacing="2" VerticalAlignment="Center" Margin="6,8">
+                                <TextBlock Text="{Binding Label}" Classes="padLabel" HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding NoteDetail}" Classes="padNumber" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DockPanel>
+    </Border>
+</UserControl>

@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             xmlns:views="using:Rythmbox.App.Views"
+             mc:Ignorable="d" d:DesignWidth="84" d:DesignHeight="320"
+             x:Class="Rythmbox.App.Views.MixerChannelStripView"
+             x:DataType="vm:MixerChannelStripViewModel"
+             Width="{Binding StripWidth}"
+             MinHeight="320">
+    <Border Classes="mixerStrip"
+            Classes.selected="{Binding IsSelected}"
+            Classes.group="{Binding Kind, Converter={x:Static vm:MixerUiConverters.IsGroupKind}}"
+            Classes.master="{Binding Kind, Converter={x:Static vm:MixerUiConverters.IsMasterKind}}"
+            PointerPressed="OnStripPointerPressed">
+        <DockPanel LastChildFill="True">
+            <Border DockPanel.Dock="Top" Height="2" Classes="mixerStripAccent" Classes.drum="{Binding AccentClass, Converter={x:Static vm:MixerUiConverters.AccentIsDrum}}"
+                    Classes.perc="{Binding AccentClass, Converter={x:Static vm:MixerUiConverters.AccentIsPerc}}"
+                    Classes.cym="{Binding AccentClass, Converter={x:Static vm:MixerUiConverters.AccentIsCym}}"
+                    Classes.master="{Binding AccentClass, Converter={x:Static vm:MixerUiConverters.AccentIsMaster}}" />
+
+            <Border DockPanel.Dock="Top" Classes="mixerStripHeader" Padding="6,5">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Border Grid.Column="0" Width="2" Height="20" CornerRadius="1" Classes="mixerStripAccentBar"
+                            Classes.drum="{Binding AccentClass, Converter={x:Static vm:MixerUiConverters.AccentIsDrum}}"
+                            Classes.perc="{Binding AccentClass, Converter={x:Static vm:MixerUiConverters.AccentIsPerc}}"
+                            Classes.cym="{Binding AccentClass, Converter={x:Static vm:MixerUiConverters.AccentIsCym}}"
+                            Classes.master="{Binding AccentClass, Converter={x:Static vm:MixerUiConverters.AccentIsMaster}}" />
+                    <StackPanel Grid.Column="1" Spacing="1" Margin="6,0,0,0">
+                        <TextBlock Text="{Binding ShortName}" Classes="mixerStripName" TextTrimming="CharacterEllipsis" />
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{Binding TypeLabel}" Classes="mixerStripMeta" />
+                            <TextBlock Text="{Binding GroupLabel}" Classes="mixerStripMeta" IsVisible="{Binding Kind, Converter={x:Static vm:MixerUiConverters.IsDrumVoiceKind}}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border DockPanel.Dock="Bottom" Classes="mixerStripFooter" Padding="4,3">
+                <TextBlock Text="{Binding RouteName}" Classes="mixerStripRoute" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" />
+            </Border>
+
+            <Border DockPanel.Dock="Bottom" Padding="4,4" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,1,0,0">
+                <UniformGrid Columns="2" Rows="1">
+                    <ToggleButton Content="M" IsChecked="{Binding IsMuted}" Classes="mixerMsBtn" Classes.mute="True"
+                                  IsEnabled="{Binding IsEnabled}" HorizontalAlignment="Stretch" Margin="0,0,2,0" />
+                    <ToggleButton Content="S" IsChecked="{Binding IsSoloed}" Classes="mixerMsBtn" Classes.solo="True"
+                                  IsEnabled="{Binding ShowSolo}" ToolTip.Tip="{Binding SoloToolTip}"
+                                  HorizontalAlignment="Stretch" Margin="2,0,0,0" />
+                </UniformGrid>
+            </Border>
+
+            <StackPanel DockPanel.Dock="Bottom" Spacing="4" Margin="4,6,4,4">
+                <Border HorizontalAlignment="Center" Classes="mixerDbPill" Classes.selected="{Binding IsSelected}">
+                    <StackPanel Orientation="Horizontal" Spacing="2">
+                        <TextBlock Text="{Binding GainDbValue}" Classes="mixerDbPillValue" />
+                        <TextBlock Text="dB" Classes="mixerDbPillUnit" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <Grid Margin="4,4,4,0" ColumnDefinitions="Auto,*,Auto" MinHeight="140">
+                <views:MixerDbScaleView Grid.Column="0" Width="15" Margin="0,0,4,0" VerticalAlignment="Stretch" />
+
+                <views:MixerFaderView Grid.Column="1"
+                                      Value="{Binding FaderValue}"
+                                      IsFaderEnabled="{Binding IsEnabled}"
+                                      VerticalAlignment="Stretch"
+                                      HorizontalAlignment="Center" />
+
+                <StackPanel Grid.Column="2" Margin="4,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Center">
+                    <views:MixerMeterView DataContext="{Binding Meter}" />
+                    <TextBlock Text="{Binding Meter.StatusLabel}" Classes="mixerMeterHint"
+                               IsVisible="{Binding !Meter.HasSignalData}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                </StackPanel>
+            </Grid>
+        </DockPanel>
+    </Border>
+</UserControl>

@@ -11,21 +11,14 @@
             <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,6" Margin="0,0,0,6">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock Text="PATTERN PADS" Classes="panelHeader" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding Machine.PatternLabel, StringFormat='Current: {0}'}" Classes="dim" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Localization.PatternPadsTitle}" Classes="panelHeader" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Machine.PatternCurrentLabel}" Classes="dim" VerticalAlignment="Center" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Machine.TransportLabel}" Classes="mono" FontSize="11" />
-                        <Button Content="Export MIDI" Command="{Binding Machine.ExportMidiCommand}" IsEnabled="{Binding Machine.ExportMidiEnabled}" Padding="8,4" ToolTip.Tip="Export selected pattern (TODO)" />
+                        <Button Content="{Binding Localization.MachineExportMidi}" Command="{Binding Machine.ExportMidiCommand}" IsEnabled="{Binding Machine.ExportMidiEnabled}" Padding="8,4" ToolTip.Tip="Export selected pattern (TODO)" />
                     </StackPanel>
                 </Grid>
-            </Border>
-
-            <Border DockPanel.Dock="Top" IsVisible="{Binding Machine.ShowEmptyStylePrompt}" Background="#1A1B20" Padding="12" Margin="0,0,0,8">
-                <StackPanel Spacing="6" HorizontalAlignment="Center">
-                    <TextBlock Text="Choose a style to start" FontSize="13" HorizontalAlignment="Center" />
-                    <Button Content="Browse Styles" Command="{Binding Machine.BrowseStylesCommand}" Classes="accent" HorizontalAlignment="Center" />
-                </StackPanel>
             </Border>
 
             <ItemsControl ItemsSource="{Binding Machine.PatternPads}"

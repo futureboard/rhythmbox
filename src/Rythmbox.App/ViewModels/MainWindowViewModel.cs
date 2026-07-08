@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Rythmbox.App.Localization;
 using Rythmbox.Core.Audio;
 using Rythmbox.Core.Engine;
 using Rythmbox.Core.Styles;
@@ -26,10 +27,14 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly PatternArrangerEngine _arranger;
     private readonly IAudioBackend _audioBackend;
     private readonly DispatcherTimer _clockTimer;
+    private readonly LocalizationService _localization;
     private readonly DispatcherTimer _beatTimer;
 
     public MainWindowViewModel()
     {
+        _localization = new LocalizationService();
+        _localization.SetLanguage(AppLanguage.English);
+
         _engine = new PlaybackEngine();
         _engine.Start();
 
@@ -52,15 +57,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _engine.DeviceChanged += OnDeviceChanged;
 
         Status = new StatusViewModel();
+        Localization = new LocalizationViewModel(_localization);
         KitBrowser = new KitBrowserViewModel(_kitPlayer, _kitPresets, _midiInput, _padRouter);
         Player = new PlayerViewModel(_midiFilePlayer);
         MasterStrip = new MasterStripViewModel(_engine);
+        Mixer = new MixerViewModel(_engine, _kitPlayer, _audioBackend, _localization);
         LoopBrowser = new LoopBrowserViewModel(_loopLibrary, Player);
         PadGrid = new PercussionPadGridViewModel(_kitPlayer, Player);
         NowPlaying = new NowPlayingViewModel(LoopBrowser, Player);
         PadMixer = new PadMixerViewModel(_kitPlayer);
         BusMixer = new BusMixerViewModel(_kitPlayer);
-        Settings = new SettingsViewModel(_padMapping, _padRouter, _midiInput, Status);
+        Settings = new SettingsViewModel(_padMapping, _padRouter, _midiInput, Status, _localization);
         Tempo = new TempoViewModel(_tempoPresets, Player, Status);
         SubLoops = new SubLoopViewModel(_subLoopService, Player, Status);
         BeatLeds = new BeatLedViewModel(Player);
@@ -71,7 +78,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
             KitBrowser,
             _audioBackend,
             _styleBank,
-            _paths);
+            _paths,
+            _localization);
 
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clockTimer.Tick += (_, _) => ClockText = DateTime.Now.ToString("HH:mm:ss");
@@ -87,11 +95,15 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     public StatusViewModel Status { get; }
 
+    public LocalizationViewModel Localization { get; }
+
     public KitBrowserViewModel KitBrowser { get; }
 
     public PlayerViewModel Player { get; }
 
     public MasterStripViewModel MasterStrip { get; }
+
+    public MixerViewModel Mixer { get; }
 
     public LoopBrowserViewModel LoopBrowser { get; }
 
@@ -267,6 +279,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _kitPlayer.ReattachToMixer();
         _midiFilePlayer.ReattachToMixer();
         Machine.RefreshAudioStatus();
+        Mixer.RefreshAudioStatus();
     }
 
     public void Dispose()
@@ -275,6 +288,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _beatTimer.Stop();
         _engine.DeviceChanged -= OnDeviceChanged;
         Machine.Dispose();
+        Mixer.Dispose();
         Player.Dispose();
         MasterStrip.Dispose();
         _midiFilePlayer.Dispose();

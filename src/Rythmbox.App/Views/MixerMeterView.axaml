@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="24" d:DesignHeight="120"
+             x:Class="Rythmbox.App.Views.MixerMeterView"
+             x:DataType="vm:MixerMeterViewModel">
+    <Grid ColumnDefinitions="*,4,*" Height="120" Width="24">
+        <Border Grid.Column="0" Classes="mixerMeterTrack" Opacity="{Binding HasSignalData, Converter={x:Static vm:MixerUiConverters.SignalOpacity}}">
+            <Border VerticalAlignment="Bottom" Height="{Binding RmsLeft, Converter={x:Static vm:MixerUiConverters.MeterHeight}}"
+                    Classes="mixerMeterFill" Classes.clip="{Binding IsClipping}" />
+        </Border>
+        <Border Grid.Column="2" Classes="mixerMeterTrack" Opacity="{Binding HasSignalData, Converter={x:Static vm:MixerUiConverters.SignalOpacity}}">
+            <Border VerticalAlignment="Bottom" Height="{Binding RmsRight, Converter={x:Static vm:MixerUiConverters.MeterHeight}}"
+                    Classes="mixerMeterFill" Classes.clip="{Binding IsClipping}" />
+        </Border>
+    </Grid>
+</UserControl>

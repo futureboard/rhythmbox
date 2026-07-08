@@ -8,7 +8,7 @@
              x:DataType="vm:MainWindowViewModel">
     <Border Classes="region regionRight">
         <StackPanel Spacing="4">
-            <TextBlock Text="TRANSPORT" Classes="panelHeader" />
+            <TextBlock Text="{Binding Localization.TransportTitle}" Classes="panelHeader" />
 
             <Grid ColumnDefinitions="*,Auto">
                 <Button Grid.Column="0" Command="{Binding Player.PlayPauseCommand}" HorizontalAlignment="Stretch" Height="40" Classes="transportStop" Margin="0,0,1,0">
@@ -29,28 +29,28 @@
                 <ToggleButton Grid.Column="0" IsChecked="{Binding Player.IsLooping}" Margin="0,0,1,0" HorizontalAlignment="Stretch" ToolTip.Tip="Loop the current file">
                     <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                         <Path Data="{StaticResource IconRepeat}" Classes="icon small" />
-                        <TextBlock Text="LOOP" FontSize="11" />
+                        <TextBlock Text="{Binding Localization.TransportLoop}" FontSize="11" />
                     </StackPanel>
                 </ToggleButton>
                 <Button Grid.Column="1" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Mixer}" HorizontalAlignment="Stretch">
                     <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                         <Path Data="{StaticResource IconSlidersHorizontal}" Classes="icon small" />
-                        <TextBlock Text="MIXER" FontSize="11" />
+                        <TextBlock Text="{Binding Localization.TransportMixer}" FontSize="11" />
                     </StackPanel>
                 </Button>
             </Grid>
 
             <Grid ColumnDefinitions="*,*">
-                <Button Grid.Column="0" Command="{Binding LoopBrowser.RescanCommand}" Margin="0,0,1,0" HorizontalAlignment="Stretch">
+                <Button Grid.Column="0" Command="{Binding Machine.StyleBank.RescanCommand}" Margin="0,0,1,0" HorizontalAlignment="Stretch">
                     <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                         <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
-                        <TextBlock Text="Scan" FontSize="11" />
+                        <TextBlock Text="{Binding Localization.TransportScan}" FontSize="11" />
                     </StackPanel>
                 </Button>
                 <Button Grid.Column="1" Command="{Binding QuitCommand}" HorizontalAlignment="Stretch" Classes="danger">
                     <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                         <Path Data="{StaticResource IconPower}" Classes="icon small danger" />
-                        <TextBlock Text="QUIT" FontSize="11" />
+                        <TextBlock Text="{Binding Localization.TransportQuit}" FontSize="11" />
                     </StackPanel>
                 </Button>
             </Grid>

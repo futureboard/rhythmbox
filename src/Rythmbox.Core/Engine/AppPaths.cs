@@ -1,28 +1,69 @@
 namespace Rythmbox.Core.Engine;
 
 /// <summary>
-/// Resolves shared asset folders from the repo root (mirrors the old C++ <c>shared/</c> layout).
-/// Walks upward from the app base directory until it finds a <c>shared/RYTHM</c> folder.
+/// Resolves RhythmLive content folders under Documents, with dev-repo fallbacks.
 /// </summary>
 public sealed class AppPaths
 {
+    public const string ProductFolderName = "Futureboard Studio";
+    public const string AppFolderName = "Rhythmlive";
+
     public AppPaths()
     {
-        RootDir = FindRootDirectory();
-        if (RootDir is null)
-        {
-            return;
-        }
+        var rhythmliveDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            ProductFolderName,
+            AppFolderName);
 
-        SharedDir = Path.Combine(RootDir, "shared");
-        ContentDir = Path.Combine(RootDir, "Content");
-        RythmDir = Path.Combine(SharedDir, "RYTHM");
-        SubMidiDir = Path.Combine(SharedDir, "SUBMIDI");
-        PresetDir = Path.Combine(SharedDir, "PRESETS");
-        SamplesDir = Path.Combine(SharedDir, "SAMPLES");
-        StylesDir = Path.Combine(ContentDir, "Styles");
-        KitsDir = Path.Combine(ContentDir, "Kits");
-        UserStylesDir = Path.Combine(ContentDir, "User", "Styles");
+        StylesDir = EnsureDirectory(Path.Combine(rhythmliveDir, "Styles"));
+        PresetDir = EnsureDirectory(Path.Combine(rhythmliveDir, "Presets"));
+        SamplesDir = EnsureDirectory(Path.Combine(rhythmliveDir, "Samplepacks"));
+        KitsDir = SamplesDir;
+        UserStylesDir = StylesDir;
+
+        RootDir = FindDevRootDirectory();
+        if (RootDir is not null)
+        {
+            SharedDir = Path.Combine(RootDir, "shared");
+            ContentDir = Path.Combine(RootDir, "Content");
+            RythmDir = Path.Combine(SharedDir, "RYTHM");
+            SubMidiDir = Path.Combine(SharedDir, "SUBMIDI");
+
+            if (!HasStyleContent(StylesDir))
+            {
+                var devStyles = Path.Combine(ContentDir, "Styles");
+                if (Directory.Exists(devStyles))
+                {
+                    StylesDir = devStyles;
+                }
+            }
+
+            if (!HasPresetContent(PresetDir))
+            {
+                var devPresets = Path.Combine(SharedDir, "PRESETS");
+                if (Directory.Exists(devPresets))
+                {
+                    PresetDir = devPresets;
+                }
+            }
+
+            if (!HasSampleContent(SamplesDir))
+            {
+                var devSamples = Path.Combine(SharedDir, "SAMPLES");
+                if (Directory.Exists(devSamples))
+                {
+                    SamplesDir = devSamples;
+                    KitsDir = SamplesDir;
+                }
+            }
+        }
+        else
+        {
+            SharedDir = null;
+            ContentDir = null;
+            RythmDir = null;
+            SubMidiDir = null;
+        }
     }
 
     public string? RootDir { get; }
@@ -35,21 +76,47 @@ public sealed class AppPaths
 
     public string? SubMidiDir { get; }
 
-    public string? PresetDir { get; }
+    public string PresetDir { get; }
 
-    public string? SamplesDir { get; }
+    public string SamplesDir { get; }
 
-    public string? StylesDir { get; }
+    public string StylesDir { get; }
 
-    public string? KitsDir { get; }
+    public string KitsDir { get; }
 
-    public string? UserStylesDir { get; }
+    public string UserStylesDir { get; }
 
     public bool HasRythmLibrary => RythmDir is not null && Directory.Exists(RythmDir);
 
-    public bool HasStyleLibrary => StylesDir is not null && Directory.Exists(StylesDir);
+    public bool HasStyleLibrary => Directory.Exists(StylesDir) && HasStyleContent(StylesDir);
 
-    private static string? FindRootDirectory()
+    public static string RhythmliveRoot =>
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            ProductFolderName,
+            AppFolderName);
+
+    private static string EnsureDirectory(string path)
+    {
+        Directory.CreateDirectory(path);
+        return path;
+    }
+
+    private static bool HasStyleContent(string dir) =>
+        Directory.Exists(dir)
+        && (Directory.EnumerateFiles(dir, "style.json", SearchOption.AllDirectories).Any()
+            || Directory.EnumerateFiles(dir, "*.rhmsty", SearchOption.AllDirectories).Any());
+
+    private static bool HasPresetContent(string dir) =>
+        Directory.Exists(dir)
+        && Directory.EnumerateFiles(dir, "*.json").Any();
+
+    private static bool HasSampleContent(string dir) =>
+        Directory.Exists(dir)
+        && (Directory.EnumerateFiles(dir, "*.wav", SearchOption.AllDirectories).Any()
+            || Directory.EnumerateFiles(dir, "*.apak", SearchOption.AllDirectories).Any());
+
+    private static string? FindDevRootDirectory()
     {
         var dir = AppContext.BaseDirectory;
 
