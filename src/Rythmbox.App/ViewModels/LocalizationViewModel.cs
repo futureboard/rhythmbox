@@ -44,6 +44,9 @@ public sealed partial class LocalizationViewModel : ViewModelBase
     [ObservableProperty] private string _transportMixer = string.Empty;
     [ObservableProperty] private string _transportScan = string.Empty;
     [ObservableProperty] private string _transportQuit = string.Empty;
+    [ObservableProperty] private string _transportTapTempo = string.Empty;
+
+    [ObservableProperty] private string _headerTapTempo = string.Empty;
 
     [ObservableProperty] private string _arrangerTitle = string.Empty;
     [ObservableProperty] private string _arrangerStyle = string.Empty;
@@ -134,6 +137,9 @@ public sealed partial class LocalizationViewModel : ViewModelBase
         TransportMixer = _i18n["transport.mixer"];
         TransportScan = _i18n["transport.scan"];
         TransportQuit = _i18n["transport.quit"];
+        TransportTapTempo = _i18n["transport.tapTempo"];
+
+        HeaderTapTempo = _i18n["header.tapTempo"];
 
         ArrangerTitle = _i18n["arranger.title"];
         ArrangerStyle = _i18n["arranger.style"];

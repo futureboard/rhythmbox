@@ -22,6 +22,9 @@
   "transport.mixer": "MIXER",
   "transport.scan": "Scan",
   "transport.quit": "QUIT",
+  "transport.tapTempo": "Tap",
+
+  "header.tapTempo": "Tap",
 
   "arranger.title": "ARRANGER",
   "arranger.style": "STYLE",
@@ -97,6 +100,10 @@
   "status.portConnected": "Port: {0}",
   "status.padModeHome": "Pad mode: QWERTY home row",
   "status.padModeNumbers": "Pad mode: Number row 1-8+",
+  "status.tapTempoKeepTapping": "Tap tempo… keep tapping",
+  "status.tapTempoSet": "Tap tempo: {0:0.0} BPM",
+
+  "tempo.tapPreset": "Tap",
 
   "common.empty": "Empty",
   "common.noSignal": "No signal"

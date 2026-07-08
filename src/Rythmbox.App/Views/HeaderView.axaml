@@ -37,6 +37,10 @@
                         <TextBlock Text="{Binding Tempo.TempoLabel}" Classes="mono" FontSize="12" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
+                <Button Command="{Binding Tempo.TapTempoCommand}" Padding="8,4" ToolTip.Tip="Tap tempo (T)"
+                        Classes.tapActive="{Binding Tempo.IsAwaitingTap}">
+                    <TextBlock Text="{Binding Localization.HeaderTapTempo}" FontSize="11" FontWeight="SemiBold" />
+                </Button>
                 <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                     <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led0}" />
                     <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led1}" />

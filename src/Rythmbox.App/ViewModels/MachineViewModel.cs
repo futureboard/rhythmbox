@@ -18,8 +18,8 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
     private readonly KitBrowserViewModel _kitBrowser;
     private readonly IAudioBackend _audioBackend;
     private readonly LocalizationService _i18n;
+    private readonly TempoViewModel _tempo;
     private readonly DispatcherTimer _syncTimer;
-    private readonly List<DateTime> _tapTimes = [];
     private bool _syncingMacros;
 
     public MachineViewModel(
@@ -30,7 +30,8 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
         IAudioBackend audioBackend,
         StyleBankService styleBank,
         AppPaths paths,
-        LocalizationService i18n)
+        LocalizationService i18n,
+        TempoViewModel tempo)
     {
         _arranger = arranger;
         _midiPlayer = midiPlayer;
@@ -38,6 +39,7 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
         _kitBrowser = kitBrowser;
         _audioBackend = audioBackend;
         _i18n = i18n;
+        _tempo = tempo;
         _i18n.LanguageChanged += OnLanguageChanged;
 
         StyleBank = new StyleBankViewModel(styleBank, SelectStyle, _i18n);
@@ -172,7 +174,7 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
     {
         if (pad.IsTapTempo)
         {
-            RegisterTapTempo();
+            _tempo.TapTempoCommand.Execute(null);
             return;
         }
 
@@ -186,33 +188,6 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
 
         _arranger.TriggerPad(pad.Slot);
         SyncFromSession();
-    }
-
-    private void RegisterTapTempo()
-    {
-        var now = DateTime.UtcNow;
-        _tapTimes.RemoveAll(t => (now - t).TotalSeconds > 2);
-        _tapTimes.Add(now);
-
-        if (_tapTimes.Count < 2)
-        {
-            return;
-        }
-
-        var intervals = new List<double>();
-        for (var i = 1; i < _tapTimes.Count; i++)
-        {
-            intervals.Add((_tapTimes[i] - _tapTimes[i - 1]).TotalSeconds);
-        }
-
-        var avgInterval = intervals.Average();
-        if (avgInterval <= 0)
-        {
-            return;
-        }
-
-        var bpm = 60.0 / avgInterval;
-        _player.UserTempo = Math.Clamp(bpm, 40, 240);
     }
 
     private void PushMacros()

@@ -272,6 +272,10 @@
         <Setter Property="Background" Value="#25262E" />
     </Style>
 
+    <Style Selector="Button.tapActive /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxAccentBrush}" />
+    </Style>
+
     <Style Selector="TextBlock.patternPadLabel">
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="Bold" />

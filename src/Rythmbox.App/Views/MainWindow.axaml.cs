@@ -51,6 +51,11 @@ public partial class MainWindow : Window
                 e.Handled = true;
                 break;
 
+            case Key.T:
+                viewModel.Tempo.TapTempoCommand.Execute(null);
+                e.Handled = true;
+                break;
+
             case Key.Up:
                 viewModel.NudgeTempo(1, shift);
                 e.Handled = true;

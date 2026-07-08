@@ -55,7 +55,13 @@
                 </Button>
             </Grid>
 
-            <TextBlock Text="{Binding Player.Bpm, StringFormat='{}{0:0.0} BPM'}" Classes="mono" FontSize="11" />
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="{Binding Tempo.TempoLabel, StringFormat='{}{0:0.0} BPM'}" Classes="mono" FontSize="11" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Command="{Binding Tempo.TapTempoCommand}" Padding="8,2" Margin="4,0,0,0"
+                        ToolTip.Tip="Tap tempo (T)" Classes.tapActive="{Binding Tempo.IsAwaitingTap}">
+                    <TextBlock Text="{Binding Localization.TransportTapTempo}" FontSize="10" FontWeight="SemiBold" />
+                </Button>
+            </Grid>
         </StackPanel>
     </Border>
 </UserControl>

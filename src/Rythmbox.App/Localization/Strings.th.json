@@ -22,6 +22,9 @@
   "transport.mixer": "มิกซ์",
   "transport.scan": "สแกน",
   "transport.quit": "ออก",
+  "transport.tapTempo": "แตะ",
+
+  "header.tapTempo": "แตะ",
 
   "arranger.title": "เรียงเพลง",
   "arranger.style": "สไตล์",
@@ -97,6 +100,10 @@
   "status.portConnected": "พอร์ต: {0}",
   "status.padModeHome": "โหมดแป้น: แถว QWERTY",
   "status.padModeNumbers": "โหมดแป้น: แถวตัวเลข 1-8+",
+  "status.tapTempoKeepTapping": "แตะเทมโป… แตะต่อ",
+  "status.tapTempoSet": "แตะเทมโป: {0:0.0} BPM",
+
+  "tempo.tapPreset": "แตะ",
 
   "common.empty": "ว่าง",
   "common.noSignal": "ไม่มีสัญญาณ"

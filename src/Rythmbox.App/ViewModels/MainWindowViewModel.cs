@@ -68,7 +68,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         PadMixer = new PadMixerViewModel(_kitPlayer);
         BusMixer = new BusMixerViewModel(_kitPlayer);
         Settings = new SettingsViewModel(_padMapping, _padRouter, _midiInput, Status, _localization);
-        Tempo = new TempoViewModel(_tempoPresets, Player, Status);
+        Tempo = new TempoViewModel(_tempoPresets, Player, Status, _localization);
         SubLoops = new SubLoopViewModel(_subLoopService, Player, Status);
         BeatLeds = new BeatLedViewModel(Player);
         Machine = new MachineViewModel(
@@ -79,7 +79,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
             _audioBackend,
             _styleBank,
             _paths,
-            _localization);
+            _localization,
+            Tempo);
 
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clockTimer.Tick += (_, _) => ClockText = DateTime.Now.ToString("HH:mm:ss");
