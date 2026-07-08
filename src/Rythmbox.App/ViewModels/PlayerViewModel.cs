@@ -49,6 +49,12 @@ public sealed partial class PlayerViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private double _bpm = 120.0;
 
+    [ObservableProperty]
+    private double _userTempo = 120.0;
+
+    [ObservableProperty]
+    private double _nativeBpm = 120.0;
+
     public string PlayPauseLabel => IsPlaying ? "Pause" : "Play";
 
     /// <summary>The distinct note numbers used anywhere in the currently loaded loop.</summary>
@@ -75,6 +81,8 @@ public sealed partial class PlayerViewModel : ViewModelBase, IDisposable
         DurationText = FormatTime(_player.Duration);
         IsLooping = _player.IsLooping;
         Bpm = _player.Bpm;
+        NativeBpm = _player.Bpm;
+        UserTempo = _player.Bpm;
         OnPropertyChanged(nameof(UsedNoteNumbers));
 
         Tracks.Clear();
@@ -84,6 +92,12 @@ public sealed partial class PlayerViewModel : ViewModelBase, IDisposable
         }
 
         _player.Play();
+    }
+
+    partial void OnUserTempoChanged(double value)
+    {
+        Bpm = value;
+        OnPropertyChanged(nameof(Bpm));
     }
 
     [RelayCommand]
@@ -105,7 +119,15 @@ public sealed partial class PlayerViewModel : ViewModelBase, IDisposable
     }
 
     [RelayCommand]
-    private void Stop() => _player.Stop();
+    private void Stop()
+    {
+        _player.Stop();
+        _isSyncingPosition = true;
+        PositionSeconds = 0;
+        _isSyncingPosition = false;
+        PositionText = FormatTime(TimeSpan.Zero);
+        IsPlaying = false;
+    }
 
     private void SyncFromEngine()
     {

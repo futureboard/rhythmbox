@@ -1,0 +1,69 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="360"
+             x:Class="Rythmbox.App.Views.PatternPadGridView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="region regionFill">
+        <DockPanel LastChildFill="True">
+            <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,6" Margin="0,0,0,6">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="PATTERN PADS" Classes="panelHeader" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Machine.PatternLabel, StringFormat='Current: {0}'}" Classes="dim" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Machine.TransportLabel}" Classes="mono" FontSize="11" />
+                        <Button Content="Export MIDI" Command="{Binding Machine.ExportMidiCommand}" IsEnabled="{Binding Machine.ExportMidiEnabled}" Padding="8,4" ToolTip.Tip="Export selected pattern (TODO)" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border DockPanel.Dock="Top" IsVisible="{Binding Machine.ShowEmptyStylePrompt}" Background="#1A1B20" Padding="12" Margin="0,0,0,8">
+                <StackPanel Spacing="6" HorizontalAlignment="Center">
+                    <TextBlock Text="Choose a style to start" FontSize="13" HorizontalAlignment="Center" />
+                    <Button Content="Browse Styles" Command="{Binding Machine.BrowseStylesCommand}" Classes="accent" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Border>
+
+            <ItemsControl ItemsSource="{Binding Machine.PatternPads}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" Rows="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerTheme>
+                    <ControlTheme TargetType="ContentPresenter">
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="VerticalAlignment" Value="Stretch" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    </ControlTheme>
+                </ItemsControl.ItemContainerTheme>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PatternPadViewModel">
+                        <Button Command="{Binding TriggerCommand}"
+                                IsEnabled="{Binding IsEnabled}"
+                                ToolTip.Tip="{Binding ToolTipText}"
+                                Padding="0"
+                                MinHeight="56"
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                Classes="patternPad"
+                                Classes.stop="{Binding IsStop}"
+                                Classes.tap="{Binding IsTapTempo}"
+                                Classes.playing="{Binding IsPlayingState}"
+                                Classes.selected="{Binding IsSelectedState}"
+                                Classes.queued="{Binding IsQueuedState}"
+                                Classes.missing="{Binding IsMissingState}">
+                            <TextBlock Text="{Binding Label}" Classes="patternPadLabel" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DockPanel>
+    </Border>
+</UserControl>

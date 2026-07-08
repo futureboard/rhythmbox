@@ -11,9 +11,27 @@ namespace Rythmbox.Core.Engine;
 /// </summary>
 public sealed class LoopLibraryService
 {
-    private static readonly string[] MidiExtensions = [".mid", ".midi"];
+    private static readonly string[] MidiExtensions = [".mid", ".midi", ".seq"];
 
     public string? CurrentFolder { get; private set; }
+
+    /// <summary>Lists sub-banks under a RYTHM root (Main + each immediate subfolder).</summary>
+    public IReadOnlyList<LoopBank> ScanBanks(string rootFolder)
+    {
+        if (!Directory.Exists(rootFolder))
+        {
+            return [];
+        }
+
+        var banks = new List<LoopBank> { new("Main", rootFolder) };
+
+        foreach (var dir in Directory.EnumerateDirectories(rootFolder).OrderBy(d => d, StringComparer.OrdinalIgnoreCase))
+        {
+            banks.Add(new LoopBank(Path.GetFileName(dir), dir));
+        }
+
+        return banks;
+    }
 
     public IReadOnlyList<MidiLoopInfo> Scan(string folder)
     {

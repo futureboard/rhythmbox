@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="272" d:DesignHeight="420"
+             x:Class="Rythmbox.App.Views.ArrangerLeftPanelView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="region regionRight">
+        <StackPanel Spacing="8">
+            <TextBlock Text="ARRANGER" Classes="panelHeader" />
+
+            <Border Classes="panel" Padding="8">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="STYLE" Classes="dim" FontSize="10" />
+                    <TextBlock Text="{Binding Machine.StyleLabel}" FontWeight="Bold" FontSize="13" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Machine.StyleBank.SelectedStyle.Detail}" Classes="dim" IsVisible="{Binding Machine.HasStyleSelected}" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="panel" Padding="8">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="PATTERN" Classes="dim" FontSize="10" />
+                    <TextBlock Text="{Binding Machine.PatternLabel}" FontWeight="Bold" FontSize="13" />
+                </StackPanel>
+            </Border>
+
+            <Border Classes="panel" Padding="8">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="MACROS" Classes="dim" FontSize="10" />
+                    <Grid ColumnDefinitions="72,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Complexity" Classes="dim" VerticalAlignment="Center" />
+                        <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding Machine.Complexity}" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Energy" Classes="dim" VerticalAlignment="Center" />
+                        <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding Machine.Energy}" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Swing" Classes="dim" VerticalAlignment="Center" />
+                        <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding Machine.Swing}" />
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Humanize" Classes="dim" VerticalAlignment="Center" />
+                        <Slider Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding Machine.Humanize}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="panel" Padding="8" IsVisible="{Binding Machine.HasLastError}">
+                <TextBlock Text="{Binding Machine.LastError}" Foreground="{DynamicResource RythmboxRedBrush}" FontSize="11" TextWrapping="Wrap" />
+            </Border>
+
+            <Border Classes="panel" Padding="8" Opacity="0.6">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="SONG CHAIN" Classes="dim" FontSize="10" />
+                    <TextBlock Text="Coming soon — pattern sequence editor" Classes="dim" FontSize="11" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

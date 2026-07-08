@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="500"
+             x:Class="Rythmbox.App.Views.SettingsView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="region regionFill">
+        <ScrollViewer>
+            <StackPanel Spacing="0">
+                <Border BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="8" Margin="0,0,0,8">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="SETTINGS" Classes="panelHeader" />
+                        <TextBlock Text="MIDI Controller setup and pad mapping options" Classes="dim" />
+                    </StackPanel>
+                </Border>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="0">
+                    <Border Grid.Column="0" Classes="settingsPanel">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="MIDI CONTROLLER" FontWeight="Bold" />
+                            <TextBlock Text="{Binding Settings.MidiEnabledLabel}" Classes="dim" />
+                            <TextBlock Text="{Binding Settings.MidiPortLabel}" Classes="dim" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Command="{Binding Settings.ToggleMidiCommand}" Content="Toggle MIDI" />
+                                <Button Content="Prev port" Command="{Binding Settings.PreviousPortCommand}" />
+                                <Button Content="Next port" Command="{Binding Settings.NextPortCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="1" Classes="settingsPanel">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="KEYBOARD MAPPING" FontWeight="Bold" />
+                            <TextBlock Text="Play/Stop: Space" Classes="dim" />
+                            <TextBlock Text="{Binding Settings.KeyboardModeLabel}" Classes="dim" />
+                            <Button Content="Switch mode" Command="{Binding Settings.ToggleKeyboardModeCommand}" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Border Classes="settingsPanel">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="MAPPING OPTIONS" FontWeight="Bold" />
+                        <TextBlock Text="Click MIDI Learn, then hit a pad/key on your controller. Use +/- to fine tune notes."
+                                   Classes="dim" TextWrapping="Wrap" />
+
+                        <ItemsControl ItemsSource="{Binding Settings.Mappings}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PadMappingEntryViewModel">
+                                    <Border Classes="mappingRow" Classes.learning="{Binding IsLearning}">
+                                        <Grid ColumnDefinitions="100,80,80,*,Auto,Auto,Auto,Auto" Margin="0,4">
+                                            <TextBlock Grid.Column="0" Text="{Binding Label}" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding KeyboardKey, StringFormat='Key: {0}'}" Classes="dim" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" Text="{Binding MidiNoteLabel, StringFormat='MIDI: {0}'}" Classes="dim" VerticalAlignment="Center" />
+                                            <Panel Grid.Column="3" />
+                                            <Button Grid.Column="4" Command="{Binding ToggleLearnCommand}" Content="Learn" Margin="2,0" />
+                                            <Button Grid.Column="5" Command="{Binding DecrementNoteCommand}" Content="-" Width="28" Margin="2,0" />
+                                            <Button Grid.Column="6" Command="{Binding IncrementNoteCommand}" Content="+" Width="28" Margin="2,0" />
+                                            <Button Grid.Column="7" Command="{Binding CycleKeyCommand}" Content="Key next" Margin="2,0" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</UserControl>

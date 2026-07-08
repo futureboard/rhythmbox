@@ -1,0 +1,114 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Rythmbox.SampleCreator.ViewModels"
+        xmlns:views="using:Rythmbox.SampleCreator.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="760"
+        x:Class="Rythmbox.SampleCreator.Views.MainWindow"
+        x:DataType="vm:SampleCreatorViewModel"
+        Title="{Binding Title}"
+        Width="1200" Height="760" MinWidth="980" MinHeight="640"
+        Background="{DynamicResource RythmboxBackgroundBrush}"
+        KeyDown="OnWindowKeyDown">
+
+    <DockPanel LastChildFill="True">
+        <Border DockPanel.Dock="Top" Classes="headerBar" Padding="14,10">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Path Data="{StaticResource IconAudioLines}" Classes="icon accent small" />
+                    <TextBlock Text="SAMPLE CREATOR" FontWeight="Bold" FontSize="14"
+                               Foreground="{DynamicResource RythmboxAccentBrush}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                    <Button Click="OnNewClick">New Kit</Button>
+                    <Button Click="OnOpenClick">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
+                            <TextBlock Text="Open Preset…" />
+                        </StackPanel>
+                    </Button>
+                    <Button Click="OnSaveClick" Classes="accent">
+                        <TextBlock Text="Save Kit…" Foreground="#1A1A1A" FontWeight="Bold" />
+                    </Button>
+                </StackPanel>
+
+                <TextBox Grid.Column="2" Text="{Binding KitName}" PlaceholderText="Kit name" MinWidth="200" />
+            </Grid>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Classes="footerBar" Margin="14,0,14,14">
+            <TextBlock Text="{Binding StatusText}" Classes="dim" FontSize="11" />
+        </Border>
+
+        <Grid ColumnDefinitions="220,*,300" Margin="14">
+            <!-- Pad list -->
+            <Border Grid.Column="0" Classes="panel" Margin="0,0,10,0">
+                <DockPanel LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Top" Text="PADS" Classes="panelHeader" Margin="0,0,0,8" />
+                    <ListBox ItemsSource="{Binding Pads}" SelectedItem="{Binding SelectedPad}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PadSampleViewModel">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0" Text="{Binding Label}" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="1" Text="{Binding DurationLabel}" Classes="dim" FontSize="10" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <!-- Waveform + trim -->
+            <Border Grid.Column="1" Classes="panel" Margin="0,0,10,0" IsVisible="{Binding SelectedPad, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <StackPanel Spacing="12" DataContext="{Binding SelectedPad}">
+                    <TextBlock Text="{Binding Label}" FontSize="20" FontWeight="Bold" />
+                    <TextBlock Text="{Binding FileName}" Classes="dim" />
+
+                    <views:WaveformView DataContext="{Binding}" Height="140" />
+
+                    <Grid ColumnDefinitions="Auto,*,Auto,*,Auto" ColumnSpacing="10">
+                        <TextBlock Grid.Column="0" Text="Trim start" Classes="dim" VerticalAlignment="Center" />
+                        <Slider Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding TrimStart}" />
+                        <TextBlock Grid.Column="2" Text="Trim end" Classes="dim" VerticalAlignment="Center" />
+                        <Slider Grid.Column="3" Minimum="0" Maximum="1" Value="{Binding TrimEnd}" />
+                        <Button Grid.Column="4" Command="{Binding ApplyTrimCommand}" Content="Apply trim" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <TextBlock Grid.Column="0" Text="Gain" Classes="dim" VerticalAlignment="Center" Margin="0,0,10,0" />
+                        <Slider Grid.Column="1" Minimum="0" Maximum="2" Value="{Binding Gain}" />
+                        <TextBlock Grid.Column="2" Text="{Binding GainLabel}" Classes="mono" VerticalAlignment="Center" Margin="10,0,0,0" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Actions -->
+            <Border Grid.Column="2" Classes="panel">
+                <StackPanel Spacing="10" DataContext="{Binding SelectedPad}">
+                    <TextBlock Text="ACTIONS" Classes="panelHeader" />
+
+                    <Button Click="OnImportWavClick" HorizontalAlignment="Stretch">
+                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                            <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
+                            <TextBlock Text="Import WAV…" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding PreviewCommand}" HorizontalAlignment="Stretch" Classes="transportStop">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <Path Data="{StaticResource IconPlay}" Width="14" Height="14" Stretch="Uniform" Fill="White" Stroke="White" StrokeThickness="0" />
+                            <TextBlock Text="Preview Pad" FontWeight="Bold" Foreground="White" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding NormalizeCommand}" HorizontalAlignment="Stretch">Normalize</Button>
+                    <Button Command="{Binding ClearCommand}" HorizontalAlignment="Stretch" Classes="danger">Clear Sample</Button>
+
+                    <TextBlock Text="Assign samples to each GM pad, trim and normalize, then Save Kit to export JSON + WAV files for shared/PRESETS and shared/SAMPLES." Classes="dim" TextWrapping="Wrap" Margin="0,12,0,0" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

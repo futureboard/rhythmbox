@@ -3,8 +3,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="26"
-             x:Class="Rythmbox.App.Views.FooterView">
+             x:Class="Rythmbox.App.Views.FooterView"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             x:DataType="vm:MainWindowViewModel">
     <Border Classes="footerBar">
-        <TextBlock Text="SPACE play/pause  |  1-8 audition pads  |  ESC quit" Classes="dim" FontSize="11" />
+        <TextBlock Text="{Binding Status.Message}" Classes="dim" FontSize="11" TextTrimming="CharacterEllipsis" />
     </Border>
 </UserControl>

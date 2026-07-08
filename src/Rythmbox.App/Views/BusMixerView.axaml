@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="280" d:DesignHeight="200"
+             x:Class="Rythmbox.App.Views.BusMixerView"
+             x:DataType="vm:MainWindowViewModel">
+    <ItemsControl ItemsSource="{Binding BusMixer.Buses}">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="2" />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:BusMixerChannelViewModel">
+                <Border Classes="mixerChannel" Width="56">
+                    <Grid RowDefinitions="Auto,*,Auto,Auto">
+                        <TextBlock Grid.Row="0" Text="{Binding Label}" Classes="mixerChannelLabel" HorizontalAlignment="Center" />
+                        <Slider Grid.Row="1" Orientation="Vertical" Minimum="0" Maximum="1.5"
+                                Value="{Binding Volume}" Classes="mixerFader"
+                                HorizontalAlignment="Center" Margin="0,4" />
+                        <TextBlock Grid.Row="2" Text="{Binding VolumeLabel}" Classes="mixerChannelDb" HorizontalAlignment="Center" />
+                        <ToggleButton Grid.Row="3" Content="M" IsChecked="{Binding IsMuted}"
+                                      Classes="mixerMute" Margin="0,2,0,0" HorizontalAlignment="Stretch" />
+                    </Grid>
+                </Border>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>

@@ -12,7 +12,7 @@ public partial class HeaderView : UserControl
         InitializeComponent();
     }
 
-    private async void OnLoadSoundFontClick(object? sender, RoutedEventArgs e)
+    private async void OnLoadKitClick(object? sender, RoutedEventArgs e)
     {
         var topLevel = TopLevel.GetTopLevel(this);
         if (topLevel is null)
@@ -22,11 +22,11 @@ public partial class HeaderView : UserControl
 
         var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
-            Title = "Load SoundFont",
+            Title = "Load Drum Kit",
             AllowMultiple = false,
             FileTypeFilter =
             [
-                new FilePickerFileType("SoundFont files") { Patterns = ["*.sf2"] },
+                new FilePickerFileType("Kit presets") { Patterns = ["*.json", "*.apak"] },
             ],
         });
 
@@ -37,7 +37,7 @@ public partial class HeaderView : UserControl
 
         if (files[0].TryGetLocalPath() is { } path && DataContext is MainWindowViewModel viewModel)
         {
-            viewModel.SoundFontBrowser.LoadSoundFont(path);
+            viewModel.KitBrowser.LoadKit(path);
         }
     }
 }

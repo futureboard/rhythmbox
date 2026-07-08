@@ -2,13 +2,30 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Rythmbox.Core.Engine;
+using Rythmbox.Core.Models;
 
 namespace Rythmbox.App.ViewModels;
+
+public sealed partial class LoopBankViewModel : ViewModelBase
+{
+    public LoopBankViewModel(LoopBank bank)
+    {
+        Bank = bank;
+    }
+
+    public LoopBank Bank { get; }
+
+    public string Name => Bank.Name;
+
+    [ObservableProperty]
+    private bool _isSelected;
+}
 
 public sealed partial class LoopBrowserViewModel : ViewModelBase
 {
     private readonly LoopLibraryService _library;
     private readonly PlayerViewModel _player;
+    private string? _rootFolder;
 
     public LoopBrowserViewModel(LoopLibraryService library, PlayerViewModel player)
     {
@@ -16,10 +33,15 @@ public sealed partial class LoopBrowserViewModel : ViewModelBase
         _player = player;
     }
 
+    public ObservableCollection<LoopBankViewModel> Banks { get; } = new();
+
     public ObservableCollection<LoopEntryViewModel> Loops { get; } = new();
 
     [ObservableProperty]
     private string _folderLabel = "(no folder selected)";
+
+    [ObservableProperty]
+    private LoopBankViewModel? _selectedBank;
 
     [ObservableProperty]
     private LoopEntryViewModel? _selectedLoop;
@@ -27,6 +49,19 @@ public sealed partial class LoopBrowserViewModel : ViewModelBase
     public int SelectedIndexDisplay => SelectedLoop is null ? 0 : Loops.IndexOf(SelectedLoop) + 1;
 
     public int TotalCount => Loops.Count;
+
+    partial void OnSelectedBankChanged(LoopBankViewModel? value)
+    {
+        foreach (var bank in Banks)
+        {
+            bank.IsSelected = ReferenceEquals(bank, value);
+        }
+
+        if (value is not null)
+        {
+            RescanBank(value.Bank.Path);
+        }
+    }
 
     partial void OnSelectedLoopChanged(LoopEntryViewModel? value)
     {
@@ -43,14 +78,34 @@ public sealed partial class LoopBrowserViewModel : ViewModelBase
         }
     }
 
-    public void SetFolder(string folder) => Rescan(folder);
+    public void SetFolder(string folder)
+    {
+        _rootFolder = folder;
+        var banks = _library.ScanBanks(folder);
+
+        Banks.Clear();
+        foreach (var bank in banks)
+        {
+            Banks.Add(new LoopBankViewModel(bank));
+        }
+
+        FolderLabel = Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)) is { Length: > 0 } name
+            ? name
+            : folder;
+
+        SelectedBank = Banks.FirstOrDefault();
+    }
 
     [RelayCommand]
     private void Rescan()
     {
-        if (_library.CurrentFolder is { } folder)
+        if (_rootFolder is not null)
         {
-            Rescan(folder);
+            SetFolder(_rootFolder);
+        }
+        else if (_library.CurrentFolder is { } folder)
+        {
+            RescanBank(folder);
         }
     }
 
@@ -70,7 +125,7 @@ public sealed partial class LoopBrowserViewModel : ViewModelBase
         SelectedLoop = Loops[nextIndex];
     }
 
-    private void Rescan(string folder)
+    private void RescanBank(string folder)
     {
         var results = _library.Scan(folder);
 
@@ -79,10 +134,6 @@ public sealed partial class LoopBrowserViewModel : ViewModelBase
         {
             Loops.Add(new LoopEntryViewModel(info));
         }
-
-        FolderLabel = Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)) is { Length: > 0 } name
-            ? name
-            : folder;
 
         OnPropertyChanged(nameof(TotalCount));
         SelectedLoop = Loops.FirstOrDefault();

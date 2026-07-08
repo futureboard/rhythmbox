@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="36"
+             x:Class="Rythmbox.App.Views.NavBarView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="navBar">
+        <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="0">
+                <Button Classes="navTab" Classes.active="{Binding IsMachinePage}"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}">
+                    <TextBlock Text="Machine" FontSize="11" />
+                </Button>
+                <Button Classes="navTab" Classes.active="{Binding IsPadsPage}"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Pads}">
+                    <TextBlock Text="Pads" FontSize="11" />
+                </Button>
+                <Button Classes="navTab" Classes.active="{Binding IsMixerPage}"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Mixer}">
+                    <TextBlock Text="Mixer" FontSize="11" />
+                </Button>
+                <Button Classes="navTab" Classes.active="{Binding IsEditorPage}"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Editor}">
+                    <TextBlock Text="Editor" FontSize="11" />
+                </Button>
+                <Button Classes="navTab" Classes.active="{Binding IsMacroPage}"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Macro}">
+                    <TextBlock Text="Macro" FontSize="11" />
+                </Button>
+                <Button Classes="navTab" Classes.active="{Binding IsSettingsPage}"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}">
+                    <TextBlock Text="Settings" FontSize="11" />
+                </Button>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="0">
+                <Button Command="{Binding LoopBrowser.RescanCommand}" Padding="10,6" CornerRadius="0"
+                        BorderThickness="1,0,0,0" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
+                        <TextBlock Text="Scan" FontSize="11" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding SubLoops.ToggleCommand}" Padding="10,6" CornerRadius="0"
+                        BorderThickness="1,0,0,0" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Path Data="{StaticResource IconRepeat}" Classes="icon small" />
+                        <TextBlock Text="Sub Output" FontSize="11" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

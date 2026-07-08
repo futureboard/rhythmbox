@@ -18,6 +18,8 @@ public partial class MainWindow : Window
             return;
         }
 
+        var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
         switch (e.Key)
         {
             case Key.Space:
@@ -26,14 +28,64 @@ public partial class MainWindow : Window
                 break;
 
             case Key.Escape:
-                viewModel.QuitCommand.Execute(null);
+                if (viewModel.Tempo.IsPickerOpen)
+                {
+                    viewModel.Tempo.TogglePickerCommand.Execute(null);
+                }
+                else if (viewModel.SubLoops.IsOpen)
+                {
+                    viewModel.SubLoops.CloseCommand.Execute(null);
+                }
+                else
+                {
+                    viewModel.QuitCommand.Execute(null);
+                }
+
+                e.Handled = true;
+                break;
+
+            case Key.F11:
+                WindowState = WindowState == WindowState.FullScreen
+                    ? WindowState.Normal
+                    : WindowState.FullScreen;
+                e.Handled = true;
+                break;
+
+            case Key.Up:
+                viewModel.NudgeTempo(1, shift);
+                e.Handled = true;
+                break;
+
+            case Key.Down:
+                viewModel.NudgeTempo(-1, shift);
+                e.Handled = true;
+                break;
+
+            case Key.Left:
+                viewModel.LoopBrowser.SelectPrevious();
+                e.Handled = true;
+                break;
+
+            case Key.Right:
+                viewModel.LoopBrowser.SelectNext();
+                e.Handled = true;
+                break;
+
+            case Key.Q:
+                if (viewModel.PadGrid.Pads.Count > 0)
+                {
+                    var selected = viewModel.PadGrid.Pads[0];
+                    selected.HitCommand.Execute(null);
+                }
+
                 e.Handled = true;
                 break;
 
             default:
-                if (TryGetPadIndex(e.Key) is { } index)
+                if (TryGetKeyName(e.Key) is { } keyName &&
+                    viewModel.FindPadByKey(keyName) is { } padIndex)
                 {
-                    viewModel.PadGrid.TriggerPad(index);
+                    viewModel.PadGrid.TriggerPad(padIndex);
                     e.Handled = true;
                 }
 
@@ -48,17 +100,27 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (TryGetPadIndex(e.Key) is { } index)
+        if (TryGetKeyName(e.Key) is { } keyName &&
+            viewModel.FindPadByKey(keyName) is { } padIndex)
         {
-            viewModel.PadGrid.ReleasePad(index);
+            viewModel.PadGrid.ReleasePad(padIndex);
             e.Handled = true;
         }
     }
 
-    private static int? TryGetPadIndex(Key key) => key switch
+    private static string? TryGetKeyName(Key key) => key switch
     {
-        >= Key.D1 and <= Key.D8 => key - Key.D1,
-        >= Key.NumPad1 and <= Key.NumPad8 => key - Key.NumPad1,
+        >= Key.D0 and <= Key.D9 => ((int)(key - Key.D0)).ToString(),
+        >= Key.A and <= Key.Z => key.ToString(),
+        Key.OemMinus => "-",
+        Key.OemPlus => "=",
+        Key.OemOpenBrackets => "[",
+        Key.OemCloseBrackets => "]",
+        Key.OemBackslash => "\\",
+        Key.OemSemicolon => ";",
+        Key.OemQuotes => "'",
+        Key.OemComma => ",",
+        Key.OemPeriod => ".",
         _ => null,
     };
 }

@@ -6,12 +6,13 @@ namespace Rythmbox.Core.Engine;
 
 /// <summary>
 /// Enumerates hardware MIDI input devices (cross-platform via PortMidi) and routes a selected
-/// device straight into a target <see cref="IMidiControllable"/> (typically the loaded SoundFont synth).
+/// device into a target <see cref="IMidiControllable"/>.
 /// </summary>
 public sealed class MidiInputService : IDisposable
 {
     private readonly PlaybackEngine _engine;
     private MidiRoute? _activeRoute;
+    private int _portIndex = -1;
 
     public MidiInputService(PlaybackEngine engine)
     {
@@ -22,6 +23,8 @@ public sealed class MidiInputService : IDisposable
 
     public MidiDeviceInfo? ConnectedDevice { get; private set; }
 
+    public int ConnectedPortIndex => _portIndex;
+
     public bool IsConnected => _activeRoute is not null;
 
     public void RefreshDevices() => _engine.RefreshDevices();
@@ -31,7 +34,30 @@ public sealed class MidiInputService : IDisposable
         Disconnect();
         _activeRoute = _engine.MidiManager.CreateRoute(device, target);
         ConnectedDevice = device;
+        _portIndex = AvailableInputs.ToList().FindIndex(d => d.Id == device.Id);
     }
+
+    public bool ConnectByIndex(int index, IMidiControllable target)
+    {
+        RefreshDevices();
+        var devices = AvailableInputs;
+        if (devices.Count == 0)
+        {
+            Disconnect();
+            return false;
+        }
+
+        var wrapped = ((index % devices.Count) + devices.Count) % devices.Count;
+        Connect(devices[wrapped], target);
+        _portIndex = wrapped;
+        return true;
+    }
+
+    public bool ConnectNext(IMidiControllable target) =>
+        ConnectByIndex(_portIndex < 0 ? 0 : _portIndex + 1, target);
+
+    public bool ConnectPrevious(IMidiControllable target) =>
+        ConnectByIndex(_portIndex < 0 ? 0 : _portIndex - 1, target);
 
     public void Disconnect()
     {
@@ -42,6 +68,7 @@ public sealed class MidiInputService : IDisposable
         }
 
         ConnectedDevice = null;
+        _portIndex = -1;
     }
 
     public void Dispose() => Disconnect();

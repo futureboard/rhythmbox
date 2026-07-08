@@ -8,12 +8,12 @@ namespace Rythmbox.App.ViewModels;
 /// <summary>A single percussion pad button: a fixed GM note that can be triggered live or highlighted when used by the loaded loop.</summary>
 public sealed partial class PadViewModel : ViewModelBase
 {
-    private readonly SoundFontPlayer _soundFontPlayer;
+    private readonly KitSamplePlayer _kitPlayer;
 
-    public PadViewModel(PercussionPad pad, SoundFontPlayer soundFontPlayer)
+    public PadViewModel(PercussionPad pad, KitSamplePlayer kitPlayer)
     {
         Pad = pad;
-        _soundFontPlayer = soundFontPlayer;
+        _kitPlayer = kitPlayer;
     }
 
     public PercussionPad Pad { get; }
@@ -21,6 +21,10 @@ public sealed partial class PadViewModel : ViewModelBase
     public int Number => Pad.Index + 1;
 
     public string Label => Pad.Label;
+
+    public string NoteName => MidiNoteNames.Format(Pad.Note);
+
+    public string NoteDetail => $"{NoteName} / {Pad.Note}";
 
     [ObservableProperty]
     private bool _isUsedInLoop;
@@ -36,7 +40,7 @@ public sealed partial class PadViewModel : ViewModelBase
         }
 
         IsPressed = true;
-        _soundFontPlayer.NoteOn(GmPercussionMap.PercussionChannel, Pad.Note, 110);
+        _kitPlayer.TriggerPad(Pad.Index, 110f / 127f);
     }
 
     public void Release()
@@ -47,7 +51,7 @@ public sealed partial class PadViewModel : ViewModelBase
         }
 
         IsPressed = false;
-        _soundFontPlayer.NoteOff(GmPercussionMap.PercussionChannel, Pad.Note);
+        // One-shot samples; release is visual only.
     }
 
     /// <summary>Triggers a single drum hit (note-on immediately followed by note-off) for mouse clicks / keyboard shortcuts.</summary>

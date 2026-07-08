@@ -7,10 +7,10 @@ public sealed class PercussionPadGridViewModel : ViewModelBase
 {
     private readonly PlayerViewModel _player;
 
-    public PercussionPadGridViewModel(SoundFontPlayer soundFontPlayer, PlayerViewModel player)
+    public PercussionPadGridViewModel(KitSamplePlayer kitPlayer, PlayerViewModel player)
     {
         _player = player;
-        Pads = GmPercussionMap.Pads.Select(pad => new PadViewModel(pad, soundFontPlayer)).ToList();
+        Pads = GmPercussionMap.Pads.Select(pad => new PadViewModel(pad, kitPlayer)).ToList();
 
         _player.PropertyChanged += (_, e) =>
         {

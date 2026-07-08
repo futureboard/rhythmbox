@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="220"
+             x:Class="Rythmbox.App.Views.StyleBankView"
+             x:DataType="vm:MainWindowViewModel">
+    <Border Classes="region regionBottom">
+        <DockPanel LastChildFill="True">
+            <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,6" Margin="0,0,0,6">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="STYLE BANK" Classes="panelHeader" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Machine.StyleBank.EmptyMessage}" Classes="dim" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                        <TextBox PlaceholderText="Search styles…" Text="{Binding Machine.StyleBank.SearchText}" Width="160" FontSize="11" />
+                        <Button Command="{Binding Machine.StyleBank.RescanCommand}" Padding="8,4" ToolTip.Tip="Rescan style library">
+                            <TextBlock Text="Rescan Styles" FontSize="11" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Grid ColumnDefinitions="120,*,160">
+                <Border Grid.Column="0" Classes="bankList">
+                    <ListBox ItemsSource="{Binding Machine.StyleBank.Categories}"
+                             SelectedItem="{Binding Machine.StyleBank.SelectedCategory}" />
+                </Border>
+
+                <ListBox Grid.Column="1" ItemsSource="{Binding Machine.StyleBank.Styles}"
+                         SelectedItem="{Binding Machine.StyleBank.SelectedStyle}"
+                         Classes="loopList">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:StyleListItemViewModel">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Detail}" Classes="dim" FontSize="10" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="{Binding StatusLabel}" Classes="dim" FontSize="10" VerticalAlignment="Center" Margin="8,0" />
+                                <TextBlock Grid.Column="2" Text="★" Foreground="{DynamicResource RythmboxAccentBrush}" IsVisible="{Binding IsFavorite}" VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <Border Grid.Column="2" Classes="bankList" BorderThickness="1,0,0,0">
+                    <StackPanel Spacing="4" Margin="8">
+                        <TextBlock Text="RECENT" Classes="dim" FontSize="10" />
+                        <ItemsControl ItemsSource="{Binding Machine.StyleBank.RecentStyles}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:StyleListItemViewModel">
+                                    <TextBlock Text="{Binding Name}" FontSize="11" Margin="0,2" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </DockPanel>
+    </Border>
+</UserControl>

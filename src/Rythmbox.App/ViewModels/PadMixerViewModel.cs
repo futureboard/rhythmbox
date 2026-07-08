@@ -6,10 +6,10 @@ namespace Rythmbox.App.ViewModels;
 /// <summary>The full percussion kit mixer: one vertical channel strip per GM pad.</summary>
 public sealed class PadMixerViewModel : ViewModelBase
 {
-    public PadMixerViewModel(SoundFontPlayer soundFontPlayer)
+    public PadMixerViewModel(KitSamplePlayer kitPlayer)
     {
         Channels = GmPercussionMap.Pads
-            .Select(pad => new PadMixerChannelViewModel(pad, soundFontPlayer))
+            .Select(pad => new PadMixerChannelViewModel(pad, kitPlayer))
             .ToList();
     }
 

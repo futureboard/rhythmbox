@@ -8,26 +8,28 @@
              x:Class="Rythmbox.App.Views.MixerPageView"
              x:DataType="vm:MainWindowViewModel">
     <DockPanel LastChildFill="True">
-        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,14">
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
-                <Path Data="{StaticResource IconSlidersHorizontal}" Classes="icon accent" />
-                <TextBlock Text="MIXER" Classes="panelHeader" FontSize="18" VerticalAlignment="Center" />
-            </StackPanel>
-            <Button Grid.Column="1" Command="{Binding ToggleMixerCommand}" Classes="accent">
-                <StackPanel Orientation="Horizontal" Spacing="6">
-                    <Path Data="{StaticResource IconChevronLeft}" Classes="icon small" Stroke="#1A1A1A" />
-                    <TextBlock Text="Back to Drum Stage" Foreground="#1A1A1A" FontWeight="Bold" />
+        <Border DockPanel.Dock="Top" Classes="region regionBottom" Padding="8,6">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="MIXER" Classes="panelHeader" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}" Classes="accent" Padding="8,4">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <Path Data="{StaticResource IconChevronLeft}" Classes="icon small" Stroke="#1A1A1A" />
+                        <TextBlock Text="Machine" Foreground="#1A1A1A" FontWeight="Bold" FontSize="11" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <views:MasterStripView DockPanel.Dock="Top" DataContext="{Binding MasterStrip}" />
+
+        <Border Classes="region regionFill" Padding="0">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                <StackPanel Orientation="Horizontal" Spacing="0">
+                    <views:BusMixerView />
+                    <Border Width="1" Background="{DynamicResource RythmboxPanelBorderBrush}" />
+                    <views:PadMixerView />
                 </StackPanel>
-            </Button>
-        </Grid>
-
-        <views:MasterStripView DockPanel.Dock="Top" DataContext="{Binding MasterStrip}" Margin="0,0,0,14" />
-
-        <views:PadMixerView DockPanel.Dock="Top" Height="360" Margin="0,0,0,14" />
-
-        <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
-            <views:SoundFontBrowserView Grid.Column="0" DataContext="{Binding SoundFontBrowser}" />
-            <views:PlayerView Grid.Column="1" DataContext="{Binding Player}" />
-        </Grid>
+            </ScrollViewer>
+        </Border>
     </DockPanel>
 </UserControl>

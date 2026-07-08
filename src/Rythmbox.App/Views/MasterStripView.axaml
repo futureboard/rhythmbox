@@ -10,18 +10,18 @@
     <Border Classes="masterStrip">
         <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto" VerticalAlignment="Center">
 
-            <TextBlock Grid.Column="0" Text="MASTER" Classes="panelHeader" VerticalAlignment="Center" Margin="0,0,16,0" />
+            <TextBlock Grid.Column="0" Text="MASTER" Classes="panelHeader" VerticalAlignment="Center" Margin="0,0,10,0" />
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                 <Path Data="{StaticResource IconVolume2}" Classes="icon dim small" />
                 <Slider Minimum="0" Maximum="1.5" Value="{Binding MasterVolume}" Width="120" VerticalAlignment="Center" />
             </StackPanel>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" Margin="20,0,0,0" VerticalAlignment="Center">
-                <TextBlock Text="RMS" Classes="dim" VerticalAlignment="Center" />
-                <ProgressBar Minimum="0" Maximum="1" Value="{Binding RmsLevel}" Width="120" Height="10" Classes="vuMeter" />
-                <TextBlock Text="PEAK" Classes="dim" VerticalAlignment="Center" Margin="14,0,0,0" />
-                <ProgressBar Minimum="0" Maximum="1" Value="{Binding PeakLevel}" Width="120" Height="10" Classes="vuMeterPeak" />
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Margin="10,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="RMS" Classes="dim" FontSize="10" VerticalAlignment="Center" />
+                <ProgressBar Minimum="0" Maximum="1" Value="{Binding RmsLevel}" Width="100" Height="8" Classes="vuMeter" />
+                <TextBlock Text="PEAK" Classes="dim" FontSize="10" VerticalAlignment="Center" Margin="8,0,0,0" />
+                <ProgressBar Minimum="0" Maximum="1" Value="{Binding PeakLevel}" Width="100" Height="8" Classes="vuMeterPeak" />
             </StackPanel>
 
             <ComboBox Grid.Column="4" ItemsSource="{Binding OutputDevices}" SelectedItem="{Binding SelectedOutputDevice}" Width="240" Margin="0,0,8,0">

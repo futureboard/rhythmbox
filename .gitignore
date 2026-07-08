@@ -21,3 +21,6 @@ Thumbs.db
 # generate src/Rythmbox.App/Styles/Icons.axaml, which is what the app actually ships with).
 
 *.log
+old
+
+Content
