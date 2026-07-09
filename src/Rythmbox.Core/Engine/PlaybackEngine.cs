@@ -66,10 +66,19 @@ public sealed class PlaybackEngine : IDisposable
             return;
         }
 
+        // The switch creates a fresh MasterMixer, so carry the master strip state
+        // (volume + mute) across to the new device to avoid a silent reset on switch.
+        var masterVolume = MasterMixer.Volume;
+        var masterMuted = MasterMixer.Mute;
+
         var newDevice = _engine.SwitchDevice(_device, device, _device.Config);
         _device = newDevice;
         _device.Start();
         AttachMasterLevelMeter();
+
+        MasterMixer.Volume = masterVolume;
+        MasterMixer.Mute = masterMuted;
+
         DeviceChanged?.Invoke(this, EventArgs.Empty);
     }
 

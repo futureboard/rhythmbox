@@ -189,12 +189,6 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
         strip.SetFxSlots(settings);
     }
 
-    [RelayCommand]
-    private void OpenAudioSettings()
-    {
-        // TODO: navigate to Settings audio section when dedicated route exists.
-    }
-
     private void OnGainChanged(MixerChannelStripViewModel strip, double gain)
     {
         switch (strip.Kind)
@@ -220,7 +214,7 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
         switch (strip.Kind)
         {
             case MixerChannelKind.Master:
-                // TODO: master mute when engine supports it.
+                _engine.MasterMixer.Mute = muted;
                 break;
             case MixerChannelKind.Group when Enum.TryParse<PadBus>(strip.Id, out var bus):
                 _kitPlayer.SetBusMute(bus, muted);
