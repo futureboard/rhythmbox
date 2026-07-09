@@ -198,14 +198,12 @@ def build_preset(
 
 def main() -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    default_sfz = repo_root / "sounds/GM/Instruments/128/000 Acoustic Drum Kit.sfz"
-    default_samples = repo_root / "sounds/GM/Samples/128/000 Acoustic Drum Kit"
     default_preset_dir = repo_root / "shared/PRESETS"
     default_output_samples = repo_root / "shared/SAMPLES"
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sfz", type=Path, default=default_sfz)
-    parser.add_argument("--samples-dir", type=Path, default=default_samples)
+    parser.add_argument("--sfz", type=Path, required=True, help="Path to SFZ instrument file")
+    parser.add_argument("--samples-dir", type=Path, required=True, help="Directory containing SFZ sample WAVs")
     parser.add_argument("--preset-dir", type=Path, default=default_preset_dir)
     parser.add_argument("--output-samples-dir", type=Path, default=default_output_samples)
     parser.add_argument("--kit-name", default="Acoustic Drum Kit")

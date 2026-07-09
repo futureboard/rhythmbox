@@ -14,8 +14,9 @@ out/
 .DS_Store
 Thumbs.db
 
-# Soundfonts and MIDI test assets (large / not part of source)
-*.sf2
+# Optional local GM SFZ pack (was a git submodule; clone separately if needed for preset generation)
+sounds/GM/
+
 
 # Raw upstream Lucide icon repo (source-only; used by scripts/convert-icons.ps1 to
 # generate src/Rythmbox.App/Styles/Icons.axaml, which is what the app actually ships with).

@@ -83,6 +83,33 @@ write_file() {
   printf "%s" "${content}" > "${target}"
 }
 
+install_plymouth_theme() {
+  local splash_src="${REPO_ROOT}/scripts/arch-efi/splash.png"
+  local theme_src="${REPO_ROOT}/scripts/arch-efi/plymouth"
+  local theme_dir="${MOUNT_DIR}/usr/share/plymouth/themes/rythmbox"
+
+  if [[ ! -f "${splash_src}" ]]; then
+    echo "Missing splash image: ${splash_src}" >&2
+    exit 1
+  fi
+
+  mkdir -p "${theme_dir}"
+  install -m 0644 "${splash_src}" "${theme_dir}/splash.png"
+  install -m 0644 "${theme_src}/rythmbox.plymouth" "${theme_dir}/rythmbox.plymouth"
+  install -m 0644 "${theme_src}/rythmbox.script" "${theme_dir}/rythmbox.script"
+
+  write_file "${MOUNT_DIR}/etc/plymouth/plymouthd.conf" "[Daemon]
+Theme=rythmbox
+ShowDelay=0
+DeviceTimeout=8
+"
+}
+
+configure_plymouth_initramfs() {
+  chroot_run "grep -q plymouth /etc/mkinitcpio.conf || sed -i 's/^HOOKS=(base udev /HOOKS=(base udev plymouth /' /etc/mkinitcpio.conf"
+  chroot_run "plymouth-set-default-theme -R rythmbox"
+}
+
 require_root
 require_commands
 ensure_loop_devices
@@ -157,7 +184,7 @@ echo "Installing Arch packages"
 chroot_run "pacman-key --init"
 chroot_run "pacman-key --populate archlinux"
 chroot_run "pacman -Syu --noconfirm"
-chroot_run "pacman -S --needed --noconfirm base linux linux-firmware grub efibootmgr networkmanager sudo openssh git dotnet-sdk dotnet-runtime aspnet-runtime xorg-server xorg-xinit xorg-xrandr mesa libglvnd libx11 libice libsm fontconfig ttf-dejavu alsa-utils pipewire pipewire-alsa pipewire-pulse wireplumber dbus"
+chroot_run "pacman -S --needed --noconfirm base linux linux-firmware grub efibootmgr networkmanager sudo openssh git dotnet-sdk dotnet-runtime aspnet-runtime xorg-server xorg-xinit xorg-xrandr mesa libglvnd libx11 libice libsm fontconfig ttf-dejavu alsa-utils pipewire pipewire-alsa pipewire-pulse wireplumber dbus plymouth"
 
 chroot_run "ln -sf /usr/share/zoneinfo/UTC /etc/localtime && hwclock --systohc || true"
 chroot_run "locale-gen"
@@ -208,16 +235,19 @@ if [[ "${DEBUG_BOOT}" == "1" ]]; then
   KERNEL_CMDLINE="console=tty0 console=ttyS0,115200n8 earlyprintk=serial,ttyS0,115200 loglevel=7 systemd.log_level=debug systemd.log_target=console"
   GRUB_TERMINAL_INPUT_VALUE="console serial"
   GRUB_TERMINAL_OUTPUT_VALUE="console serial"
+  USE_PLYMOUTH=0
 elif [[ "${FASTBOOT}" == "1" ]]; then
   GRUB_TIMEOUT_VALUE=0
-  KERNEL_CMDLINE="quiet loglevel=3 rd.udev.log_level=3 systemd.show_status=false vt.global_cursor_default=0 nowatchdog"
+  KERNEL_CMDLINE="quiet splash loglevel=3 rd.udev.log_level=3 rd.systemd.show_status=false systemd.show_status=false vt.global_cursor_default=0 nowatchdog"
   GRUB_TERMINAL_INPUT_VALUE="console"
   GRUB_TERMINAL_OUTPUT_VALUE="console"
+  USE_PLYMOUTH=1
 else
   GRUB_TIMEOUT_VALUE=3
-  KERNEL_CMDLINE="quiet loglevel=3"
+  KERNEL_CMDLINE="quiet splash loglevel=3 rd.systemd.show_status=false systemd.show_status=false"
   GRUB_TERMINAL_INPUT_VALUE="console"
   GRUB_TERMINAL_OUTPUT_VALUE="console"
+  USE_PLYMOUTH=1
 fi
 
 write_file "${MOUNT_DIR}/etc/default/grub" "GRUB_DEFAULT=0
@@ -246,6 +276,13 @@ if [[ "${DEBUG_BOOT}" == "1" ]]; then
   chroot_run "systemctl enable serial-getty@ttyS0"
 fi
 chroot_run "systemctl mask NetworkManager-wait-online.service systemd-networkd-wait-online.service"
+if [[ "${USE_PLYMOUTH}" == "1" ]]; then
+  echo "Installing Plymouth splash theme"
+  install_plymouth_theme
+  configure_plymouth_initramfs
+else
+  chroot_run "mkinitcpio -P"
+fi
 chroot_run "grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=Rythmbox --removable --no-nvram"
 chroot_run "grub-mkconfig -o /boot/grub/grub.cfg"
 

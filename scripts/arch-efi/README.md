@@ -45,10 +45,14 @@ Variables:
 - `KIOSK_USER` - autologin user, default `rythmbox`
 - `ROOT_PASSWORD` - root password in the image, default `rythmbox`
 - `USER_PASSWORD` - kiosk user password, default `rythmbox`
+- `FASTBOOT` - `1` hides boot logs and shows Plymouth splash, default `1`
+- `DEBUG_BOOT` - `1` enables verbose console/serial boot logs and disables Plymouth
 
 ## Boot behavior
 
 - EFI boots with GRUB installed as removable media (`EFI/BOOT/BOOTX64.EFI`).
+- **Fastboot** (`FASTBOOT=1`, default) shows a Plymouth splash with `scripts/arch-efi/splash.png` instead of kernel boot logs.
+- Set `DEBUG_BOOT=1` to disable Plymouth and keep serial/console boot logs for troubleshooting.
 - TTY1 auto-logins as `rythmbox`.
 - `startx` launches `/opt/rhythmbox/app/Rythmbox.App`.
 - `RYTHMBOX_FULLSCREEN=1` starts the Avalonia window fullscreen.

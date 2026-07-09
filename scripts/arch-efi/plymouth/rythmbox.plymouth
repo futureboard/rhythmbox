@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Rythmbox
+Description=Rythmbox boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/rythmbox
+ScriptFile=/usr/share/plymouth/themes/rythmbox/rythmbox.script
