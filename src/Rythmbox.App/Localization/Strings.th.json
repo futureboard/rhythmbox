@@ -142,6 +142,7 @@
   "machine.notLoaded": "ยังไม่ได้โหลดคิต",
   "machine.noDevice": "ยังไม่ได้เลือกอุปกรณ์",
   "machine.exportMidi": "ส่งออก MIDI",
+  "machine.exportMidiTip": "ส่งออกแพทเทิร์นที่เลือกเป็นไฟล์ MIDI มาตรฐาน",
 
   "style.status.invalid": "ไม่ถูกต้อง",
   "style.status.incomplete": "ไม่สมบูรณ์",
@@ -163,6 +164,8 @@
   "status.padModeNumbers": "โหมดแพด: แถวตัวเลข 1-8+",
   "status.tapTempoKeepTapping": "แตะจังหวะ… แตะต่อ",
   "status.tapTempoSet": "BPM: {0:0.0}",
+  "status.midiExported": "ส่งออกแล้ว {0}",
+  "status.midiExportFailed": "ส่งออกไม่สำเร็จ: {0}",
 
   "tempo.tapPreset": "แตะจังหวะ",
 

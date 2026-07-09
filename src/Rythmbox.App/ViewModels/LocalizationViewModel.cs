@@ -153,6 +153,7 @@ public sealed partial class LocalizationViewModel : ViewModelBase
     [ObservableProperty] private string _settingsFootSwitchCycleSig = string.Empty;
 
     [ObservableProperty] private string _machineExportMidi = string.Empty;
+    [ObservableProperty] private string _machineExportMidiTip = string.Empty;
 
     public string Format(string key, params object[] args) => _i18n.Format(key, args);
 
@@ -305,5 +306,6 @@ public sealed partial class LocalizationViewModel : ViewModelBase
         SettingsFootSwitchCycleSig = _i18n["settings.footSwitchCycleSig"];
 
         MachineExportMidi = _i18n["machine.exportMidi"];
+        MachineExportMidiTip = _i18n["machine.exportMidiTip"];
     }
 }

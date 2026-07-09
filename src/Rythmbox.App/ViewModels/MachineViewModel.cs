@@ -6,17 +6,23 @@ using Rythmbox.App.Localization;
 using Rythmbox.Core.Audio;
 using Rythmbox.Core.Engine;
 using Rythmbox.Core.Models.Styles;
+using Rythmbox.Core.Services;
 using Rythmbox.Core.Styles;
 
 namespace Rythmbox.App.ViewModels;
 
 public sealed partial class MachineViewModel : ViewModelBase, IDisposable
 {
+    private static readonly string[] MidiExtensions = [".mid"];
+
     private readonly PatternArrangerEngine _arranger;
     private readonly MidiFilePlayer _midiPlayer;
     private readonly PlayerViewModel _player;
     private readonly KitBrowserViewModel _kitBrowser;
     private readonly IAudioBackend _audioBackend;
+    private readonly AppPaths _paths;
+    private readonly IFileDialogService _fileDialog;
+    private readonly StatusViewModel _status;
     private readonly LocalizationService _i18n;
     private readonly TempoViewModel _tempo;
     private readonly DispatcherTimer _syncTimer;
@@ -31,6 +37,8 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
         IAudioBackend audioBackend,
         StyleBankService styleBank,
         AppPaths paths,
+        IFileDialogService fileDialog,
+        StatusViewModel status,
         LocalizationService i18n,
         TempoViewModel tempo)
     {
@@ -39,6 +47,9 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
         _player = player;
         _kitBrowser = kitBrowser;
         _audioBackend = audioBackend;
+        _paths = paths;
+        _fileDialog = fileDialog;
+        _status = status;
         _i18n = i18n;
         _tempo = tempo;
         _i18n.LanguageChanged += OnLanguageChanged;
@@ -200,9 +211,47 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
     public string PatternCurrentLabel => _i18n.Format("patternPads.current", PatternLabel);
 
     [RelayCommand]
-    private void ExportMidi()
+    private async Task ExportMidiAsync()
     {
-        // TODO: export selected pattern MIDI to file.
+        var session = _arranger.Session;
+        var pattern = session.GetPattern(session.SelectedPatternId);
+        if (pattern is null || !pattern.HasMidiFile)
+        {
+            return;
+        }
+
+        var sourcePath = pattern.ResolvedMidiPath!;
+        var defaultName = BuildExportFileName(pattern.Name);
+        var destination = await _fileDialog.SaveFileAsync(
+            _paths.PresetDir,
+            _i18n["machine.exportMidi"],
+            defaultName,
+            MidiExtensions);
+        if (string.IsNullOrEmpty(destination))
+        {
+            return;
+        }
+
+        try
+        {
+            File.Copy(sourcePath, destination, overwrite: true);
+            _status.Show(_i18n.Format("status.midiExported", Path.GetFileName(destination)));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            _status.Show(_i18n.Format("status.midiExportFailed", ex.Message));
+        }
+    }
+
+    private static string BuildExportFileName(string patternName)
+    {
+        var name = string.IsNullOrWhiteSpace(patternName) ? "pattern" : patternName.Trim();
+        foreach (var invalid in Path.GetInvalidFileNameChars())
+        {
+            name = name.Replace(invalid, '_');
+        }
+
+        return name + ".mid";
     }
 
     /// <summary>Drop a momentary short bar (e.g. 2/4), then return to the base groove. Bound to the SIG button.</summary>
