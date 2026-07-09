@@ -19,6 +19,26 @@
                 </Button>
             </Grid>
 
+            <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding HotloadSlots}" Margin="0,0,0,6">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:KitHotloadSlotViewModel">
+                        <StackPanel Margin="2" Spacing="2">
+                            <Button Command="{Binding LoadCommand}" ToolTip.Tip="{Binding ToolTip}" HorizontalAlignment="Stretch" Padding="6,4">
+                                <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" FontSize="10" HorizontalAlignment="Center" />
+                            </Button>
+                            <Button Command="{Binding AssignCommand}" HorizontalAlignment="Stretch" Padding="4,1" ToolTip.Tip="Assign selected kit">
+                                <TextBlock Text="Set" FontSize="9" HorizontalAlignment="Center" Classes="dim" />
+                            </Button>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
             <ListBox ItemsSource="{Binding Kits}" SelectedItem="{Binding SelectedKit}">
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="engine:KitPresetEntry">

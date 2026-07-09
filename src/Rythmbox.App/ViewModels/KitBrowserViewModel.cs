@@ -25,10 +25,14 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
         _presetService = presetService;
         _midiInput = midiInput;
         _padRouter = padRouter;
+        HotloadSlots = new ObservableCollection<KitHotloadSlotViewModel>(
+            new[] { "A", "B", "C", "D" }.Select(name => new KitHotloadSlotViewModel(name, LoadHotloadSlot, AssignHotloadSlot)));
         RefreshMidiInputs();
     }
 
     public ObservableCollection<KitPresetEntry> Kits { get; } = new();
+
+    public ObservableCollection<KitHotloadSlotViewModel> HotloadSlots { get; }
 
     public ObservableCollection<PadAuditionViewModel> Pads { get; } = new();
 
@@ -114,6 +118,8 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
             Kits.Add(entry);
         }
 
+        RefreshHotloadSlots();
+
         if (SelectedKit is null && _kitPlayer.LoadedKitPath is { } loaded)
         {
             SelectedKit = Kits.FirstOrDefault(k => string.Equals(k.FilePath, loaded, StringComparison.OrdinalIgnoreCase));
@@ -152,6 +158,42 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
         }
     }
 
+    private void LoadHotloadSlot(KitHotloadSlotViewModel slot)
+    {
+        if (slot.Kit is null)
+        {
+            AssignHotloadSlot(slot);
+            return;
+        }
+
+        LoadKit(slot.Kit.FilePath);
+    }
+
+    private void AssignHotloadSlot(KitHotloadSlotViewModel slot)
+    {
+        if (SelectedKit is not null)
+        {
+            slot.Kit = SelectedKit;
+        }
+    }
+
+    private void RefreshHotloadSlots()
+    {
+        for (var i = 0; i < HotloadSlots.Count; i++)
+        {
+            var slot = HotloadSlots[i];
+            if (slot.Kit is { } kit)
+            {
+                slot.Kit = Kits.FirstOrDefault(k => string.Equals(k.FilePath, kit.FilePath, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (slot.Kit is null && i < Kits.Count)
+            {
+                slot.Kit = Kits[i];
+            }
+        }
+    }
+
     private void RefreshPads()
     {
         Pads.Clear();
@@ -162,6 +204,41 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
             Pads.Add(new PadAuditionViewModel(GmPercussionMap.Pads[i], hasSample[i], _kitPlayer));
         }
     }
+}
+
+public sealed partial class KitHotloadSlotViewModel : ViewModelBase
+{
+    private readonly Action<KitHotloadSlotViewModel> _load;
+    private readonly Action<KitHotloadSlotViewModel> _assign;
+
+    public KitHotloadSlotViewModel(
+        string slotName,
+        Action<KitHotloadSlotViewModel> load,
+        Action<KitHotloadSlotViewModel> assign)
+    {
+        SlotName = slotName;
+        _load = load;
+        _assign = assign;
+    }
+
+    public string SlotName { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayName))]
+    [NotifyPropertyChangedFor(nameof(ToolTip))]
+    private KitPresetEntry? _kit;
+
+    public string DisplayName => Kit is null ? SlotName : $"{SlotName}: {Kit.Name}";
+
+    public string ToolTip => Kit is null
+        ? $"Assign selected kit to hotload slot {SlotName}"
+        : $"Load {Kit.Name}. Right-click Assign to replace slot {SlotName}.";
+
+    [RelayCommand]
+    private void Load() => _load(this);
+
+    [RelayCommand]
+    private void Assign() => _assign(this);
 }
 
 public sealed partial class PadAuditionViewModel : ViewModelBase

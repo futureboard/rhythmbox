@@ -10,10 +10,14 @@ namespace Rythmbox.Editor.ViewModels;
 
 public sealed partial class EditorViewModel : ViewModelBase, IDisposable
 {
+    private const int MinDrumNote = 1;
+    private const int MaxDrumNote = 127;
+
     private readonly PlaybackEngine _engine;
     private readonly KitSamplePlayer _kitPlayer;
     private readonly PatternPreviewEngine _preview;
     private readonly AppPaths _paths;
+    private readonly KitPresetService _presetService;
     private string? _currentFilePath;
 
     public EditorViewModel()
@@ -23,6 +27,9 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
         _kitPlayer = new KitSamplePlayer(_engine);
         _preview = new PatternPreviewEngine(_kitPlayer);
         _paths = new AppPaths();
+        _presetService = new KitPresetService();
+        HotloadSlots = new ObservableCollection<EditorKitHotloadSlotViewModel>(
+            new[] { "A", "B", "C", "D" }.Select(name => new EditorKitHotloadSlotViewModel(name, LoadHotloadSlot)));
         Pattern = new DrumPattern();
 
         _preview.StepAdvanced += OnPreviewStep;
@@ -34,6 +41,8 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
     public DrumPattern Pattern { get; private set; }
 
     public ObservableCollection<PianoRollLaneViewModel> Lanes { get; } = new();
+
+    public ObservableCollection<EditorKitHotloadSlotViewModel> HotloadSlots { get; }
 
     public IReadOnlyList<PianoRollRulerTickViewModel> RulerTicks { get; private set; } = [];
 
@@ -180,8 +189,29 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
         StatusText = $"Kit: {KitLabel}";
     }
 
+    private void LoadHotloadSlot(EditorKitHotloadSlotViewModel slot)
+    {
+        if (slot.Kit is null)
+        {
+            return;
+        }
+
+        LoadKit(slot.Kit.FilePath);
+    }
+
+    private void RefreshHotloadSlots()
+    {
+        var kits = _presetService.Scan(_paths.PresetDir);
+        for (var i = 0; i < HotloadSlots.Count; i++)
+        {
+            HotloadSlots[i].Kit = i < kits.Count ? kits[i] : null;
+        }
+    }
+
     private void TryLoadDefaultKit()
     {
+        RefreshHotloadSlots();
+
         if (!Directory.Exists(_paths.PresetDir))
         {
             _kitPlayer.LoadProceduralGmKit();
@@ -256,19 +286,23 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
         Lanes.Clear();
         BuildRuler();
 
-        var pads = GmPercussionMap.Pads.OrderByDescending(p => p.Note).ToList();
-        for (var i = 0; i < pads.Count; i++)
+        var gmPadsByNote = GmPercussionMap.Pads.ToDictionary(p => p.Note);
+        var laneIndex = 0;
+        for (var note = MaxDrumNote; note >= MinDrumNote; note--)
         {
-            var pad = pads[i];
-            var lane = new PianoRollLaneViewModel(pad, this, isAlternateRow: i % 2 == 0);
+            var pad = gmPadsByNote.TryGetValue(note, out var gmPad)
+                ? gmPad with { Index = note }
+                : new PercussionPad(note, $"Note {note}", note, PadCategory.Drum, PadBus.Drum);
+            var lane = new PianoRollLaneViewModel(pad, this, isAlternateRow: laneIndex % 2 == 0);
             for (var step = 0; step < Pattern.TotalSteps; step++)
             {
-                var note = new PianoRollNoteViewModel(lane, this, step);
-                note.SyncFromPattern();
-                lane.Notes.Add(note);
+                var cell = new PianoRollNoteViewModel(lane, this, step);
+                cell.SyncFromPattern();
+                lane.Notes.Add(cell);
             }
 
             Lanes.Add(lane);
+            laneIndex++;
         }
     }
 
@@ -342,4 +376,29 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
         _kitPlayer.Dispose();
         _engine.Dispose();
     }
+}
+
+public sealed partial class EditorKitHotloadSlotViewModel : ViewModelBase
+{
+    private readonly Action<EditorKitHotloadSlotViewModel> _load;
+
+    public EditorKitHotloadSlotViewModel(string slotName, Action<EditorKitHotloadSlotViewModel> load)
+    {
+        SlotName = slotName;
+        _load = load;
+    }
+
+    public string SlotName { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DisplayName))]
+    [NotifyPropertyChangedFor(nameof(ToolTip))]
+    private KitPresetEntry? _kit;
+
+    public string DisplayName => Kit is null ? SlotName : $"{SlotName}: {Kit.Name}";
+
+    public string ToolTip => Kit is null ? $"No kit assigned to slot {SlotName}" : $"Load {Kit.Name}";
+
+    [RelayCommand]
+    private void Load() => _load(this);
 }

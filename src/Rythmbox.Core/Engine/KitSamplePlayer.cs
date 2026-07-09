@@ -232,6 +232,8 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         }
     }
 
+    public void TriggerNote(int note, float velocity = 1f) => TriggerByNote(note, velocity);
+
     public void ProcessMidiMessage(MidiMessage message)
     {
         if (message.Command != MidiCommand.NoteOn || message.Velocity <= 0)

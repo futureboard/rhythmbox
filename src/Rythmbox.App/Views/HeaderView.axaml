@@ -73,6 +73,19 @@
                         <TextBlock Text="{Binding KitBrowser.LoadButtonLabel}" TextTrimming="CharacterEllipsis" FontSize="11" />
                     </StackPanel>
                 </Button>
+                <Button Click="OnToggleFullscreenClick" Padding="8,4" ToolTip.Tip="Toggle fullscreen (F11)">
+                    <TextBlock Text="FULL" FontSize="10" FontWeight="SemiBold" />
+                </Button>
+                <Button Padding="8,4" ToolTip.Tip="Power">
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuItem Header="Shutdown" Command="{Binding ShutdownComputerCommand}" />
+                            <MenuItem Header="Restart" Command="{Binding RestartComputerCommand}" />
+                            <MenuItem Header="Exit" Command="{Binding QuitCommand}" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                    <Path Data="{StaticResource IconPower}" Classes="icon small danger" />
+                </Button>
                 <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}" Padding="8,4" ToolTip.Tip="{Binding Localization.HeaderSettingsTip}">
                     <Path Data="{StaticResource IconSlidersHorizontal}" Classes="icon small" />
                 </Button>

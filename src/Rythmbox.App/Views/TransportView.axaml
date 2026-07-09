@@ -47,10 +47,17 @@
                         <TextBlock Text="{Binding Localization.TransportScan}" FontSize="11" />
                     </StackPanel>
                 </Button>
-                <Button Grid.Column="1" Command="{Binding QuitCommand}" HorizontalAlignment="Stretch" Classes="danger">
+                <Button Grid.Column="1" HorizontalAlignment="Stretch" Classes="danger">
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <MenuItem Header="Shutdown" Command="{Binding ShutdownComputerCommand}" />
+                            <MenuItem Header="Restart" Command="{Binding RestartComputerCommand}" />
+                            <MenuItem Header="Exit" Command="{Binding QuitCommand}" />
+                        </MenuFlyout>
+                    </Button.Flyout>
                     <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
                         <Path Data="{StaticResource IconPower}" Classes="icon small danger" />
-                        <TextBlock Text="{Binding Localization.TransportQuit}" FontSize="11" />
+                        <TextBlock Text="POWER" FontSize="11" />
                     </StackPanel>
                 </Button>
             </Grid>

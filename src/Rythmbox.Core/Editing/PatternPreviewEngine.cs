@@ -49,7 +49,7 @@ public sealed class PatternPreviewEngine : IDisposable
                     {
                         if (hitStep == step)
                         {
-                            _kitPlayer.TriggerPad(pad, velocity / 127f);
+                            _kitPlayer.TriggerNote(pad, velocity / 127f);
                         }
                     }
 

@@ -12,6 +12,16 @@ public partial class HeaderView : UserControl
         InitializeComponent();
     }
 
+    private void OnToggleFullscreenClick(object? sender, RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is Window window)
+        {
+            window.WindowState = window.WindowState == WindowState.FullScreen
+                ? WindowState.Normal
+                : WindowState.FullScreen;
+        }
+    }
+
     private async void OnLoadKitClick(object? sender, RoutedEventArgs e)
     {
         var topLevel = TopLevel.GetTopLevel(this);

@@ -1,0 +1,9 @@
+<Project>
+  <Target Name="RemoveDuplicateCommunityToolkitMvvmAnalyzers" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)" Condition="$([System.String]::Copy('%(Analyzer.Identity)').Contains('communitytoolkit.mvvm\8.4.1\analyzers\dotnet\roslyn4.0\'))" />
+      <Analyzer Remove="@(Analyzer)" Condition="$([System.String]::Copy('%(Analyzer.Identity)').Contains('communitytoolkit.mvvm\8.4.1\analyzers\dotnet\roslyn4.3\'))" />
+      <Analyzer Remove="@(Analyzer)" Condition="$([System.String]::Copy('%(Analyzer.Identity)').Contains('communitytoolkit.mvvm\8.4.1\analyzers\dotnet\roslyn4.12\'))" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -23,7 +23,7 @@ public sealed class PianoRollLaneViewModel : ViewModelBase
 
     public int NoteNumber { get; }
 
-    public string NoteLabel => $"C{NoteNumber / 12 - 2} · {NoteNumber}";
+    public string NoteLabel => $"{FormatNoteName(NoteNumber)} · {NoteNumber}";
 
     public EditorViewModel Editor { get; }
 
@@ -32,4 +32,10 @@ public sealed class PianoRollLaneViewModel : ViewModelBase
     public bool IsPerc => Pad.Category == PadCategory.Perc;
 
     public ObservableCollection<PianoRollNoteViewModel> Notes { get; } = new();
+
+    private static string FormatNoteName(int note)
+    {
+        string[] names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        return $"{names[Math.Clamp(note, 0, 127) % 12]}{Math.Clamp(note, 0, 127) / 12}";
+    }
 }

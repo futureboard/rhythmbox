@@ -22,9 +22,6 @@ public static class DrumPatternCodec
         };
 
         var ticksPerStep = TicksPerStep(pattern, ppq);
-        var noteToPad = GmPercussionMap.Pads
-            .Select((pad, index) => (pad.Note, index))
-            .ToDictionary(x => x.Note, x => x.index);
 
         var maxStep = 0;
         var absoluteTick = 0L;
@@ -45,7 +42,8 @@ public static class DrumPatternCodec
                     continue;
                 }
 
-                if (!noteToPad.TryGetValue(message.NoteNumber, out var padIndex))
+                var note = message.NoteNumber;
+                if (note is < 0 or > 127)
                 {
                     continue;
                 }
@@ -53,7 +51,7 @@ public static class DrumPatternCodec
                 var step = (int)(absoluteTick / ticksPerStep);
                 if (step >= 0)
                 {
-                    pattern.Hits[(padIndex, step)] = (byte)message.Velocity;
+                    pattern.Hits[(note, step)] = (byte)message.Velocity;
                     maxStep = Math.Max(maxStep, step);
                 }
             }
@@ -70,14 +68,13 @@ public static class DrumPatternCodec
         var sequence = new MidiSequence(ppq, [], [], [], []);
         var ticksPerStep = TicksPerStep(pattern, ppq);
 
-        foreach (var ((pad, step), velocity) in pattern.Hits.OrderBy(h => h.Key.Step).ThenBy(h => h.Key.Pad))
+        foreach (var ((note, step), velocity) in pattern.Hits.OrderBy(h => h.Key.Step).ThenBy(h => h.Key.Pad))
         {
-            if ((uint)pad >= (uint)GmPercussionMap.Pads.Count)
+            if (note is < 0 or > 127)
             {
                 continue;
             }
 
-            var note = GmPercussionMap.Pads[pad].Note;
             var startTick = (long)step * ticksPerStep;
             sequence.AddNote(startTick, NoteDurationTicks, note, velocity);
         }

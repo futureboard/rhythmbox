@@ -35,9 +35,25 @@
                     <Button Command="{Binding ClearPatternCommand}">Clear</Button>
                 </StackPanel>
 
-                <Button Grid.Column="2" Click="OnLoadKitClick" MaxWidth="240">
-                    <TextBlock Text="{Binding KitLabel}" TextTrimming="CharacterEllipsis" />
-                </Button>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
+                    <ItemsControl ItemsSource="{Binding HotloadSlots}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:EditorKitHotloadSlotViewModel">
+                                <Button Command="{Binding LoadCommand}" ToolTip.Tip="{Binding ToolTip}" MaxWidth="82" Padding="6,4">
+                                    <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" FontSize="10" />
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Click="OnLoadKitClick" MaxWidth="240">
+                        <TextBlock Text="{Binding KitLabel}" TextTrimming="CharacterEllipsis" />
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 

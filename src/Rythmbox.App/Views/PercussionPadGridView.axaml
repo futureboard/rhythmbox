@@ -15,36 +15,81 @@
                 </StackPanel>
             </Border>
 
-            <ItemsControl ItemsSource="{Binding PadGrid.Pads}"
-                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <UniformGrid Columns="4" Rows="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemContainerTheme>
-                    <ControlTheme TargetType="ContentPresenter">
-                        <Setter Property="HorizontalAlignment" Value="Stretch" />
-                        <Setter Property="VerticalAlignment" Value="Stretch" />
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
-                    </ControlTheme>
-                </ItemsControl.ItemContainerTheme>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="vm:PadViewModel">
-                        <Button Command="{Binding HitCommand}" Padding="0"
-                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                                HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                                MinHeight="0"
-                                Classes="pad" Classes.used="{Binding IsUsedInLoop}">
-                            <StackPanel Spacing="2" VerticalAlignment="Center" Margin="6,8">
-                                <TextBlock Text="{Binding Label}" Classes="padLabel" HorizontalAlignment="Center" />
-                                <TextBlock Text="{Binding NoteDetail}" Classes="padNumber" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <Grid ColumnDefinitions="*,132" ColumnSpacing="10">
+                <ItemsControl Grid.Column="0"
+                              ItemsSource="{Binding PadGrid.Pads}"
+                              HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="4" Rows="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemContainerTheme>
+                        <ControlTheme TargetType="ContentPresenter">
+                            <Setter Property="HorizontalAlignment" Value="Stretch" />
+                            <Setter Property="VerticalAlignment" Value="Stretch" />
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                        </ControlTheme>
+                    </ItemsControl.ItemContainerTheme>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PadViewModel">
+                            <Button Command="{Binding HitCommand}" Padding="0"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                                    MinHeight="0"
+                                    Classes="pad" Classes.used="{Binding IsUsedInLoop}">
+                                <StackPanel Spacing="2" VerticalAlignment="Center" Margin="6,8">
+                                    <TextBlock Text="{Binding Label}" Classes="padLabel" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding NoteDetail}" Classes="padNumber" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Border Grid.Column="1" Classes="panel" Padding="8">
+                    <DockPanel LastChildFill="True">
+                        <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,8">
+                            <TextBlock Text="DRUM PRESET" Classes="panelHeader" FontSize="11" />
+                            <TextBlock Text="RACK" Classes="dim" FontSize="10" />
+                        </StackPanel>
+
+                        <ItemsControl ItemsSource="{Binding KitBrowser.HotloadSlots}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="4" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerTheme>
+                                <ControlTheme TargetType="ContentPresenter">
+                                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                                </ControlTheme>
+                            </ItemsControl.ItemContainerTheme>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:KitHotloadSlotViewModel">
+                                    <Button Command="{Binding LoadCommand}"
+                                            ToolTip.Tip="{Binding ToolTip}"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                            HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Stretch"
+                                            Padding="6"
+                                            Margin="0,0,0,6">
+                                        <Grid ColumnDefinitions="32,*">
+                                            <TextBlock Grid.Column="0" Text="{Binding SlotName}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Kit.Name, FallbackValue='Empty'}" Classes="dim" FontSize="10" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                        </Grid>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DockPanel>
+                </Border>
+            </Grid>
         </DockPanel>
     </Border>
 </UserControl>

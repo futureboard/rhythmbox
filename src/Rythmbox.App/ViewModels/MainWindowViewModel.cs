@@ -1,4 +1,6 @@
-﻿using Avalonia;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -247,6 +249,59 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         {
             desktop.Shutdown();
         }
+    }
+
+    [RelayCommand]
+    private void ShutdownComputer() => RunPowerCommand(restart: false);
+
+    [RelayCommand]
+    private void RestartComputer() => RunPowerCommand(restart: true);
+
+    private void RunPowerCommand(bool restart)
+    {
+        try
+        {
+            var startInfo = CreatePowerProcessStartInfo(restart);
+            if (startInfo is null)
+            {
+                Status.Show("Power command is not supported on this platform");
+                return;
+            }
+
+            Process.Start(startInfo);
+            Status.Show(restart ? "Restart requested" : "Shutdown requested");
+        }
+        catch (Exception ex)
+        {
+            Status.Show($"Power command failed: {ex.Message}");
+        }
+    }
+
+    private static ProcessStartInfo? CreatePowerProcessStartInfo(bool restart)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return new ProcessStartInfo
+            {
+                FileName = "shutdown.exe",
+                Arguments = restart ? "/r /t 0" : "/s /t 0",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return new ProcessStartInfo
+            {
+                FileName = "systemctl",
+                Arguments = restart ? "reboot" : "poweroff",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+        }
+
+        return null;
     }
 
     public void SetLoopFolder(string folder)
