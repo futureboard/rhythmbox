@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
@@ -24,6 +25,9 @@ public partial class App : Application
             desktop.MainWindow = new MainWindow
             {
                 DataContext = mainWindowViewModel,
+                WindowState = string.Equals(Environment.GetEnvironmentVariable("RYTHMBOX_FULLSCREEN"), "1", StringComparison.Ordinal)
+                    ? WindowState.FullScreen
+                    : WindowState.Normal,
             };
             desktop.ShutdownRequested += (_, _) => mainWindowViewModel.Dispose();
         }
