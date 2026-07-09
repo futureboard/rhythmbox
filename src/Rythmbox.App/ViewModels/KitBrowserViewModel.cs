@@ -10,7 +10,7 @@ namespace Rythmbox.App.ViewModels;
 
 public sealed partial class KitBrowserViewModel : ViewModelBase
 {
-    private readonly KitSamplePlayer _kitPlayer;
+    private readonly KitSession _kitSession;
     private readonly KitPresetService _presetService;
     private readonly MidiInputService _midiInput;
     private readonly PadMidiRouter _padRouter;
@@ -18,19 +18,23 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
     private string? _presetDir;
 
     public KitBrowserViewModel(
-        KitSamplePlayer kitPlayer,
+        KitSession kitSession,
         KitPresetService presetService,
         MidiInputService midiInput,
         PadMidiRouter padRouter,
         IFileDialogService fileDialog)
     {
-        _kitPlayer = kitPlayer;
+        _kitSession = kitSession;
         _presetService = presetService;
         _midiInput = midiInput;
         _padRouter = padRouter;
         _fileDialog = fileDialog;
         HotloadSlots = new ObservableCollection<KitHotloadSlotViewModel>(
             new[] { "A", "B", "C", "D" }.Select(name => new KitHotloadSlotViewModel(name, LoadHotloadSlot, AssignHotloadSlot)));
+
+        _kitSession.LiveKitUpdated += SyncFromSession;
+        _kitSession.StructureChanged += SyncFromSession;
+        SyncFromSession();
         RefreshMidiInputs();
     }
 
@@ -74,42 +78,24 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
         Rescan();
     }
 
-    public void LoadKit(string path)
-    {
-        _kitPlayer.LoadKit(path, Path.GetDirectoryName(path));
-        LoadedKitName = _kitPlayer.KitName;
-        SelectedKit = Kits.FirstOrDefault(k => string.Equals(k.FilePath, path, StringComparison.OrdinalIgnoreCase));
-        RefreshPads();
-    }
+    public void LoadKit(string path) => _kitSession.LoadFromFile(path);
 
     public void TryLoadDefault(string? presetDir)
     {
-        if (presetDir is null || !Directory.Exists(presetDir))
+        if (presetDir is not null)
         {
-            _kitPlayer.LoadProceduralGmKit();
-            LoadedKitName = _kitPlayer.KitName;
-            RefreshPads();
-            return;
+            _presetDir = presetDir;
         }
 
-        var defaultPath = Path.Combine(presetDir, "default.json");
-        if (File.Exists(defaultPath))
-        {
-            LoadKit(defaultPath);
-            return;
-        }
+        _kitSession.TryLoadDefaultPreset();
+    }
 
-        var first = Directory.EnumerateFiles(presetDir, "*.json")
-            .FirstOrDefault(p => !string.Equals(Path.GetFileName(p), "tempo.json", StringComparison.OrdinalIgnoreCase));
-
-        if (first is not null)
-        {
-            LoadKit(first);
-            return;
-        }
-
-        _kitPlayer.LoadProceduralGmKit();
-        LoadedKitName = _kitPlayer.KitName;
+    public void SyncFromSession()
+    {
+        LoadedKitName = _kitSession.KitName;
+        SelectedKit = _kitSession.PresetPath is { } loaded
+            ? Kits.FirstOrDefault(k => string.Equals(k.FilePath, loaded, StringComparison.OrdinalIgnoreCase))
+            : SelectedKit;
         RefreshPads();
     }
 
@@ -123,11 +109,7 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
         }
 
         RefreshHotloadSlots();
-
-        if (SelectedKit is null && _kitPlayer.LoadedKitPath is { } loaded)
-        {
-            SelectedKit = Kits.FirstOrDefault(k => string.Equals(k.FilePath, loaded, StringComparison.OrdinalIgnoreCase));
-        }
+        SyncFromSession();
     }
 
     [RelayCommand]
@@ -215,11 +197,11 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
     private void RefreshPads()
     {
         Pads.Clear();
-        var hasSample = _kitPlayer.PadHasSample;
+        var hasSample = _kitSession.Player.PadHasSample;
 
         for (var i = 0; i < GmPercussionMap.Pads.Count; i++)
         {
-            Pads.Add(new PadAuditionViewModel(GmPercussionMap.Pads[i], hasSample[i], _kitPlayer));
+            Pads.Add(new PadAuditionViewModel(GmPercussionMap.Pads[i], hasSample[i], _kitSession.Player));
         }
     }
 }

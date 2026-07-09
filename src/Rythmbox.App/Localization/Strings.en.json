@@ -41,7 +41,7 @@
   "arranger.songChainSoon": "Coming soon — pattern sequence editor",
 
   "drumPads.title": "DRUM PADS",
-  "drumPads.voices": "19 voices · channel 10",
+  "drumPads.voices": "{0} GM voices · ch 10",
 
   "styleBank.title": "STYLE BANK",
   "styleBank.rescan": "Rescan Styles",

@@ -38,7 +38,8 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
     private sealed class Voice
     {
         public int PadIndex = -1;
-        public int Position;
+        public float[] Buffer = [];
+        public double Position;
         public float Gain = 1f;
         public bool Active;
         public int ChokeGroup;
@@ -58,7 +59,11 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
     private readonly Dictionary<PadBus, BusMixState> _busMix;
     private readonly int[] _drumMap = Enumerable.Repeat(-1, 128).ToArray();
     private readonly int[] _chokeGroups = Enumerable.Repeat(0, GmPercussionMap.Pads.Count).ToArray();
-    private readonly float[][] _buffers = new float[GmPercussionMap.Pads.Count][];
+    private readonly float[] _pitchSemitones = new float[GmPercussionMap.Pads.Count];
+    private readonly float[] _padGains = Enumerable.Repeat(1f, GmPercussionMap.Pads.Count).ToArray();
+    private readonly PadPlaybackState[] _padPlayback = Enumerable.Range(0, GmPercussionMap.Pads.Count)
+        .Select(_ => new PadPlaybackState())
+        .ToArray();
     private readonly ChannelDspChain[] _padDsp = Enumerable.Range(0, GmPercussionMap.Pads.Count).Select(_ => new ChannelDspChain()).ToArray();
     private readonly ChannelDspChain[] _busDsp = Enum.GetValues<PadBus>().Select(_ => new ChannelDspChain()).ToArray();
     private readonly ChannelDspChain _masterDsp = new();
@@ -90,7 +95,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
     public bool IsLoaded => LoadedKitPath is not null || KitName.Length > 0;
 
     public IReadOnlyList<bool> PadHasSample =>
-        _buffers.Select(buf => buf.Length > 0).ToArray();
+        _padPlayback.Select(static pad => pad.HasAudio).ToArray();
 
     public void LoadKit(string presetPath, string? samplesRoot = null)
     {
@@ -105,6 +110,8 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         ApplyKit(KitPresetCodec.CreateDefaultGmKit(), null);
     }
 
+    public void LoadKitPreset(KitPreset kit, string? presetPath = null) => ApplyKit(kit, presetPath);
+
     private void ApplyKit(KitPreset kit, string? jsonPath)
     {
         lock (_voiceLock)
@@ -114,22 +121,20 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
             KitName = kit.Name;
             LoadedKitPath = jsonPath;
 
+            var kitByNote = kit.Pads
+                .Where(static pad => pad.MidiNote >= 0)
+                .GroupBy(static pad => pad.MidiNote)
+                .ToDictionary(static group => group.Key, static group => group.First());
+
             for (var i = 0; i < GmPercussionMap.Pads.Count; i++)
             {
                 var gmPad = GmPercussionMap.Pads[i];
-                var sample = i < kit.Pads.Count ? kit.Pads[i] : null;
+                kitByNote.TryGetValue(gmPad.Note, out var sample);
 
-                if (sample?.HasAudio == true)
-                {
-                    _buffers[i] = sample.Samples;
-                    _chokeGroups[i] = sample.ChokeGroup;
-                }
-                else
-                {
-                    var label = sample?.Label ?? gmPad.Label;
-                    _buffers[i] = ProceduralDrumSynth.ForLabel(label, WavCodec.TargetSampleRate);
-                    _chokeGroups[i] = sample?.ChokeGroup ?? 0;
-                }
+                _padPlayback[i] = PadPlaybackState.FromSample(sample, gmPad.Label);
+                _chokeGroups[i] = sample?.ChokeGroup ?? 0;
+                _pitchSemitones[i] = sample?.PitchSemitones ?? 0f;
+                _padGains[i] = sample?.Gain ?? 1f;
             }
 
             RebuildDrumMap(kit);
@@ -316,6 +321,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         }
 
         var note = GmPercussionMap.Pads[padIndex].Note;
+        var midiVelocity = Math.Clamp((int)Math.Round(velocity * 127f), 1, 127);
         if (!TryResolveMix(note, velocity, out var gain))
         {
             return;
@@ -323,7 +329,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
 
         lock (_voiceLock)
         {
-            StartVoice(padIndex, gain);
+            StartVoice(padIndex, midiVelocity, gain * _padGains[padIndex]);
         }
     }
 
@@ -353,6 +359,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         }
 
         var gmNote = GmPercussionMap.Pads[padIndex].Note;
+        var midiVelocity = Math.Clamp((int)Math.Round(velocity * 127f), 1, 127);
         if (!TryResolveMix(gmNote, velocity, out var gain))
         {
             return;
@@ -360,7 +367,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
 
         lock (_voiceLock)
         {
-            StartVoice(padIndex, gain);
+            StartVoice(padIndex, midiVelocity, gain * _padGains[padIndex]);
         }
     }
 
@@ -383,8 +390,14 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         return gain > 0.0001f;
     }
 
-    private void StartVoice(int padIndex, float gain)
+    private void StartVoice(int padIndex, int midiVelocity, float gain)
     {
+        var buffer = _padPlayback[padIndex].SelectBuffer(midiVelocity);
+        if (buffer is null || buffer.Length == 0)
+        {
+            return;
+        }
+
         var choke = _chokeGroups[padIndex];
         if (choke > 0)
         {
@@ -399,6 +412,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
 
         var slot = _voices.FirstOrDefault(v => !v.Active) ?? _voices[0];
         slot.PadIndex = padIndex;
+        slot.Buffer = buffer;
         slot.Position = 0;
         slot.Gain = gain;
         slot.Active = true;
@@ -441,14 +455,23 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
                         continue;
                     }
 
-                    var buf = _buffers[voice.PadIndex];
-                    if (voice.Position >= buf.Length)
+                    var buf = voice.Buffer;
+                    if (buf.Length == 0)
                     {
                         voice.Active = false;
                         continue;
                     }
 
-                    var src = buf[voice.Position++] * voice.Gain;
+                    var pitchRatio = WavCodec.PitchToPlaybackRatio(_pitchSemitones[voice.PadIndex]);
+                    var index = (int)voice.Position;
+                    if (index >= buf.Length)
+                    {
+                        voice.Active = false;
+                        continue;
+                    }
+
+                    var src = buf[index] * voice.Gain;
+                    voice.Position += pitchRatio;
 
                     if (voice.FadeOut > 0)
                     {

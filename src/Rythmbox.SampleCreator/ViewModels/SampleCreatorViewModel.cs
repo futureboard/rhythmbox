@@ -10,22 +10,19 @@ namespace Rythmbox.SampleCreator.ViewModels;
 
 public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
 {
-    private readonly PlaybackEngine _engine;
+    private readonly KitSession _kitSession;
     private readonly SamplePreviewPlayer _preview;
-    private readonly AppPaths _paths;
     private readonly IFileDialogService _fileDialog;
-    private KitPreset _kit;
-    private string? _presetPath;
 
-    public SampleCreatorViewModel(IFileDialogService fileDialog)
+    public SampleCreatorViewModel(IFileDialogService fileDialog, KitSession kitSession, PlaybackEngine engine)
     {
         _fileDialog = fileDialog;
-        _engine = new PlaybackEngine();
-        _engine.Start();
-        _preview = new SamplePreviewPlayer(_engine);
-        _paths = new AppPaths();
-        _kit = KitPresetCodec.CreateDefaultGmKit();
+        _kitSession = kitSession;
+        _preview = new SamplePreviewPlayer(engine);
+        _kitSession.StructureChanged += OnKitStructureChanged;
+        _kitSession.LiveKitUpdated += OnLiveKitUpdated;
         RebuildPads();
+        SyncFromSession();
     }
 
     public ObservableCollection<PadSampleViewModel> Pads { get; } = new();
@@ -50,15 +47,19 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
         }
     }
 
+    partial void OnKitNameChanged(string value)
+    {
+        if (!string.Equals(_kitSession.WorkingKit.Name, value, StringComparison.Ordinal))
+        {
+            _kitSession.SetKitName(value);
+        }
+    }
+
     public void OpenPreset(string path)
     {
         try
         {
-            _kit = KitPresetCodec.Load(path, _paths.SamplesDir);
-            _presetPath = path;
-            KitName = _kit.Name;
-            Title = $"Rythmbox Sample Creator — {_kit.Name}";
-            RebuildPads();
+            _kitSession.LoadFromFile(path);
             StatusText = $"Opened {Path.GetFileName(path)}";
         }
         catch (Exception ex)
@@ -69,13 +70,9 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
 
     public void SavePreset(string jsonPath)
     {
-        _kit.Name = KitName;
+        _kitSession.WorkingKit.Name = KitName;
         SyncKitFromPads();
-
-        var samplesDir = _paths.SamplesDir ?? Path.Combine(Path.GetDirectoryName(jsonPath) ?? ".", "SAMPLES");
-        KitPresetCodec.Save(_kit, jsonPath, samplesDir);
-        _presetPath = jsonPath;
-        Title = $"Rythmbox Sample Creator — {_kit.Name}";
+        _kitSession.SaveToFile(jsonPath);
         StatusText = $"Saved kit + WAVs to {Path.GetFileName(jsonPath)}";
     }
 
@@ -90,6 +87,46 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
         SelectedPad.LoadFromFile(path);
     }
 
+    public void ImportDroppedFiles(IEnumerable<string> paths)
+    {
+        var wavPaths = paths
+            .Where(static p => p.EndsWith(".wav", StringComparison.OrdinalIgnoreCase)
+                               || p.EndsWith(".wave", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (wavPaths.Count == 0)
+        {
+            StatusText = "Drop WAV files to import";
+            return;
+        }
+
+        if (wavPaths.Count == 1)
+        {
+            if (SelectedPad is null)
+            {
+                StatusText = "Select a pad first";
+                return;
+            }
+
+            ImportWavToSelected(wavPaths[0]);
+            return;
+        }
+
+        var startIndex = SelectedPad?.Index ?? 0;
+        var imported = 0;
+
+        for (var i = 0; i < wavPaths.Count && startIndex + i < Pads.Count; i++)
+        {
+            Pads[startIndex + i].LoadFromFile(wavPaths[i]);
+            imported++;
+        }
+
+        SelectedPad = Pads[Math.Min(startIndex + imported - 1, Pads.Count - 1)];
+        StatusText = imported == wavPaths.Count
+            ? $"Imported {imported} samples"
+            : $"Imported {imported} of {wavPaths.Count} (ran out of pads)";
+    }
+
     public void PreviewPad(PadSampleViewModel pad)
     {
         if (!pad.HasAudio)
@@ -102,15 +139,21 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
         StatusText = $"Previewing {pad.Label}";
     }
 
+    internal void NotifyKitEdited(string? status = null)
+    {
+        SyncKitFromPads();
+        _kitSession.PushToPlayer();
+        if (status is not null)
+        {
+            StatusText = status;
+        }
+    }
+
     [RelayCommand]
     private void NewKit()
     {
         _preview.Stop();
-        _kit = KitPresetCodec.CreateDefaultGmKit();
-        _presetPath = null;
-        KitName = _kit.Name;
-        Title = "Rythmbox Sample Creator";
-        RebuildPads();
+        _kitSession.ResetToEmptyGmKit();
         StatusText = "New kit";
     }
 
@@ -134,8 +177,8 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     private async Task BrowseSaveKitAsync()
     {
-        var defaultName = _presetPath is not null
-            ? Path.GetFileName(_presetPath)
+        var defaultName = _kitSession.PresetPath is not null
+            ? Path.GetFileName(_kitSession.PresetPath)
             : $"{KitName}.json";
 
         var path = await _fileDialog.SaveFileAsync(
@@ -170,18 +213,35 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public string? SuggestPresetFolder() => _paths.PresetDir;
+    public string? SuggestPresetFolder() => _kitSession.PresetDir;
 
-    public string? SuggestSamplesFolder() => _paths.SamplesDir;
+    public string? SuggestSamplesFolder() => _kitSession.SamplesDir;
+
+    private void OnKitStructureChanged()
+    {
+        RebuildPads();
+        SyncFromSession();
+    }
+
+    private void OnLiveKitUpdated() => SyncFromSession();
+
+    private void SyncFromSession()
+    {
+        KitName = _kitSession.KitName;
+        Title = $"Rythmbox Sample Creator — {_kitSession.KitName}";
+    }
 
     private void RebuildPads()
     {
         Pads.Clear();
-        for (var i = 0; i < _kit.Pads.Count; i++)
+        var kit = _kitSession.WorkingKit;
+        for (var i = 0; i < kit.Pads.Count; i++)
         {
-            var vm = new PadSampleViewModel(this, _kit.Pads[i], i);
-            vm.Gain = _kit.Pads[i].Gain;
-            if (_kit.Pads[i].FilePath is { } fp)
+            kit.Pads[i].PitchSemitones = 0f;
+            var vm = new PadSampleViewModel(this, kit.Pads[i], i);
+            vm.Gain = kit.Pads[i].Gain;
+            vm.Pitch = 0;
+            if (kit.Pads[i].FilePath is { } fp)
             {
                 vm.FileName = Path.GetFileName(fp);
             }
@@ -194,15 +254,30 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
 
     private void SyncKitFromPads()
     {
-        for (var i = 0; i < Pads.Count && i < _kit.Pads.Count; i++)
+        var kit = _kitSession.WorkingKit;
+        for (var i = 0; i < Pads.Count && i < kit.Pads.Count; i++)
         {
-            _kit.Pads[i] = Pads[i].Sample;
+            Pads[i].Sample.PitchSemitones = 0f;
+            kit.Pads[i] = Pads[i].Sample;
         }
+    }
+
+    [RelayCommand]
+    private void ResetAllPitch()
+    {
+        foreach (var pad in Pads)
+        {
+            pad.Pitch = 0;
+            pad.Sample.PitchSemitones = 0f;
+        }
+
+        NotifyKitEdited("Reset pitch on all pads to 0 st");
     }
 
     public void Dispose()
     {
+        _kitSession.StructureChanged -= OnKitStructureChanged;
+        _kitSession.LiveKitUpdated -= OnLiveKitUpdated;
         _preview.Dispose();
-        _engine.Dispose();
     }
 }

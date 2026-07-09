@@ -11,6 +11,13 @@ public sealed class DrumSample
 
     public float Gain { get; set; } = 1f;
 
+    /// <summary>Pitch offset in semitones applied at playback (0 = original). Not read from WAV metadata.</summary>
+    public float PitchSemitones { get; set; }
+
+    public List<VelocityLayer> VelocityLayers { get; set; } = [];
+
+    public bool HasVelocityLayers => VelocityLayers.Exists(static layer => layer.HasSamples);
+
     public string? FilePath { get; set; }
 
     public float[] Samples { get; set; } = [];
@@ -31,6 +38,18 @@ public sealed class DrumSample
             MidiNote = MidiNote,
             ChokeGroup = ChokeGroup,
             Gain = Gain,
+            PitchSemitones = PitchSemitones,
+            VelocityLayers = VelocityLayers
+                .Select(layer => new VelocityLayer
+                {
+                    VelocityLow = layer.VelocityLow,
+                    VelocityHigh = layer.VelocityHigh,
+                    RoundRobinPaths = [.. layer.RoundRobinPaths],
+                    RoundRobinSamples = layer.RoundRobinSamples
+                        .Select(samples => (float[])samples.Clone())
+                        .ToList(),
+                })
+                .ToList(),
             FilePath = FilePath,
             SampleRate = SampleRate,
             Samples = (float[])Samples.Clone(),

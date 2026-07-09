@@ -179,6 +179,7 @@ public static class ApakCodec
             {
                 Label = padEl.TryGetProperty("label", out var labelEl) ? labelEl.GetString() ?? "Pad" : "Pad",
                 Gain = padEl.TryGetProperty("gain", out var gainEl) && gainEl.TryGetSingle(out var g) ? g : 1f,
+                PitchSemitones = 0f,
                 MidiNote = padEl.TryGetProperty("midi_note", out var noteEl) && noteEl.ValueKind == JsonValueKind.Number
                     ? noteEl.GetInt32()
                     : -1,
@@ -196,10 +197,6 @@ public static class ApakCodec
                 var wavBytes = assets[assetIndex];
                 sample.Samples = WavCodec.DecodeMono(wavBytes, out _);
                 sample.SampleRate = WavCodec.TargetSampleRate;
-                if (sample.Gain != 1f)
-                {
-                    WavCodec.ApplyGain(sample.Samples, sample.Gain);
-                }
             }
 
             kit.Pads.Add(sample);

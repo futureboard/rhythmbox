@@ -18,6 +18,21 @@ public partial class MainWindow : Window
             return;
         }
 
+        if (viewModel.IsEditorPage)
+        {
+            if (HandleEditorKeys(viewModel, e))
+            {
+                return;
+            }
+        }
+        else if (viewModel.IsMacroPage)
+        {
+            if (HandleSampleCreatorKeys(viewModel, e))
+            {
+                return;
+            }
+        }
+
         var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
 
         switch (e.Key)
@@ -111,6 +126,55 @@ public partial class MainWindow : Window
             viewModel.PadGrid.ReleasePad(padIndex);
             e.Handled = true;
         }
+    }
+
+    private static bool HandleEditorKeys(MainWindowViewModel viewModel, KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.Space:
+                viewModel.Editor.PlayPreviewCommand.Execute(null);
+                e.Handled = true;
+                return true;
+
+            case Key.Escape:
+                viewModel.Editor.StopPreviewCommand.Execute(null);
+                e.Handled = true;
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool HandleSampleCreatorKeys(MainWindowViewModel viewModel, KeyEventArgs e)
+    {
+        var creator = viewModel.SampleCreator;
+        var ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+
+        switch (e.Key)
+        {
+            case Key.Space when creator.SelectedPad is not null:
+                creator.SelectedPad.PreviewCommand.Execute(null);
+                e.Handled = true;
+                return true;
+
+            case Key.Escape:
+                creator.StopPreviewCommand.Execute(null);
+                e.Handled = true;
+                return true;
+
+            case Key.O when ctrl:
+                creator.BrowseOpenPresetCommand.Execute(null);
+                e.Handled = true;
+                return true;
+
+            case Key.S when ctrl:
+                creator.BrowseSaveKitCommand.Execute(null);
+                e.Handled = true;
+                return true;
+        }
+
+        return false;
     }
 
     private static string? TryGetKeyName(Key key) => key switch

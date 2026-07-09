@@ -1,0 +1,1695 @@
+{
+  "name": "Acoustic Drum Kit (Velocity Layered)",
+  "pads": [
+    {
+      "label": "Kick",
+      "gain": 1.0,
+      "midi_note": 36,
+      "mic": "dir_in",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 6,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_01.wav",
+            "kick/36_dir_in_kick_2_01.wav",
+            "kick/36_dir_in_kick_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 7,
+          "velocity_high": 12,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_02.wav",
+            "kick/36_dir_in_kick_2_02.wav",
+            "kick/36_dir_in_kick_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 13,
+          "velocity_high": 18,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_03.wav",
+            "kick/36_dir_in_kick_2_03.wav",
+            "kick/36_dir_in_kick_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 19,
+          "velocity_high": 24,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_04.wav",
+            "kick/36_dir_in_kick_2_04.wav",
+            "kick/36_dir_in_kick_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 25,
+          "velocity_high": 30,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_05.wav",
+            "kick/36_dir_in_kick_2_05.wav",
+            "kick/36_dir_in_kick_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 31,
+          "velocity_high": 36,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_06.wav",
+            "kick/36_dir_in_kick_2_06.wav",
+            "kick/36_dir_in_kick_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 37,
+          "velocity_high": 42,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_07.wav",
+            "kick/36_dir_in_kick_2_07.wav",
+            "kick/36_dir_in_kick_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 43,
+          "velocity_high": 48,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_08.wav",
+            "kick/36_dir_in_kick_2_08.wav",
+            "kick/36_dir_in_kick_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 49,
+          "velocity_high": 54,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_09.wav",
+            "kick/36_dir_in_kick_2_09.wav",
+            "kick/36_dir_in_kick_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 55,
+          "velocity_high": 60,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_10.wav",
+            "kick/36_dir_in_kick_2_10.wav",
+            "kick/36_dir_in_kick_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 61,
+          "velocity_high": 66,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_11.wav",
+            "kick/36_dir_in_kick_2_11.wav",
+            "kick/36_dir_in_kick_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 67,
+          "velocity_high": 72,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_12.wav",
+            "kick/36_dir_in_kick_2_12.wav",
+            "kick/36_dir_in_kick_3_12.wav"
+          ]
+        },
+        {
+          "velocity_low": 73,
+          "velocity_high": 78,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_13.wav",
+            "kick/36_dir_in_kick_2_13.wav",
+            "kick/36_dir_in_kick_3_13.wav"
+          ]
+        },
+        {
+          "velocity_low": 79,
+          "velocity_high": 84,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_14.wav",
+            "kick/36_dir_in_kick_2_14.wav",
+            "kick/36_dir_in_kick_3_14.wav"
+          ]
+        },
+        {
+          "velocity_low": 85,
+          "velocity_high": 90,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_15.wav",
+            "kick/36_dir_in_kick_2_15.wav",
+            "kick/36_dir_in_kick_3_15.wav"
+          ]
+        },
+        {
+          "velocity_low": 91,
+          "velocity_high": 96,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_16.wav",
+            "kick/36_dir_in_kick_2_16.wav",
+            "kick/36_dir_in_kick_3_16.wav"
+          ]
+        },
+        {
+          "velocity_low": 97,
+          "velocity_high": 102,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_17.wav",
+            "kick/36_dir_in_kick_2_17.wav",
+            "kick/36_dir_in_kick_3_17.wav"
+          ]
+        },
+        {
+          "velocity_low": 103,
+          "velocity_high": 108,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_18.wav",
+            "kick/36_dir_in_kick_2_18.wav",
+            "kick/36_dir_in_kick_3_18.wav"
+          ]
+        },
+        {
+          "velocity_low": 109,
+          "velocity_high": 114,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_19.wav",
+            "kick/36_dir_in_kick_2_19.wav",
+            "kick/36_dir_in_kick_3_19.wav"
+          ]
+        },
+        {
+          "velocity_low": 115,
+          "velocity_high": 120,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_20.wav",
+            "kick/36_dir_in_kick_2_20.wav",
+            "kick/36_dir_in_kick_3_20.wav"
+          ]
+        },
+        {
+          "velocity_low": 121,
+          "velocity_high": 127,
+          "round_robin": [
+            "kick/36_dir_in_kick_1_21.wav",
+            "kick/36_dir_in_kick_2_21.wav",
+            "kick/36_dir_in_kick_3_21.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Snare",
+      "gain": 1.0,
+      "midi_note": 38,
+      "mic": "dir_top",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 5,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_01.wav",
+            "snare/38_dir_top_snare_2_01.wav",
+            "snare/38_dir_top_snare_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 6,
+          "velocity_high": 11,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_02.wav",
+            "snare/38_dir_top_snare_2_02.wav",
+            "snare/38_dir_top_snare_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 12,
+          "velocity_high": 17,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_03.wav",
+            "snare/38_dir_top_snare_2_03.wav",
+            "snare/38_dir_top_snare_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 18,
+          "velocity_high": 23,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_04.wav",
+            "snare/38_dir_top_snare_2_04.wav",
+            "snare/38_dir_top_snare_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 24,
+          "velocity_high": 28,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_05.wav",
+            "snare/38_dir_top_snare_2_05.wav",
+            "snare/38_dir_top_snare_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 29,
+          "velocity_high": 34,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_06.wav",
+            "snare/38_dir_top_snare_2_06.wav",
+            "snare/38_dir_top_snare_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 35,
+          "velocity_high": 40,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_07.wav",
+            "snare/38_dir_top_snare_2_07.wav",
+            "snare/38_dir_top_snare_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 41,
+          "velocity_high": 46,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_08.wav",
+            "snare/38_dir_top_snare_2_08.wav",
+            "snare/38_dir_top_snare_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 47,
+          "velocity_high": 51,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_09.wav",
+            "snare/38_dir_top_snare_2_09.wav",
+            "snare/38_dir_top_snare_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 52,
+          "velocity_high": 57,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_10.wav",
+            "snare/38_dir_top_snare_2_10.wav",
+            "snare/38_dir_top_snare_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 58,
+          "velocity_high": 63,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_11.wav",
+            "snare/38_dir_top_snare_2_11.wav",
+            "snare/38_dir_top_snare_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 64,
+          "velocity_high": 69,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_12.wav",
+            "snare/38_dir_top_snare_2_12.wav",
+            "snare/38_dir_top_snare_3_12.wav"
+          ]
+        },
+        {
+          "velocity_low": 70,
+          "velocity_high": 75,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_13.wav",
+            "snare/38_dir_top_snare_2_13.wav",
+            "snare/38_dir_top_snare_3_13.wav"
+          ]
+        },
+        {
+          "velocity_low": 76,
+          "velocity_high": 80,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_14.wav",
+            "snare/38_dir_top_snare_2_14.wav",
+            "snare/38_dir_top_snare_3_14.wav"
+          ]
+        },
+        {
+          "velocity_low": 81,
+          "velocity_high": 86,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_15.wav",
+            "snare/38_dir_top_snare_2_15.wav",
+            "snare/38_dir_top_snare_3_15.wav"
+          ]
+        },
+        {
+          "velocity_low": 87,
+          "velocity_high": 92,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_16.wav",
+            "snare/38_dir_top_snare_2_16.wav",
+            "snare/38_dir_top_snare_3_16.wav"
+          ]
+        },
+        {
+          "velocity_low": 93,
+          "velocity_high": 98,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_17.wav",
+            "snare/38_dir_top_snare_2_17.wav",
+            "snare/38_dir_top_snare_3_17.wav"
+          ]
+        },
+        {
+          "velocity_low": 99,
+          "velocity_high": 103,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_18.wav",
+            "snare/38_dir_top_snare_2_18.wav",
+            "snare/38_dir_top_snare_3_18.wav"
+          ]
+        },
+        {
+          "velocity_low": 104,
+          "velocity_high": 109,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_19.wav",
+            "snare/38_dir_top_snare_2_19.wav",
+            "snare/38_dir_top_snare_3_19.wav"
+          ]
+        },
+        {
+          "velocity_low": 110,
+          "velocity_high": 115,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_20.wav",
+            "snare/38_dir_top_snare_2_20.wav",
+            "snare/38_dir_top_snare_3_20.wav"
+          ]
+        },
+        {
+          "velocity_low": 116,
+          "velocity_high": 121,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_21.wav",
+            "snare/38_dir_top_snare_2_21.wav",
+            "snare/38_dir_top_snare_3_21.wav"
+          ]
+        },
+        {
+          "velocity_low": 122,
+          "velocity_high": 127,
+          "round_robin": [
+            "snare/38_dir_top_snare_1_22.wav",
+            "snare/38_dir_top_snare_2_22.wav",
+            "snare/38_dir_top_snare_3_22.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "C.Hat",
+      "gain": 1.0,
+      "midi_note": 42,
+      "choke_group": 1,
+      "mic": "dir",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 9,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_01.wav",
+            "hihat/42_dir_hihat_2_01.wav",
+            "hihat/42_dir_hihat_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 10,
+          "velocity_high": 19,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_02.wav",
+            "hihat/42_dir_hihat_2_02.wav",
+            "hihat/42_dir_hihat_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 20,
+          "velocity_high": 29,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_03.wav",
+            "hihat/42_dir_hihat_2_03.wav",
+            "hihat/42_dir_hihat_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 30,
+          "velocity_high": 39,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_04.wav",
+            "hihat/42_dir_hihat_2_04.wav",
+            "hihat/42_dir_hihat_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 40,
+          "velocity_high": 48,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_05.wav",
+            "hihat/42_dir_hihat_2_05.wav",
+            "hihat/42_dir_hihat_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 49,
+          "velocity_high": 58,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_06.wav",
+            "hihat/42_dir_hihat_2_06.wav",
+            "hihat/42_dir_hihat_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 59,
+          "velocity_high": 68,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_07.wav",
+            "hihat/42_dir_hihat_2_07.wav",
+            "hihat/42_dir_hihat_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 69,
+          "velocity_high": 78,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_08.wav",
+            "hihat/42_dir_hihat_2_08.wav",
+            "hihat/42_dir_hihat_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 79,
+          "velocity_high": 87,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_09.wav",
+            "hihat/42_dir_hihat_2_09.wav",
+            "hihat/42_dir_hihat_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 88,
+          "velocity_high": 97,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_10.wav",
+            "hihat/42_dir_hihat_2_10.wav",
+            "hihat/42_dir_hihat_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 98,
+          "velocity_high": 107,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_11.wav",
+            "hihat/42_dir_hihat_2_11.wav",
+            "hihat/42_dir_hihat_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 108,
+          "velocity_high": 117,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_12.wav",
+            "hihat/42_dir_hihat_2_12.wav",
+            "hihat/42_dir_hihat_3_12.wav"
+          ]
+        },
+        {
+          "velocity_low": 118,
+          "velocity_high": 127,
+          "round_robin": [
+            "hihat/42_dir_hihat_1_13.wav",
+            "hihat/42_dir_hihat_2_13.wav",
+            "hihat/42_dir_hihat_3_13.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "O.Hat",
+      "gain": 1.0,
+      "midi_note": 46,
+      "choke_group": 1,
+      "mic": "dir",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 9,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_01.wav",
+            "hihat/46_dir_hihat_2_01.wav",
+            "hihat/46_dir_hihat_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 10,
+          "velocity_high": 19,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_02.wav",
+            "hihat/46_dir_hihat_2_02.wav",
+            "hihat/46_dir_hihat_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 20,
+          "velocity_high": 29,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_03.wav",
+            "hihat/46_dir_hihat_2_03.wav",
+            "hihat/46_dir_hihat_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 30,
+          "velocity_high": 39,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_04.wav",
+            "hihat/46_dir_hihat_2_04.wav",
+            "hihat/46_dir_hihat_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 40,
+          "velocity_high": 48,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_05.wav",
+            "hihat/46_dir_hihat_2_05.wav",
+            "hihat/46_dir_hihat_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 49,
+          "velocity_high": 58,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_06.wav",
+            "hihat/46_dir_hihat_2_06.wav",
+            "hihat/46_dir_hihat_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 59,
+          "velocity_high": 68,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_07.wav",
+            "hihat/46_dir_hihat_2_07.wav",
+            "hihat/46_dir_hihat_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 69,
+          "velocity_high": 78,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_08.wav",
+            "hihat/46_dir_hihat_2_08.wav",
+            "hihat/46_dir_hihat_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 79,
+          "velocity_high": 87,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_09.wav",
+            "hihat/46_dir_hihat_2_09.wav",
+            "hihat/46_dir_hihat_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 88,
+          "velocity_high": 97,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_10.wav",
+            "hihat/46_dir_hihat_2_10.wav",
+            "hihat/46_dir_hihat_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 98,
+          "velocity_high": 107,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_11.wav",
+            "hihat/46_dir_hihat_2_11.wav",
+            "hihat/46_dir_hihat_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 108,
+          "velocity_high": 117,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_12.wav",
+            "hihat/46_dir_hihat_2_12.wav",
+            "hihat/46_dir_hihat_3_12.wav"
+          ]
+        },
+        {
+          "velocity_low": 118,
+          "velocity_high": 127,
+          "round_robin": [
+            "hihat/46_dir_hihat_1_13.wav",
+            "hihat/46_dir_hihat_2_13.wav",
+            "hihat/46_dir_hihat_3_13.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Cym1",
+      "gain": 1.0,
+      "midi_note": 49,
+      "mic": "oh",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 9,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_01.wav",
+            "overhead/crash/49_oh_crash_2_01.wav",
+            "overhead/crash/49_oh_crash_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 10,
+          "velocity_high": 19,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_02.wav",
+            "overhead/crash/49_oh_crash_2_02.wav",
+            "overhead/crash/49_oh_crash_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 20,
+          "velocity_high": 29,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_03.wav",
+            "overhead/crash/49_oh_crash_2_03.wav",
+            "overhead/crash/49_oh_crash_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 30,
+          "velocity_high": 39,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_04.wav",
+            "overhead/crash/49_oh_crash_2_04.wav",
+            "overhead/crash/49_oh_crash_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 40,
+          "velocity_high": 48,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_05.wav",
+            "overhead/crash/49_oh_crash_2_05.wav",
+            "overhead/crash/49_oh_crash_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 49,
+          "velocity_high": 58,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_06.wav",
+            "overhead/crash/49_oh_crash_2_06.wav",
+            "overhead/crash/49_oh_crash_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 59,
+          "velocity_high": 68,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_07.wav",
+            "overhead/crash/49_oh_crash_2_07.wav",
+            "overhead/crash/49_oh_crash_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 69,
+          "velocity_high": 78,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_08.wav",
+            "overhead/crash/49_oh_crash_2_08.wav",
+            "overhead/crash/49_oh_crash_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 79,
+          "velocity_high": 87,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_09.wav",
+            "overhead/crash/49_oh_crash_2_09.wav",
+            "overhead/crash/49_oh_crash_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 88,
+          "velocity_high": 97,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_10.wav",
+            "overhead/crash/49_oh_crash_2_10.wav",
+            "overhead/crash/49_oh_crash_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 98,
+          "velocity_high": 107,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_11.wav",
+            "overhead/crash/49_oh_crash_2_11.wav",
+            "overhead/crash/49_oh_crash_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 108,
+          "velocity_high": 117,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_12.wav",
+            "overhead/crash/49_oh_crash_2_12.wav",
+            "overhead/crash/49_oh_crash_3_12.wav"
+          ]
+        },
+        {
+          "velocity_low": 118,
+          "velocity_high": 127,
+          "round_robin": [
+            "overhead/crash/49_oh_crash_1_13.wav",
+            "overhead/crash/49_oh_crash_2_13.wav",
+            "overhead/crash/49_oh_crash_3_13.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Cym2",
+      "gain": 1.0,
+      "midi_note": 57,
+      "mic": "oh",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 10,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_01.wav",
+            "overhead/crash/57_oh_crash_2_01.wav",
+            "overhead/crash/57_oh_crash_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 11,
+          "velocity_high": 21,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_02.wav",
+            "overhead/crash/57_oh_crash_2_02.wav",
+            "overhead/crash/57_oh_crash_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 22,
+          "velocity_high": 31,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_03.wav",
+            "overhead/crash/57_oh_crash_2_03.wav",
+            "overhead/crash/57_oh_crash_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 32,
+          "velocity_high": 42,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_04.wav",
+            "overhead/crash/57_oh_crash_2_04.wav",
+            "overhead/crash/57_oh_crash_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 43,
+          "velocity_high": 52,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_05.wav",
+            "overhead/crash/57_oh_crash_2_05.wav",
+            "overhead/crash/57_oh_crash_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 53,
+          "velocity_high": 63,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_06.wav",
+            "overhead/crash/57_oh_crash_2_06.wav",
+            "overhead/crash/57_oh_crash_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 64,
+          "velocity_high": 74,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_07.wav",
+            "overhead/crash/57_oh_crash_2_07.wav",
+            "overhead/crash/57_oh_crash_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 75,
+          "velocity_high": 84,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_08.wav",
+            "overhead/crash/57_oh_crash_2_08.wav",
+            "overhead/crash/57_oh_crash_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 85,
+          "velocity_high": 95,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_09.wav",
+            "overhead/crash/57_oh_crash_2_09.wav",
+            "overhead/crash/57_oh_crash_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 96,
+          "velocity_high": 105,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_10.wav",
+            "overhead/crash/57_oh_crash_2_10.wav",
+            "overhead/crash/57_oh_crash_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 106,
+          "velocity_high": 116,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_11.wav",
+            "overhead/crash/57_oh_crash_2_11.wav",
+            "overhead/crash/57_oh_crash_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 117,
+          "velocity_high": 127,
+          "round_robin": [
+            "overhead/crash/57_oh_crash_1_12.wav",
+            "overhead/crash/57_oh_crash_2_12.wav",
+            "overhead/crash/57_oh_crash_3_12.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "H.Tom",
+      "gain": 1.0,
+      "midi_note": 50
+    },
+    {
+      "label": "M.Tom",
+      "gain": 1.0,
+      "midi_note": 47,
+      "mic": "dir",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 9,
+          "round_robin": [
+            "tom/47_dir_tom_1_01.wav",
+            "tom/47_dir_tom_2_01.wav",
+            "tom/47_dir_tom_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 10,
+          "velocity_high": 18,
+          "round_robin": [
+            "tom/47_dir_tom_1_02.wav",
+            "tom/47_dir_tom_2_02.wav",
+            "tom/47_dir_tom_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 19,
+          "velocity_high": 27,
+          "round_robin": [
+            "tom/47_dir_tom_1_03.wav",
+            "tom/47_dir_tom_2_03.wav",
+            "tom/47_dir_tom_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 28,
+          "velocity_high": 36,
+          "round_robin": [
+            "tom/47_dir_tom_1_04.wav",
+            "tom/47_dir_tom_2_04.wav",
+            "tom/47_dir_tom_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 37,
+          "velocity_high": 45,
+          "round_robin": [
+            "tom/47_dir_tom_1_05.wav",
+            "tom/47_dir_tom_2_05.wav",
+            "tom/47_dir_tom_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 46,
+          "velocity_high": 54,
+          "round_robin": [
+            "tom/47_dir_tom_1_06.wav",
+            "tom/47_dir_tom_2_06.wav",
+            "tom/47_dir_tom_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 55,
+          "velocity_high": 63,
+          "round_robin": [
+            "tom/47_dir_tom_1_07.wav",
+            "tom/47_dir_tom_2_07.wav",
+            "tom/47_dir_tom_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 64,
+          "velocity_high": 72,
+          "round_robin": [
+            "tom/47_dir_tom_1_08.wav",
+            "tom/47_dir_tom_2_08.wav",
+            "tom/47_dir_tom_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 73,
+          "velocity_high": 81,
+          "round_robin": [
+            "tom/47_dir_tom_1_09.wav",
+            "tom/47_dir_tom_2_09.wav",
+            "tom/47_dir_tom_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 82,
+          "velocity_high": 90,
+          "round_robin": [
+            "tom/47_dir_tom_1_10.wav",
+            "tom/47_dir_tom_2_10.wav",
+            "tom/47_dir_tom_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 91,
+          "velocity_high": 99,
+          "round_robin": [
+            "tom/47_dir_tom_1_11.wav",
+            "tom/47_dir_tom_2_11.wav",
+            "tom/47_dir_tom_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 100,
+          "velocity_high": 108,
+          "round_robin": [
+            "tom/47_dir_tom_1_12.wav",
+            "tom/47_dir_tom_2_12.wav",
+            "tom/47_dir_tom_3_12.wav"
+          ]
+        },
+        {
+          "velocity_low": 109,
+          "velocity_high": 117,
+          "round_robin": [
+            "tom/47_dir_tom_1_13.wav",
+            "tom/47_dir_tom_2_13.wav",
+            "tom/47_dir_tom_3_13.wav"
+          ]
+        },
+        {
+          "velocity_low": 118,
+          "velocity_high": 127,
+          "round_robin": [
+            "tom/47_dir_tom_1_14.wav",
+            "tom/47_dir_tom_2_14.wav",
+            "tom/47_dir_tom_3_14.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "L.Tom",
+      "gain": 1.0,
+      "midi_note": 45,
+      "mic": "dir",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 9,
+          "round_robin": [
+            "tom/45_dir_tom_1_01.wav",
+            "tom/45_dir_tom_2_01.wav",
+            "tom/45_dir_tom_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 10,
+          "velocity_high": 18,
+          "round_robin": [
+            "tom/45_dir_tom_1_02.wav",
+            "tom/45_dir_tom_2_02.wav",
+            "tom/45_dir_tom_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 19,
+          "velocity_high": 27,
+          "round_robin": [
+            "tom/45_dir_tom_1_03.wav",
+            "tom/45_dir_tom_2_03.wav",
+            "tom/45_dir_tom_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 28,
+          "velocity_high": 36,
+          "round_robin": [
+            "tom/45_dir_tom_1_04.wav",
+            "tom/45_dir_tom_2_04.wav",
+            "tom/45_dir_tom_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 37,
+          "velocity_high": 45,
+          "round_robin": [
+            "tom/45_dir_tom_1_05.wav",
+            "tom/45_dir_tom_2_05.wav",
+            "tom/45_dir_tom_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 46,
+          "velocity_high": 54,
+          "round_robin": [
+            "tom/45_dir_tom_1_06.wav",
+            "tom/45_dir_tom_2_06.wav",
+            "tom/45_dir_tom_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 55,
+          "velocity_high": 63,
+          "round_robin": [
+            "tom/45_dir_tom_1_07.wav",
+            "tom/45_dir_tom_2_07.wav",
+            "tom/45_dir_tom_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 64,
+          "velocity_high": 72,
+          "round_robin": [
+            "tom/45_dir_tom_1_08.wav",
+            "tom/45_dir_tom_2_08.wav",
+            "tom/45_dir_tom_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 73,
+          "velocity_high": 81,
+          "round_robin": [
+            "tom/45_dir_tom_1_09.wav",
+            "tom/45_dir_tom_2_09.wav",
+            "tom/45_dir_tom_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 82,
+          "velocity_high": 90,
+          "round_robin": [
+            "tom/45_dir_tom_1_10.wav",
+            "tom/45_dir_tom_2_10.wav",
+            "tom/45_dir_tom_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 91,
+          "velocity_high": 99,
+          "round_robin": [
+            "tom/45_dir_tom_1_11.wav",
+            "tom/45_dir_tom_2_11.wav",
+            "tom/45_dir_tom_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 100,
+          "velocity_high": 108,
+          "round_robin": [
+            "tom/45_dir_tom_1_12.wav",
+            "tom/45_dir_tom_2_12.wav",
+            "tom/45_dir_tom_3_12.wav"
+          ]
+        },
+        {
+          "velocity_low": 109,
+          "velocity_high": 117,
+          "round_robin": [
+            "tom/45_dir_tom_1_13.wav",
+            "tom/45_dir_tom_2_13.wav",
+            "tom/45_dir_tom_3_13.wav"
+          ]
+        },
+        {
+          "velocity_low": 118,
+          "velocity_high": 127,
+          "round_robin": [
+            "tom/45_dir_tom_1_14.wav",
+            "tom/45_dir_tom_2_14.wav",
+            "tom/45_dir_tom_3_14.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "F.Tom",
+      "gain": 1.0,
+      "midi_note": 41,
+      "mic": "dir",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 9,
+          "round_robin": [
+            "tom/41_dir_tom_1_01.wav",
+            "tom/41_dir_tom_2_01.wav",
+            "tom/41_dir_tom_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 10,
+          "velocity_high": 18,
+          "round_robin": [
+            "tom/41_dir_tom_1_02.wav",
+            "tom/41_dir_tom_2_02.wav",
+            "tom/41_dir_tom_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 19,
+          "velocity_high": 27,
+          "round_robin": [
+            "tom/41_dir_tom_1_03.wav",
+            "tom/41_dir_tom_2_03.wav",
+            "tom/41_dir_tom_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 28,
+          "velocity_high": 36,
+          "round_robin": [
+            "tom/41_dir_tom_1_04.wav",
+            "tom/41_dir_tom_2_04.wav",
+            "tom/41_dir_tom_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 37,
+          "velocity_high": 45,
+          "round_robin": [
+            "tom/41_dir_tom_1_05.wav",
+            "tom/41_dir_tom_2_05.wav",
+            "tom/41_dir_tom_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 46,
+          "velocity_high": 54,
+          "round_robin": [
+            "tom/41_dir_tom_1_06.wav",
+            "tom/41_dir_tom_2_06.wav",
+            "tom/41_dir_tom_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 55,
+          "velocity_high": 63,
+          "round_robin": [
+            "tom/41_dir_tom_1_07.wav",
+            "tom/41_dir_tom_2_07.wav",
+            "tom/41_dir_tom_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 64,
+          "velocity_high": 72,
+          "round_robin": [
+            "tom/41_dir_tom_1_08.wav",
+            "tom/41_dir_tom_2_08.wav",
+            "tom/41_dir_tom_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 73,
+          "velocity_high": 81,
+          "round_robin": [
+            "tom/41_dir_tom_1_09.wav",
+            "tom/41_dir_tom_2_09.wav",
+            "tom/41_dir_tom_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 82,
+          "velocity_high": 90,
+          "round_robin": [
+            "tom/41_dir_tom_1_10.wav",
+            "tom/41_dir_tom_2_10.wav",
+            "tom/41_dir_tom_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 91,
+          "velocity_high": 99,
+          "round_robin": [
+            "tom/41_dir_tom_1_11.wav",
+            "tom/41_dir_tom_2_11.wav",
+            "tom/41_dir_tom_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 100,
+          "velocity_high": 108,
+          "round_robin": [
+            "tom/41_dir_tom_1_12.wav",
+            "tom/41_dir_tom_2_12.wav",
+            "tom/41_dir_tom_3_12.wav"
+          ]
+        },
+        {
+          "velocity_low": 109,
+          "velocity_high": 117,
+          "round_robin": [
+            "tom/41_dir_tom_1_13.wav",
+            "tom/41_dir_tom_2_13.wav",
+            "tom/41_dir_tom_3_13.wav"
+          ]
+        },
+        {
+          "velocity_low": 118,
+          "velocity_high": 127,
+          "round_robin": [
+            "tom/41_dir_tom_1_14.wav",
+            "tom/41_dir_tom_2_14.wav",
+            "tom/41_dir_tom_3_14.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "China",
+      "gain": 1.0,
+      "midi_note": 52,
+      "mic": "oh",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 12,
+          "round_robin": [
+            "overhead/china/52_oh_china_1_01.wav",
+            "overhead/china/52_oh_china_2_01.wav",
+            "overhead/china/52_oh_china_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 13,
+          "velocity_high": 25,
+          "round_robin": [
+            "overhead/china/52_oh_china_1_02.wav",
+            "overhead/china/52_oh_china_2_02.wav",
+            "overhead/china/52_oh_china_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 26,
+          "velocity_high": 38,
+          "round_robin": [
+            "overhead/china/52_oh_china_1_03.wav",
+            "overhead/china/52_oh_china_2_03.wav",
+            "overhead/china/52_oh_china_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 39,
+          "velocity_high": 50,
+          "round_robin": [
+            "overhead/china/52_oh_china_1_04.wav",
+            "overhead/china/52_oh_china_2_04.wav",
+            "overhead/china/52_oh_china_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 51,
+          "velocity_high": 63,
+          "round_robin": [
+            "overhead/china/52_oh_china_1_05.wav",
+            "overhead/china/52_oh_china_2_05.wav",
+            "overhead/china/52_oh_china_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 64,
+          "velocity_high": 76,
+          "round_robin": [
+            "overhead/china/52_oh_china_1_06.wav",
+            "overhead/china/52_oh_china_2_06.wav",
+            "overhead/china/52_oh_china_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 77,
+          "velocity_high": 88,
+          "round_robin": [
+            "overhead/china/52_oh_china_1_07.wav",
+            "overhead/china/52_oh_china_2_07.wav",
+            "overhead/china/52_oh_china_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 89,
+          "velocity_high": 101,
+          "round_robin": [
+            "overhead/china/52_oh_china_1_08.wav",
+            "overhead/china/52_oh_china_2_08.wav",
+            "overhead/china/52_oh_china_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 102,
+          "velocity_high": 114,
+          "round_robin": [
+            "overhead/china/52_oh_china_1_09.wav",
+            "overhead/china/52_oh_china_2_09.wav",
+            "overhead/china/52_oh_china_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 115,
+          "velocity_high": 127,
+          "round_robin": [
+            "overhead/china/52_oh_china_1_10.wav",
+            "overhead/china/52_oh_china_2_10.wav",
+            "overhead/china/52_oh_china_3_10.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Ride",
+      "gain": 1.0,
+      "midi_note": 51,
+      "mic": "oh",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 9,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_01.wav",
+            "overhead/ride/51_oh_ride_2_01.wav",
+            "overhead/ride/51_oh_ride_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 10,
+          "velocity_high": 18,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_02.wav",
+            "overhead/ride/51_oh_ride_2_02.wav",
+            "overhead/ride/51_oh_ride_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 19,
+          "velocity_high": 27,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_03.wav",
+            "overhead/ride/51_oh_ride_2_03.wav",
+            "overhead/ride/51_oh_ride_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 28,
+          "velocity_high": 36,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_04.wav",
+            "overhead/ride/51_oh_ride_2_04.wav",
+            "overhead/ride/51_oh_ride_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 37,
+          "velocity_high": 45,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_05.wav",
+            "overhead/ride/51_oh_ride_2_05.wav",
+            "overhead/ride/51_oh_ride_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 46,
+          "velocity_high": 54,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_06.wav",
+            "overhead/ride/51_oh_ride_2_06.wav",
+            "overhead/ride/51_oh_ride_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 55,
+          "velocity_high": 63,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_07.wav",
+            "overhead/ride/51_oh_ride_2_07.wav",
+            "overhead/ride/51_oh_ride_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 64,
+          "velocity_high": 72,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_08.wav",
+            "overhead/ride/51_oh_ride_2_08.wav",
+            "overhead/ride/51_oh_ride_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 73,
+          "velocity_high": 81,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_09.wav",
+            "overhead/ride/51_oh_ride_2_09.wav",
+            "overhead/ride/51_oh_ride_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 82,
+          "velocity_high": 90,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_10.wav",
+            "overhead/ride/51_oh_ride_2_10.wav",
+            "overhead/ride/51_oh_ride_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 91,
+          "velocity_high": 99,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_11.wav",
+            "overhead/ride/51_oh_ride_2_11.wav",
+            "overhead/ride/51_oh_ride_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 100,
+          "velocity_high": 108,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_12.wav",
+            "overhead/ride/51_oh_ride_2_12.wav",
+            "overhead/ride/51_oh_ride_3_12.wav"
+          ]
+        },
+        {
+          "velocity_low": 109,
+          "velocity_high": 117,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_13.wav",
+            "overhead/ride/51_oh_ride_2_13.wav",
+            "overhead/ride/51_oh_ride_3_13.wav"
+          ]
+        },
+        {
+          "velocity_low": 118,
+          "velocity_high": 127,
+          "round_robin": [
+            "overhead/ride/51_oh_ride_1_14.wav",
+            "overhead/ride/51_oh_ride_2_14.wav",
+            "overhead/ride/51_oh_ride_3_14.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Rim",
+      "gain": 1.0,
+      "midi_note": 37,
+      "mic": "dir_top",
+      "velocity_layers": [
+        {
+          "velocity_low": 1,
+          "velocity_high": 9,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_01.wav",
+            "snare/37_dir_top_snare_2_01.wav",
+            "snare/37_dir_top_snare_3_01.wav"
+          ]
+        },
+        {
+          "velocity_low": 10,
+          "velocity_high": 19,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_02.wav",
+            "snare/37_dir_top_snare_2_02.wav",
+            "snare/37_dir_top_snare_3_02.wav"
+          ]
+        },
+        {
+          "velocity_low": 20,
+          "velocity_high": 29,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_03.wav",
+            "snare/37_dir_top_snare_2_03.wav",
+            "snare/37_dir_top_snare_3_03.wav"
+          ]
+        },
+        {
+          "velocity_low": 30,
+          "velocity_high": 39,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_04.wav",
+            "snare/37_dir_top_snare_2_04.wav",
+            "snare/37_dir_top_snare_3_04.wav"
+          ]
+        },
+        {
+          "velocity_low": 40,
+          "velocity_high": 48,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_05.wav",
+            "snare/37_dir_top_snare_2_05.wav",
+            "snare/37_dir_top_snare_3_05.wav"
+          ]
+        },
+        {
+          "velocity_low": 49,
+          "velocity_high": 58,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_06.wav",
+            "snare/37_dir_top_snare_2_06.wav",
+            "snare/37_dir_top_snare_3_06.wav"
+          ]
+        },
+        {
+          "velocity_low": 59,
+          "velocity_high": 68,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_07.wav",
+            "snare/37_dir_top_snare_2_07.wav",
+            "snare/37_dir_top_snare_3_07.wav"
+          ]
+        },
+        {
+          "velocity_low": 69,
+          "velocity_high": 78,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_08.wav",
+            "snare/37_dir_top_snare_2_08.wav",
+            "snare/37_dir_top_snare_3_08.wav"
+          ]
+        },
+        {
+          "velocity_low": 79,
+          "velocity_high": 87,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_09.wav",
+            "snare/37_dir_top_snare_2_09.wav",
+            "snare/37_dir_top_snare_3_09.wav"
+          ]
+        },
+        {
+          "velocity_low": 88,
+          "velocity_high": 97,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_10.wav",
+            "snare/37_dir_top_snare_2_10.wav",
+            "snare/37_dir_top_snare_3_10.wav"
+          ]
+        },
+        {
+          "velocity_low": 98,
+          "velocity_high": 107,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_11.wav",
+            "snare/37_dir_top_snare_2_11.wav",
+            "snare/37_dir_top_snare_3_11.wav"
+          ]
+        },
+        {
+          "velocity_low": 108,
+          "velocity_high": 117,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_12.wav",
+            "snare/37_dir_top_snare_2_12.wav",
+            "snare/37_dir_top_snare_3_12.wav"
+          ]
+        },
+        {
+          "velocity_low": 118,
+          "velocity_high": 127,
+          "round_robin": [
+            "snare/37_dir_top_snare_1_13.wav",
+            "snare/37_dir_top_snare_2_13.wav",
+            "snare/37_dir_top_snare_3_13.wav"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Cowbell",
+      "gain": 1.0,
+      "midi_note": 56
+    },
+    {
+      "label": "L.Conga",
+      "gain": 1.0,
+      "midi_note": 64
+    },
+    {
+      "label": "Mt.Conga",
+      "gain": 1.0,
+      "midi_note": 63
+    },
+    {
+      "label": "H.Conga",
+      "gain": 1.0,
+      "midi_note": 62
+    },
+    {
+      "label": "Hi Bongo",
+      "gain": 1.0,
+      "midi_note": 60
+    },
+    {
+      "label": "Tamb",
+      "gain": 1.0,
+      "midi_note": 54
+    }
+  ]
+}

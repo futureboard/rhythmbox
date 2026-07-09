@@ -19,6 +19,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private readonly PlaybackEngine _engine;
     private readonly KitSamplePlayer _kitPlayer;
+    private readonly KitSession _kitSession;
     private readonly KitPresetService _kitPresets;
     private readonly PadMappingService _padMapping;
     private readonly PadMidiRouter _padRouter;
@@ -46,6 +47,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
         _paths = new AppPaths();
         _kitPlayer = new KitSamplePlayer(_engine);
+        _kitSession = new KitSession(_kitPlayer, _paths);
         _kitPresets = new KitPresetService();
         _padMapping = new PadMappingService();
         _padRouter = new PadMidiRouter(_kitPlayer, _padMapping);
@@ -71,7 +73,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         FileDialog = new FileManagerDialogViewModel(new FileManagerViewModel(_paths), Localization);
         var fileDialogService = new AppFileDialogService(FileDialog);
 
-        KitBrowser = new KitBrowserViewModel(_kitPlayer, _kitPresets, _midiInput, _padRouter, fileDialogService);
+        KitBrowser = new KitBrowserViewModel(_kitSession, _kitPresets, _midiInput, _padRouter, fileDialogService);
         Player = new PlayerViewModel(_midiFilePlayer);
         MasterStrip = new MasterStripViewModel(_engine);
         Mixer = new MixerViewModel(_engine, _kitPlayer, _audioBackend, _localization);
@@ -96,7 +98,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
             Tempo);
 
         Editor = new EditorViewModel(fileDialogService);
-        SampleCreator = new SampleCreatorViewModel(fileDialogService);
+        SampleCreator = new SampleCreatorViewModel(fileDialogService, _kitSession, _engine);
 
         // Foot switch: MIDI CC -> momentary time-signature switch. CC arrives on the MIDI thread,
         // so marshal the state change onto the UI thread before touching the arranger view models.
@@ -281,7 +283,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         SubLoops.Scan(_paths.SubMidiDir);
 
         KitBrowser.SetPresetDirectory(_paths.PresetDir);
-        KitBrowser.TryLoadDefault(_paths.PresetDir);
+        _kitSession.TryLoadDefaultPreset();
+        KitBrowser.SyncFromSession();
 
         if (_midiInput.ConnectByIndex(0, _padRouter))
         {

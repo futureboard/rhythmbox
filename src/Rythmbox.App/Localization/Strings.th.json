@@ -41,7 +41,7 @@
   "arranger.songChainSoon": "เร็วๆ นี้ — ตัวแก้ไขลำดับแพทเทิร์น",
 
   "drumPads.title": "แป้นกลอง",
-  "drumPads.voices": "19 เสียง · ช่อง 10",
+  "drumPads.voices": "{0} เสียง GM · ช่อง 10",
 
   "styleBank.title": "คลังสไตล์",
   "styleBank.rescan": "สแกนสไตล์ใหม่",

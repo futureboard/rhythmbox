@@ -53,6 +53,7 @@ public static class KitPresetCodec
             {
                 Label = padEl.TryGetProperty("label", out var labelEl) ? labelEl.GetString() ?? "Pad" : "Pad",
                 Gain = padEl.TryGetProperty("gain", out var gainEl) && gainEl.TryGetSingle(out var g) ? g : 1f,
+                PitchSemitones = 0f,
                 MidiNote = padEl.TryGetProperty("midi_note", out var noteEl) && noteEl.ValueKind == JsonValueKind.Number
                     ? noteEl.GetInt32()
                     : -1,
@@ -60,6 +61,53 @@ public static class KitPresetCodec
                     ? chokeEl.GetInt32()
                     : 0,
             };
+
+            if (padEl.TryGetProperty("velocity_layers", out var layersEl) && layersEl.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var layerEl in layersEl.EnumerateArray())
+                {
+                    var layer = new VelocityLayer
+                    {
+                        VelocityLow = layerEl.TryGetProperty("velocity_low", out var lowEl) && lowEl.TryGetInt32(out var low)
+                            ? low
+                            : 1,
+                        VelocityHigh = layerEl.TryGetProperty("velocity_high", out var highEl) && highEl.TryGetInt32(out var high)
+                            ? high
+                            : 127,
+                    };
+
+                    if (layerEl.TryGetProperty("round_robin", out var rrEl) && rrEl.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var pathEl in rrEl.EnumerateArray())
+                        {
+                            if (pathEl.GetString() is not { Length: > 0 } layerPath)
+                            {
+                                continue;
+                            }
+
+                            layer.RoundRobinPaths.Add(layerPath);
+                            var resolved = ResolveSamplePath(layerPath, baseDir, samplesRoot);
+                            if (resolved is null || !File.Exists(resolved))
+                            {
+                                continue;
+                            }
+
+                            try
+                            {
+                                layer.RoundRobinSamples.Add(WavCodec.LoadMono(resolved));
+                            }
+                            catch (Exception ex) when (ex is InvalidDataException or NotSupportedException)
+                            {
+                            }
+                        }
+                    }
+
+                    if (layer.HasSamples)
+                    {
+                        sample.VelocityLayers.Add(layer);
+                    }
+                }
+            }
 
             if (padEl.TryGetProperty("sample", out var sampleEl) && sampleEl.GetString() is { Length: > 0 } relPath)
             {
@@ -71,10 +119,6 @@ public static class KitPresetCodec
                         sample.FilePath = resolved;
                         sample.Samples = WavCodec.LoadMono(resolved);
                         sample.SampleRate = WavCodec.TargetSampleRate;
-                        if (sample.Gain != 1f)
-                        {
-                            WavCodec.ApplyGain(sample.Samples, sample.Gain);
-                        }
                     }
                     catch (Exception ex) when (ex is InvalidDataException or NotSupportedException)
                     {
@@ -101,8 +145,24 @@ public static class KitPresetCodec
         {
             var pad = kit.Pads[i];
             string? relativeSample = null;
+            object[]? velocityLayers = null;
 
-            if (exportWavs && pad.HasAudio)
+            if (pad.HasVelocityLayers)
+            {
+                velocityLayers = pad.VelocityLayers
+                    .Where(static layer => layer.HasSamples)
+                    .Select(layer => new
+                    {
+                        velocity_low = layer.VelocityLow,
+                        velocity_high = layer.VelocityHigh,
+                        round_robin = layer.RoundRobinPaths.Count > 0
+                            ? layer.RoundRobinPaths.ToArray()
+                            : layer.RoundRobinSamples.Select((_, index) => $"SAMPLES/{SanitizeFileName($"{pad.Label}_{pad.MidiNote}_rr{index + 1}.wav")}").ToArray(),
+                    })
+                    .ToArray();
+            }
+
+            if (exportWavs && pad.HasAudio && !pad.HasVelocityLayers)
             {
                 var safeName = SanitizeFileName($"{pad.Label}_{pad.MidiNote}.wav");
                 var wavPath = Path.Combine(samplesDir, safeName);
@@ -122,6 +182,7 @@ public static class KitPresetCodec
                 midi_note = pad.MidiNote >= 0 ? pad.MidiNote : (int?)null,
                 choke_group = pad.ChokeGroup > 0 ? pad.ChokeGroup : (int?)null,
                 sample = relativeSample,
+                velocity_layers = velocityLayers,
             });
         }
 
@@ -137,24 +198,40 @@ public static class KitPresetCodec
             return;
         }
 
+        var byNote = kit.Pads
+            .Where(static pad => pad.MidiNote >= 0)
+            .GroupBy(static pad => pad.MidiNote)
+            .ToDictionary(static group => group.Key, static group => group.First());
+
         kit.Pads.Clear();
         foreach (var pad in GmPercussionMap.Pads)
         {
-            kit.Pads.Add(new DrumSample { Label = pad.Label, MidiNote = pad.Note });
+            kit.Pads.Add(byNote.TryGetValue(pad.Note, out var existing)
+                ? existing
+                : new DrumSample { Label = pad.Label, MidiNote = pad.Note });
         }
     }
 
-    private static string? ResolveSamplePath(string relative, string presetDir, string? samplesRoot)
+    public static string? ResolveSamplePath(string relative, string presetDir, string? samplesRoot)
     {
         var candidates = new List<string>
         {
             Path.GetFullPath(Path.Combine(presetDir, relative)),
+            Path.GetFullPath(Path.Combine(presetDir, "SAMPLES", relative)),
             Path.GetFullPath(relative),
         };
 
+        var presetParent = Directory.GetParent(presetDir)?.FullName;
+        if (presetParent is not null)
+        {
+            candidates.Add(Path.GetFullPath(Path.Combine(presetParent, "SAMPLES", relative)));
+            candidates.Add(Path.GetFullPath(Path.Combine(presetParent, relative)));
+        }
+
         if (samplesRoot is not null)
         {
-            candidates.Add(Path.Combine(samplesRoot, Path.GetFileName(relative)));
+            candidates.Add(Path.GetFullPath(Path.Combine(samplesRoot, relative)));
+            candidates.Add(Path.GetFullPath(Path.Combine(samplesRoot, Path.GetFileName(relative))));
         }
 
         return candidates.FirstOrDefault(File.Exists);

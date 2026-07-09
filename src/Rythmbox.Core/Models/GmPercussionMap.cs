@@ -11,34 +11,64 @@ public enum PadCategory
 public sealed record PercussionPad(int Index, string Label, int Note, PadCategory Category, PadBus Bus);
 
 /// <summary>
-/// The standard General MIDI percussion map, laid out as 19 pads (4 columns) similar to a
-/// DR-880-style pad grid. Note numbers map to kit pads via <see cref="KitSamplePlayer"/>.
+/// General MIDI Level 1 percussion map (notes 35–81). Used by the kit player, mixer, and pad grids.
 /// </summary>
 public static class GmPercussionMap
 {
     /// <summary>MIDI channel reserved for percussion by the General MIDI convention (0-based: channel 10).</summary>
     public const int PercussionChannel = 9;
 
+    public const int FirstNote = 35;
+    public const int LastNote = 81;
+
     public static readonly IReadOnlyList<PercussionPad> Pads =
     [
-        new(0, "Kick", 36, PadCategory.Drum, PadBus.Drum),
-        new(1, "Snare", 38, PadCategory.Drum, PadBus.Drum),
-        new(2, "C.Hat", 42, PadCategory.Drum, PadBus.Perc),
-        new(3, "O.Hat", 46, PadCategory.Drum, PadBus.Perc),
-        new(4, "Cym1", 49, PadCategory.Drum, PadBus.Cym),
-        new(5, "Cym2", 57, PadCategory.Drum, PadBus.Cym),
-        new(6, "H.Tom", 50, PadCategory.Drum, PadBus.Perc),
-        new(7, "M.Tom", 47, PadCategory.Drum, PadBus.Perc),
-        new(8, "L.Tom", 45, PadCategory.Drum, PadBus.Perc),
-        new(9, "F.Tom", 41, PadCategory.Drum, PadBus.Perc),
-        new(10, "China", 52, PadCategory.Drum, PadBus.Cym),
-        new(11, "Ride", 51, PadCategory.Drum, PadBus.Cym),
-        new(12, "Rim", 37, PadCategory.Drum, PadBus.Drum),
-        new(13, "Cowbell", 56, PadCategory.Perc, PadBus.Perc),
-        new(14, "L.Conga", 64, PadCategory.Perc, PadBus.Perc),
-        new(15, "Mt.Conga", 63, PadCategory.Perc, PadBus.Perc),
-        new(16, "H.Conga", 62, PadCategory.Perc, PadBus.Perc),
-        new(17, "Hi Bongo", 60, PadCategory.Perc, PadBus.Perc),
-        new(18, "Tamb", 54, PadCategory.Perc, PadBus.Perc),
+        new(0, "A.Kick", 35, PadCategory.Drum, PadBus.Drum),
+        new(1, "Kick", 36, PadCategory.Drum, PadBus.Drum),
+        new(2, "Rim", 37, PadCategory.Drum, PadBus.Drum),
+        new(3, "Snare", 38, PadCategory.Drum, PadBus.Drum),
+        new(4, "Clap", 39, PadCategory.Drum, PadBus.Drum),
+        new(5, "E.Snr", 40, PadCategory.Drum, PadBus.Drum),
+        new(6, "F.Tom", 41, PadCategory.Drum, PadBus.Perc),
+        new(7, "C.Hat", 42, PadCategory.Drum, PadBus.Perc),
+        new(8, "H.F.Tm", 43, PadCategory.Drum, PadBus.Perc),
+        new(9, "P.Hat", 44, PadCategory.Drum, PadBus.Perc),
+        new(10, "L.Tom", 45, PadCategory.Drum, PadBus.Perc),
+        new(11, "O.Hat", 46, PadCategory.Drum, PadBus.Perc),
+        new(12, "M.Tom", 47, PadCategory.Drum, PadBus.Perc),
+        new(13, "H.M.Tm", 48, PadCategory.Drum, PadBus.Perc),
+        new(14, "Cym1", 49, PadCategory.Drum, PadBus.Cym),
+        new(15, "H.Tom", 50, PadCategory.Drum, PadBus.Perc),
+        new(16, "Ride", 51, PadCategory.Drum, PadBus.Cym),
+        new(17, "China", 52, PadCategory.Drum, PadBus.Cym),
+        new(18, "Rd.Bell", 53, PadCategory.Drum, PadBus.Cym),
+        new(19, "Tamb", 54, PadCategory.Perc, PadBus.Perc),
+        new(20, "Splash", 55, PadCategory.Drum, PadBus.Cym),
+        new(21, "Cowbell", 56, PadCategory.Perc, PadBus.Perc),
+        new(22, "Cym2", 57, PadCategory.Drum, PadBus.Cym),
+        new(23, "Vibra", 58, PadCategory.Perc, PadBus.Perc),
+        new(24, "Ride2", 59, PadCategory.Drum, PadBus.Cym),
+        new(25, "H.Bongo", 60, PadCategory.Perc, PadBus.Perc),
+        new(26, "L.Bongo", 61, PadCategory.Perc, PadBus.Perc),
+        new(27, "M.Cnga", 62, PadCategory.Perc, PadBus.Perc),
+        new(28, "O.Cnga", 63, PadCategory.Perc, PadBus.Perc),
+        new(29, "L.Cnga", 64, PadCategory.Perc, PadBus.Perc),
+        new(30, "H.Timb", 65, PadCategory.Perc, PadBus.Perc),
+        new(31, "L.Timb", 66, PadCategory.Perc, PadBus.Perc),
+        new(32, "H.Agogo", 67, PadCategory.Perc, PadBus.Perc),
+        new(33, "L.Agogo", 68, PadCategory.Perc, PadBus.Perc),
+        new(34, "Cabasa", 69, PadCategory.Perc, PadBus.Perc),
+        new(35, "Maracas", 70, PadCategory.Perc, PadBus.Perc),
+        new(36, "Sh.Wh", 71, PadCategory.Perc, PadBus.Perc),
+        new(37, "Lg.Wh", 72, PadCategory.Perc, PadBus.Perc),
+        new(38, "Sh.Gui", 73, PadCategory.Perc, PadBus.Perc),
+        new(39, "Lg.Gui", 74, PadCategory.Perc, PadBus.Perc),
+        new(40, "Claves", 75, PadCategory.Perc, PadBus.Perc),
+        new(41, "H.Wood", 76, PadCategory.Perc, PadBus.Perc),
+        new(42, "L.Wood", 77, PadCategory.Perc, PadBus.Perc),
+        new(43, "M.Cuica", 78, PadCategory.Perc, PadBus.Perc),
+        new(44, "O.Cuica", 79, PadCategory.Perc, PadBus.Perc),
+        new(45, "M.Tri", 80, PadCategory.Perc, PadBus.Perc),
+        new(46, "O.Tri", 81, PadCategory.Perc, PadBus.Perc),
     ];
 }

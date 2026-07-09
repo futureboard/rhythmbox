@@ -1,12 +1,19 @@
-namespace Rythmbox.Core.Samples;
-
 using System.Buffers.Binary;
 using System.Text;
+
+namespace Rythmbox.Core.Samples;
 
 /// <summary>Loads and saves mono PCM WAV files for drum kit samples (compatible with old DrumStage SDL_LoadWAV kits).</summary>
 public static class WavCodec
 {
     public const int TargetSampleRate = 48_000;
+
+    private const short WaveFormatPcm = 1;
+    private const short WaveFormatIeeeFloat = 3;
+    private const short WaveFormatExtensible = unchecked((short)0xFFFE);
+
+    private static readonly Guid SubFormatPcm = new("00000001-0000-0010-8000-00AA00389B71");
+    private static readonly Guid SubFormatFloat = new("00000003-0000-0010-8000-00AA00389B71");
 
     public static float[] LoadMono(string path, int targetSampleRate = TargetSampleRate)
     {
@@ -22,10 +29,7 @@ public static class WavCodec
             throw new InvalidDataException("Not a RIFF/WAVE file.");
         }
 
-        int channels = 1;
-        sampleRate = TargetSampleRate;
-        short bitsPerSample = 16;
-        short blockAlign = 2;
+        var format = new WavFormat();
         byte[]? data = null;
 
         var offset = 12;
@@ -43,10 +47,7 @@ public static class WavCodec
             switch (chunkId)
             {
                 case "fmt ":
-                    channels = BinaryPrimitives.ReadInt16LittleEndian(wavBytes.Slice(offset + 2, 2));
-                    sampleRate = BinaryPrimitives.ReadInt32LittleEndian(wavBytes.Slice(offset + 4, 4));
-                    blockAlign = BinaryPrimitives.ReadInt16LittleEndian(wavBytes.Slice(offset + 12, 2));
-                    bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(wavBytes.Slice(offset + 14, 2));
+                    format = ParseFmtChunk(wavBytes.Slice(offset, chunkSize));
                     offset += chunkSize;
                     break;
 
@@ -77,10 +78,11 @@ public static class WavCodec
             return [];
         }
 
-        var mono = DecodeToMono(data, channels, bitsPerSample, blockAlign);
+        sampleRate = format.SampleRate;
+        var mono = DecodeToMono(data, format);
         return sampleRate == targetSampleRate
             ? mono
-            : Resample(mono, sampleRate, targetSampleRate);
+            : WavResampler.Resample(mono, sampleRate, targetSampleRate);
     }
 
     public static byte[] EncodeMono(ReadOnlySpan<float> samples, int sampleRate = TargetSampleRate)
@@ -126,112 +128,32 @@ public static class WavCodec
         File.WriteAllBytes(path, EncodeMono(samples, sampleRate));
     }
 
-    private static float[] DecodeToMono(byte[] data, int channels, short bitsPerSample, short blockAlign)
-    {
-        if (channels <= 0)
-        {
-            throw new InvalidDataException("WAV channel count must be positive.");
-        }
-
-        if (blockAlign <= 0)
-        {
-            blockAlign = (short)(channels * ((bitsPerSample + 7) / 8));
-        }
-
-        if (data.Length < blockAlign)
-        {
-            return [];
-        }
-
-        var frameCount = data.Length / blockAlign;
-        var bytesPerSample = blockAlign / channels;
-        var mono = new float[frameCount];
-
-        for (var i = 0; i < frameCount; i++)
-        {
-            var frameOffset = i * blockAlign;
-            float sum = 0;
-
-            for (var ch = 0; ch < channels; ch++)
-            {
-                var sampleOffset = frameOffset + (ch * bytesPerSample);
-                sum += ReadPcmSample(data, sampleOffset, bitsPerSample, bytesPerSample);
-            }
-
-            mono[i] = sum / channels;
-        }
-
-        return mono;
-    }
-
-    private static float ReadPcmSample(byte[] data, int offset, short bitsPerSample, int bytesPerSample)
-    {
-        return bitsPerSample switch
-        {
-            8 => (data[offset] - 128) / 128f,
-            16 => BinaryPrimitives.ReadInt16LittleEndian(data.AsSpan(offset, 2)) / (float)short.MaxValue,
-            24 => ReadInt24LittleEndian(data.AsSpan(offset, Math.Min(3, bytesPerSample))) / 8_388_608f,
-            32 => BinaryPrimitives.ReadInt32LittleEndian(data.AsSpan(offset, Math.Min(4, bytesPerSample))) / (float)int.MaxValue,
-            _ => throw new NotSupportedException($"Only 8/16/24/32-bit PCM WAV is supported (got {bitsPerSample}-bit)."),
-        };
-    }
-
-    private static int ReadInt24LittleEndian(ReadOnlySpan<byte> data)
-    {
-        var value = data[0] | (data[1] << 8) | (data[2] << 16);
-        if ((value & 0x800000) != 0)
-        {
-            value |= unchecked((int)0xFF000000);
-        }
-
-        return value;
-    }
-
-    private static float[] Resample(float[] input, int fromRate, int toRate)
-    {
-        if (fromRate == toRate)
-        {
-            return input;
-        }
-
-        var outputLength = (int)((long)input.Length * toRate / fromRate);
-        var output = new float[Math.Max(1, outputLength)];
-
-        for (var i = 0; i < output.Length; i++)
-        {
-            var srcPos = (double)i * fromRate / toRate;
-            var idx = (int)srcPos;
-            var frac = (float)(srcPos - idx);
-            var a = input[Math.Min(idx, input.Length - 1)];
-            var b = input[Math.Min(idx + 1, input.Length - 1)];
-            output[i] = a + (b - a) * frac;
-        }
-
-        return output;
-    }
-
-    /// <summary>Downsamples float PCM to peak values for waveform display (0..1).</summary>
-    public static float[] BuildWaveformPeaks(ReadOnlySpan<float> samples, int peakCount)
+    /// <summary>Downsamples float PCM to min/max envelope columns for waveform display.</summary>
+    public static WaveformPeak[] BuildWaveformEnvelope(ReadOnlySpan<float> samples, int peakCount)
     {
         if (samples.Length == 0 || peakCount <= 0)
         {
             return [];
         }
 
-        var peaks = new float[peakCount];
+        var peaks = new WaveformPeak[peakCount];
         var block = Math.Max(1, samples.Length / peakCount);
 
         for (var i = 0; i < peakCount; i++)
         {
             var start = i * block;
             var end = Math.Min(samples.Length, start + block);
-            var peak = 0f;
+            var min = 0f;
+            var max = 0f;
+
             for (var s = start; s < end; s++)
             {
-                peak = Math.Max(peak, Math.Abs(samples[s]));
+                var sample = samples[s];
+                min = Math.Min(min, sample);
+                max = Math.Max(max, sample);
             }
 
-            peaks[i] = peak;
+            peaks[i] = new WaveformPeak(min, max);
         }
 
         return peaks;
@@ -282,4 +204,181 @@ public static class WavCodec
             samples[i] *= gain;
         }
     }
+
+    /// <summary>Reads the MIDI root note from a WAV <c>smpl</c> chunk, if present. We intentionally do not apply it.</summary>
+    public static bool TryReadSamplerRootNote(ReadOnlySpan<byte> wavBytes, out int midiNote)
+    {
+        midiNote = -1;
+
+        if (wavBytes.Length < 44
+            || Encoding.ASCII.GetString(wavBytes.Slice(0, 4)) != "RIFF"
+            || Encoding.ASCII.GetString(wavBytes.Slice(8, 4)) != "WAVE")
+        {
+            return false;
+        }
+
+        var offset = 12;
+        while (offset + 8 <= wavBytes.Length)
+        {
+            var chunkId = Encoding.ASCII.GetString(wavBytes.Slice(offset, 4));
+            var chunkSize = BinaryPrimitives.ReadInt32LittleEndian(wavBytes.Slice(offset + 4, 4));
+            offset += 8;
+
+            if (chunkSize < 0 || offset + chunkSize > wavBytes.Length)
+            {
+                break;
+            }
+
+            if (chunkId == "smpl" && chunkSize >= 36)
+            {
+                midiNote = BinaryPrimitives.ReadInt32LittleEndian(wavBytes.Slice(offset + 20, 4));
+                return midiNote is >= 0 and <= 127;
+            }
+
+            offset += chunkSize;
+            if ((chunkSize & 1) != 0)
+            {
+                offset++;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Pitch-shift by resampling (drum-machine style). Positive semitones = higher pitch.</summary>
+    public static float[] PitchShift(ReadOnlySpan<float> samples, float semitones)
+    {
+        if (samples.Length == 0 || MathF.Abs(semitones) < 0.001f)
+        {
+            return samples.ToArray();
+        }
+
+        var ratio = Math.Pow(2, semitones / 12.0);
+        var outLength = Math.Max(1, (int)(samples.Length / ratio));
+        var output = new float[outLength];
+
+        for (var i = 0; i < outLength; i++)
+        {
+            var srcPos = i * ratio;
+            var idx = (int)srcPos;
+            var frac = (float)(srcPos - idx);
+            var a = samples[Math.Min(idx, samples.Length - 1)];
+            var b = samples[Math.Min(idx + 1, samples.Length - 1)];
+            output[i] = a + (b - a) * frac;
+        }
+
+        return output;
+    }
+
+    public static float PitchToPlaybackRatio(float semitones) =>
+        (float)Math.Pow(2, semitones / 12.0);
+
+    private static WavFormat ParseFmtChunk(ReadOnlySpan<byte> chunk)
+    {
+        if (chunk.Length < 16)
+        {
+            throw new InvalidDataException("WAV fmt chunk is too small.");
+        }
+
+        var formatTag = BinaryPrimitives.ReadInt16LittleEndian(chunk);
+        var channels = BinaryPrimitives.ReadInt16LittleEndian(chunk.Slice(2, 2));
+        var sampleRate = BinaryPrimitives.ReadInt32LittleEndian(chunk.Slice(4, 4));
+        var blockAlign = BinaryPrimitives.ReadInt16LittleEndian(chunk.Slice(12, 2));
+        var bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(chunk.Slice(14, 2));
+        var isFloat = formatTag == WaveFormatIeeeFloat;
+
+        if (formatTag == WaveFormatExtensible && chunk.Length >= 40)
+        {
+            bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(chunk.Slice(18, 2));
+            var subFormat = ReadGuid(chunk.Slice(24, 16));
+            isFloat = subFormat == SubFormatFloat;
+            if (subFormat != SubFormatPcm && subFormat != SubFormatFloat)
+            {
+                throw new NotSupportedException($"Unsupported WAV sub-format {subFormat}.");
+            }
+        }
+        else if (formatTag != WaveFormatPcm && formatTag != WaveFormatIeeeFloat)
+        {
+            throw new NotSupportedException($"Unsupported WAV format tag {formatTag}.");
+        }
+
+        return new WavFormat(channels, sampleRate, blockAlign, bitsPerSample, isFloat);
+    }
+
+    private static Guid ReadGuid(ReadOnlySpan<byte> bytes)
+    {
+        if (bytes.Length < 16)
+        {
+            return Guid.Empty;
+        }
+
+        return new Guid(bytes.Slice(0, 16));
+    }
+
+    private static float[] DecodeToMono(byte[] data, WavFormat format)
+    {
+        if (format.Channels <= 0)
+        {
+            throw new InvalidDataException("WAV channel count must be positive.");
+        }
+
+        var blockAlign = format.BlockAlign > 0
+            ? format.BlockAlign
+            : (short)(format.Channels * ((format.BitsPerSample + 7) / 8));
+
+        if (data.Length < blockAlign)
+        {
+            return [];
+        }
+
+        var frameCount = data.Length / blockAlign;
+        var bytesPerSample = blockAlign / format.Channels;
+        var mono = new float[frameCount];
+
+        for (var i = 0; i < frameCount; i++)
+        {
+            var frameOffset = i * blockAlign;
+            float sum = 0;
+
+            for (var ch = 0; ch < format.Channels; ch++)
+            {
+                var sampleOffset = frameOffset + (ch * bytesPerSample);
+                sum += ReadSample(data, sampleOffset, format, bytesPerSample);
+            }
+
+            mono[i] = sum / format.Channels;
+        }
+
+        return mono;
+    }
+
+    private static float ReadSample(byte[] data, int offset, WavFormat format, int bytesPerSample)
+    {
+        if (format.IsFloat && format.BitsPerSample == 32)
+        {
+            return BinaryPrimitives.ReadSingleLittleEndian(data.AsSpan(offset, 4));
+        }
+
+        return format.BitsPerSample switch
+        {
+            8 => (data[offset] - 128) / 128f,
+            16 => BinaryPrimitives.ReadInt16LittleEndian(data.AsSpan(offset, 2)) / (float)short.MaxValue,
+            24 => ReadInt24LittleEndian(data.AsSpan(offset, Math.Min(3, bytesPerSample))) / 8_388_608f,
+            32 => BinaryPrimitives.ReadInt32LittleEndian(data.AsSpan(offset, Math.Min(4, bytesPerSample))) / (float)int.MaxValue,
+            _ => throw new NotSupportedException($"Unsupported WAV bit depth ({format.BitsPerSample}-bit)."),
+        };
+    }
+
+    private static int ReadInt24LittleEndian(ReadOnlySpan<byte> data)
+    {
+        var value = data[0] | (data[1] << 8) | (data[2] << 16);
+        if ((value & 0x800000) != 0)
+        {
+            value |= unchecked((int)0xFF000000);
+        }
+
+        return value;
+    }
+
+    private readonly record struct WavFormat(int Channels, int SampleRate, short BlockAlign, short BitsPerSample, bool IsFloat);
 }

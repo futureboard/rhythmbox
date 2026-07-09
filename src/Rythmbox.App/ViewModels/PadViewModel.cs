@@ -8,23 +8,39 @@ namespace Rythmbox.App.ViewModels;
 /// <summary>A single percussion pad button: a fixed GM note that can be triggered live or highlighted when used by the loaded loop.</summary>
 public sealed partial class PadViewModel : ViewModelBase
 {
-    private readonly KitSamplePlayer _kitPlayer;
+    private readonly KitSamplePlayer? _kitPlayer;
 
-    public PadViewModel(PercussionPad pad, KitSamplePlayer kitPlayer)
+    private PadViewModel(PercussionPad pad, KitSamplePlayer? kitPlayer, bool isPlaceholder)
     {
         Pad = pad;
         _kitPlayer = kitPlayer;
+        IsPlaceholder = isPlaceholder;
     }
+
+    public PadViewModel(PercussionPad pad, KitSamplePlayer kitPlayer)
+        : this(pad, kitPlayer, isPlaceholder: false)
+    {
+    }
+
+    public static PadViewModel CreatePlaceholder(int slotIndex) =>
+        new(new PercussionPad(-1, string.Empty, -1, PadCategory.Drum, PadBus.Drum), null, isPlaceholder: true)
+        {
+            PlaceholderSlot = slotIndex,
+        };
 
     public PercussionPad Pad { get; }
 
-    public int Number => Pad.Index + 1;
+    public bool IsPlaceholder { get; }
 
-    public string Label => Pad.Label;
+    public int PlaceholderSlot { get; private init; }
 
-    public string NoteName => MidiNoteNames.Format(Pad.Note);
+    public int Number => IsPlaceholder ? 0 : Pad.Index + 1;
 
-    public string NoteDetail => $"{NoteName} / {Pad.Note}";
+    public string Label => IsPlaceholder ? string.Empty : Pad.Label;
+
+    public string NoteName => IsPlaceholder ? string.Empty : MidiNoteNames.Format(Pad.Note);
+
+    public string NoteDetail => IsPlaceholder ? string.Empty : $"{NoteName} / {Pad.Note}";
 
     [ObservableProperty]
     private bool _isUsedInLoop;
@@ -34,6 +50,11 @@ public sealed partial class PadViewModel : ViewModelBase
 
     public void Press()
     {
+        if (IsPlaceholder || _kitPlayer is null)
+        {
+            return;
+        }
+
         if (IsPressed)
         {
             return;
@@ -54,10 +75,14 @@ public sealed partial class PadViewModel : ViewModelBase
         // One-shot samples; release is visual only.
     }
 
-    /// <summary>Triggers a single drum hit (note-on immediately followed by note-off) for mouse clicks / keyboard shortcuts.</summary>
     [RelayCommand]
     private void Hit()
     {
+        if (IsPlaceholder)
+        {
+            return;
+        }
+
         Press();
         Release();
     }

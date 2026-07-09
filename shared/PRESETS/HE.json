@@ -1,5 +1,5 @@
 {
-  "name": "Acoustic Drum Kit",
+  "name": "GM Kit (empty)",
   "pads": [
     {
       "label": "Kick",
@@ -16,14 +16,12 @@
     {
       "label": "C.Hat",
       "gain": 1,
-      "midi_note": 42,
-      "choke_group": 1
+      "midi_note": 42
     },
     {
       "label": "O.Hat",
       "gain": 1,
-      "midi_note": 46,
-      "choke_group": 1
+      "midi_note": 46
     },
     {
       "label": "Cym1",

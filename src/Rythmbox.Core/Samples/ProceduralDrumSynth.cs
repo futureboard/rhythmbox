@@ -18,7 +18,19 @@ public static class ProceduralDrumSynth
             var u when u.Contains("CHINA") => SynthCrash(sampleRate),
             var u when u.Contains("CYM") || u.Contains("CRASH") => SynthCrash(sampleRate),
             var u when u.Contains("RIDE") => SynthRide(sampleRate),
-            var u when u.Contains("CONGA") => SynthConga(label, sampleRate),
+            var u when u.Contains("BONGO") => SynthTom(sampleRate, u.StartsWith('L') ? 110f : 170f),
+            var u when u.Contains("TIMB") => SynthTom(sampleRate, u.StartsWith('L') ? 125f : 200f),
+            var u when u.Contains("AGOGO") => SynthHat(sampleRate, 0.12f, 0.08f),
+            var u when u.Contains("CABASA") || u.Contains("MARACA") => SynthHat(sampleRate, 0.14f, 0.1f),
+            var u when u.Contains("WH") => SynthHat(sampleRate, 0.2f, 0.16f),
+            var u when u.Contains("GUI") => SynthHat(sampleRate, 0.16f, 0.12f),
+            var u when u.Contains("CLAVE") => SynthTom(sampleRate, 240f),
+            var u when u.Contains("WOOD") => SynthTom(sampleRate, u.StartsWith('L') ? 210f : 260f),
+            var u when u.Contains("CUICA") => SynthTom(sampleRate, 150f),
+            var u when u.Contains("TRI") => SynthHat(sampleRate, 0.45f, 0.35f),
+            var u when u.Contains("SPLASH") => SynthCrash(sampleRate),
+            var u when u.Contains("VIBRA") => SynthClap(sampleRate),
+            var u when u.Contains("CONGA") || u.Contains("CNGA") => SynthConga(label, sampleRate),
             var u when u.Contains("COWBELL") || u.Contains("TAMB") => SynthHat(sampleRate, 0.18f, 0.12f),
             _ => SynthHat(sampleRate, 0.08f, 0.04f),
         };
@@ -31,14 +43,14 @@ public static class ProceduralDrumSynth
             return SynthTom(sr, 115f);
         }
 
-        if (u.StartsWith("MT H"))
-        {
-            return SynthTom(sr, 175f);
-        }
-
-        if (u.StartsWith("MT"))
+        if (u.StartsWith("M."))
         {
             return SynthTom(sr, 150f);
+        }
+
+        if (u.StartsWith('O'))
+        {
+            return SynthTom(sr, 175f);
         }
 
         if (u.StartsWith('H'))

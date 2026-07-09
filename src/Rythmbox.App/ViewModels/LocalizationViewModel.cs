@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Rythmbox.App.Localization;
+using Rythmbox.Core.Models;
 
 namespace Rythmbox.App.ViewModels;
 
@@ -189,7 +190,7 @@ public sealed partial class LocalizationViewModel : ViewModelBase
         ArrangerSongChainSoon = _i18n["arranger.songChainSoon"];
 
         DrumPadsTitle = _i18n["drumPads.title"];
-        DrumPadsVoices = _i18n["drumPads.voices"];
+        DrumPadsVoices = _i18n.Format("drumPads.voices", GmPercussionMap.Pads.Count);
 
         StyleBankTitle = _i18n["styleBank.title"];
         StyleBankRescan = _i18n["styleBank.rescan"];

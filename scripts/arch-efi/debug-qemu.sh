@@ -8,7 +8,7 @@ QEMU_BIN_DIR="${QEMU_BIN_DIR:-${REPO_ROOT}/bin}"
 UEFI_DIR="${UEFI_DIR:-${REPO_ROOT}/bin/share}"
 IMAGE_PATH="${IMAGE_PATH:-${REPO_ROOT}/out/rythmbox-arch-efi.img}"
 QEMU_WORK_DIR="${QEMU_WORK_DIR:-${REPO_ROOT}/out/qemu-debug}"
-MEMORY="${MEMORY:-4096}"
+MEMORY="${MEMORY:-2048}"
 CPUS="${CPUS:-4}"
 SSH_PORT="${SSH_PORT:-2222}"
 MONITOR_PORT="${MONITOR_PORT:-4444}"
@@ -20,14 +20,112 @@ QEMU_TRACE="${QEMU_TRACE:-guest_errors,unimp}"
 QEMU_ACCEL="${QEMU_ACCEL:-kvm:tcg}"
 QEMU_DISPLAY="${QEMU_DISPLAY:-gtk,gl=off}"
 ALLOW_WINDOWS_QEMU="${ALLOW_WINDOWS_QEMU:-0}"
+AUTO_INSTALL="${AUTO_INSTALL:-0}"
+CHECK_ONLY="${CHECK_ONLY:-0}"
+
+for arg in "$@"; do
+  case "${arg}" in
+    --check)
+      CHECK_ONLY=1
+      ;;
+  esac
+done
 
 resolve_full_path() {
   local path="$1"
-  if [[ "${path}" = /* ]]; then
+  if [[ "${path}" != /* ]]; then
+    path="${PWD}/${path}"
+  fi
+  if [[ -e "${path}" ]]; then
     readlink -f "${path}"
   else
-    readlink -f "${PWD}/${path}"
+    printf '%s\n' "${path}"
   fi
+}
+
+pacman_pkg_installed() {
+  pacman -Q "$1" >/dev/null 2>&1
+}
+
+ovmf_code_candidates() {
+  printf '%s\n' \
+    "/usr/share/edk2/x64/OVMF_CODE.fd" \
+    "/usr/share/edk2/x64/OVMF_CODE.4m.fd" \
+    "/usr/share/edk2/x64/OVMF_CODE.secboot.4m.fd" \
+    "/usr/share/OVMF/OVMF_CODE.fd" \
+    "/usr/share/OVMF/OVMF_CODE_4M.fd" \
+    "/usr/share/qemu/OVMF_CODE.fd" \
+    "${UEFI_DIR}/OVMF_CODE.fd" \
+    "${UEFI_DIR}/OVMF_CODE_4M.fd" \
+    "${UEFI_DIR}/edk2-x86_64-code.fd"
+}
+
+ovmf_vars_candidates() {
+  printf '%s\n' \
+    "/usr/share/edk2/x64/OVMF_VARS.fd" \
+    "/usr/share/edk2/x64/OVMF_VARS.4m.fd" \
+    "/usr/share/OVMF/OVMF_VARS.fd" \
+    "/usr/share/OVMF/OVMF_VARS_4M.fd" \
+    "/usr/share/qemu/OVMF_VARS.fd" \
+    "${UEFI_DIR}/OVMF_VARS.fd" \
+    "${UEFI_DIR}/OVMF_VARS_4M.fd" \
+    "${UEFI_DIR}/edk2-x86_64-vars.fd"
+}
+
+ovmf_code_available() {
+  if [[ -n "${OVMF_CODE:-}" && -f "${OVMF_CODE}" ]]; then
+    return 0
+  fi
+  local candidate
+  while IFS= read -r candidate; do
+    if [[ -f "${candidate}" ]]; then
+      return 0
+    fi
+  done < <(ovmf_code_candidates)
+  return 1
+}
+
+ensure_pacman_debug_deps() {
+  if ! command -v pacman >/dev/null 2>&1; then
+    return 0
+  fi
+
+  local missing_pkgs=()
+  local qemu_pkg=""
+
+  if [[ -z "${QEMU:-}" ]] && ! command -v qemu-system-x86_64 >/dev/null 2>&1; then
+    if ! pacman_pkg_installed qemu-system-x86 \
+      && ! pacman_pkg_installed qemu-full \
+      && ! pacman_pkg_installed qemu-desktop; then
+      missing_pkgs+=(qemu-system-x86)
+      qemu_pkg="qemu-system-x86"
+    fi
+  fi
+
+  if ! ovmf_code_available && ! pacman_pkg_installed edk2-ovmf; then
+    missing_pkgs+=(edk2-ovmf)
+  fi
+
+  if [[ "${#missing_pkgs[@]}" -eq 0 ]]; then
+    return 0
+  fi
+
+  echo "Missing host packages for QEMU debug: ${missing_pkgs[*]}" >&2
+  if [[ "${AUTO_INSTALL}" == "1" ]]; then
+    if [[ "${EUID}" -ne 0 ]]; then
+      sudo pacman -Sy --needed --noconfirm "${missing_pkgs[@]}"
+    else
+      pacman -Sy --needed --noconfirm "${missing_pkgs[@]}"
+    fi
+    return 0
+  fi
+
+  echo "Install with: sudo pacman -S --needed ${missing_pkgs[*]}" >&2
+  echo "Or rerun with AUTO_INSTALL=1 to install automatically." >&2
+  if [[ -n "${qemu_pkg}" ]]; then
+    echo "Or set QEMU=/path/to/qemu-system-x86_64." >&2
+  fi
+  exit 1
 }
 
 find_first() {
@@ -40,6 +138,8 @@ find_first() {
   done
   return 1
 }
+
+ensure_pacman_debug_deps
 
 QEMU="${QEMU:-}"
 if [[ -z "${QEMU}" ]]; then
@@ -83,37 +183,34 @@ fi
 
 OVMF_CODE="${OVMF_CODE:-}"
 if [[ -z "${OVMF_CODE}" ]]; then
-  OVMF_CODE="$(find_first \
-    "/usr/share/edk2/x64/OVMF_CODE.fd" \
-    "/usr/share/edk2/x64/OVMF_CODE.4m.fd" \
-    "/usr/share/edk2/x64/OVMF_CODE.secboot.4m.fd" \
-    "/usr/share/OVMF/OVMF_CODE.fd" \
-    "/usr/share/OVMF/OVMF_CODE_4M.fd" \
-    "/usr/share/qemu/OVMF_CODE.fd" \
-    "${UEFI_DIR}/OVMF_CODE.fd" \
-    "${UEFI_DIR}/OVMF_CODE_4M.fd" \
-    "${UEFI_DIR}/edk2-x86_64-code.fd" \
-    || true)"
+  mapfile -t _ovmf_code_candidates < <(ovmf_code_candidates)
+  OVMF_CODE="$(find_first "${_ovmf_code_candidates[@]}" || true)"
 fi
 
 OVMF_VARS="${OVMF_VARS:-}"
 if [[ -z "${OVMF_VARS}" ]]; then
-  OVMF_VARS="$(find_first \
-    "/usr/share/edk2/x64/OVMF_VARS.fd" \
-    "/usr/share/edk2/x64/OVMF_VARS.4m.fd" \
-    "/usr/share/OVMF/OVMF_VARS.fd" \
-    "/usr/share/OVMF/OVMF_VARS_4M.fd" \
-    "/usr/share/qemu/OVMF_VARS.fd" \
-    "${UEFI_DIR}/OVMF_VARS.fd" \
-    "${UEFI_DIR}/OVMF_VARS_4M.fd" \
-    "${UEFI_DIR}/edk2-x86_64-vars.fd" \
-    || true)"
+  mapfile -t _ovmf_vars_candidates < <(ovmf_vars_candidates)
+  OVMF_VARS="$(find_first "${_ovmf_vars_candidates[@]}" || true)"
 fi
 
 if [[ -z "${OVMF_CODE}" ]]; then
   echo "UEFI code firmware not found in ${UEFI_DIR}." >&2
   echo "Expected OVMF_CODE.fd, OVMF_CODE_4M.fd, or edk2-x86_64-code.fd. Set OVMF_CODE." >&2
+  if command -v pacman >/dev/null 2>&1; then
+    echo "On Arch Linux install: sudo pacman -S --needed edk2-ovmf" >&2
+  fi
   exit 1
+fi
+
+if [[ "${CHECK_ONLY}" == "1" ]]; then
+  cat <<CHECK
+QEMU debug dependencies OK
+  QEMU:       ${QEMU}
+  UEFI code:  ${OVMF_CODE}
+  UEFI vars:  ${OVMF_VARS:-none}
+  Image:      ${IMAGE_PATH}
+CHECK
+  exit 0
 fi
 
 OVMF_CODE="$(resolve_full_path "${OVMF_CODE}")"

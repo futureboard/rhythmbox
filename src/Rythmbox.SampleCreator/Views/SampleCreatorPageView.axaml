@@ -7,6 +7,7 @@
              mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="760"
              x:Class="Rythmbox.SampleCreator.Views.SampleCreatorPageView"
              x:DataType="vm:SampleCreatorViewModel"
+             Focusable="True"
              KeyDown="OnPageKeyDown">
 
     <DockPanel LastChildFill="True">
@@ -46,9 +47,15 @@
                     <ListBox ItemsSource="{Binding Pads}" SelectedItem="{Binding SelectedPad}">
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="vm:PadSampleViewModel">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <TextBlock Grid.Column="0" Text="{Binding Label}" FontWeight="SemiBold" />
-                                    <TextBlock Grid.Column="1" Text="{Binding DurationLabel}" Classes="dim" FontSize="10" />
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                    <Ellipse Grid.Column="0" Width="6" Height="6" VerticalAlignment="Center"
+                                             Fill="{DynamicResource RythmboxGreenBrush}"
+                                             IsVisible="{Binding HasAudio}" />
+                                    <Ellipse Grid.Column="0" Width="6" Height="6" VerticalAlignment="Center"
+                                             Fill="{DynamicResource RythmboxBorderBrush}"
+                                             IsVisible="{Binding !HasAudio}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Label}" FontWeight="SemiBold" />
+                                    <TextBlock Grid.Column="2" Text="{Binding DurationLabel}" Classes="dim" FontSize="10" />
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -60,18 +67,46 @@
                 <StackPanel Spacing="12" DataContext="{Binding SelectedPad}">
                     <TextBlock Text="{Binding Label}" FontSize="20" FontWeight="Bold" />
                     <TextBlock Text="{Binding FileName}" Classes="dim" />
+                    <TextBlock Text="{Binding SampleRateLabel}" Classes="mono dim" FontSize="11"
+                               IsVisible="{Binding HasAudio}" />
                     <views:WaveformView DataContext="{Binding}" Height="140" />
-                    <Grid ColumnDefinitions="Auto,*,Auto,*,Auto" ColumnSpacing="10">
-                        <TextBlock Grid.Column="0" Text="Trim start" Classes="dim" VerticalAlignment="Center" />
-                        <Slider Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding TrimStart}" />
-                        <TextBlock Grid.Column="2" Text="Trim end" Classes="dim" VerticalAlignment="Center" />
-                        <Slider Grid.Column="3" Minimum="0" Maximum="1" Value="{Binding TrimEnd}" />
-                        <Button Grid.Column="4" Command="{Binding ApplyTrimCommand}" Content="Apply trim" Classes="toolbarBtn" />
+
+                    <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="20" Margin="0,4,0,0">
+                        <StackPanel Grid.Column="0" Spacing="6" HorizontalAlignment="Center">
+                            <TextBlock Text="TRIM START" Classes="dim" FontSize="10" HorizontalAlignment="Center" />
+                            <views:RotaryKnobView Minimum="0" Maximum="1" DefaultValue="0"
+                                                  Value="{Binding TrimStart, Mode=TwoWay}"
+                                                  HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding TrimStart, StringFormat={}{0:0.000}}" Classes="mono" FontSize="10" HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="6" HorizontalAlignment="Center">
+                            <TextBlock Text="TRIM END" Classes="dim" FontSize="10" HorizontalAlignment="Center" />
+                            <views:RotaryKnobView Minimum="0" Maximum="1" DefaultValue="1"
+                                                  Value="{Binding TrimEnd, Mode=TwoWay}"
+                                                  HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding TrimEnd, StringFormat={}{0:0.000}}" Classes="mono" FontSize="10" HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <Button Grid.Column="2" Command="{Binding ApplyTrimCommand}" Content="Apply trim"
+                                Classes="toolbarBtn" VerticalAlignment="Center" />
                     </Grid>
-                    <Grid ColumnDefinitions="Auto,*,Auto">
-                        <TextBlock Grid.Column="0" Text="Gain" Classes="dim" VerticalAlignment="Center" Margin="0,0,10,0" />
-                        <Slider Grid.Column="1" Minimum="0" Maximum="2" Value="{Binding Gain}" />
-                        <TextBlock Grid.Column="2" Text="{Binding GainLabel}" Classes="mono" VerticalAlignment="Center" Margin="10,0,0,0" />
+
+                    <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="20" Margin="0,8,0,0">
+                        <StackPanel Grid.Column="0" Spacing="6" HorizontalAlignment="Center">
+                            <TextBlock Text="GAIN" Classes="dim" FontSize="10" HorizontalAlignment="Center" />
+                            <views:RotaryKnobView Minimum="0" Maximum="2" DefaultValue="1"
+                                                  Value="{Binding Gain, Mode=TwoWay}"
+                                                  HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding GainLabel}" Classes="mono" FontSize="10" HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="6" HorizontalAlignment="Center">
+                            <TextBlock Text="PITCH" Classes="dim" FontSize="10" HorizontalAlignment="Center" />
+                            <views:RotaryKnobView Minimum="-12" Maximum="12" DefaultValue="0"
+                                                  Value="{Binding Pitch, Mode=TwoWay}"
+                                                  HorizontalAlignment="Center" />
+                            <TextBlock Text="{Binding PitchLabel}" Classes="mono" FontSize="10" HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <Button Grid.Column="2" Command="{Binding ApplyPitchCommand}" Content="Apply pitch"
+                                Classes="toolbarBtn" VerticalAlignment="Center" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -85,6 +120,7 @@
                             <TextBlock Text="Import WAV…" />
                         </StackPanel>
                     </Button>
+                    <Button Command="{Binding ResetAllPitchCommand}" HorizontalAlignment="Stretch" Classes="toolbarBtn">Reset all pitch</Button>
                     <StackPanel Spacing="10" DataContext="{Binding SelectedPad}">
                         <Button Command="{Binding PreviewCommand}" HorizontalAlignment="Stretch" Classes="transportStop toolbarBtn">
                             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
@@ -95,7 +131,7 @@
                         <Button Command="{Binding NormalizeCommand}" HorizontalAlignment="Stretch" Classes="toolbarBtn">Normalize</Button>
                         <Button Command="{Binding ClearCommand}" HorizontalAlignment="Stretch" Classes="danger toolbarBtn">Clear Sample</Button>
                     </StackPanel>
-                    <TextBlock Text="Assign samples to each GM pad, trim and normalize, then Save Kit to export JSON + WAV files for shared/PRESETS and shared/SAMPLES."
+                    <TextBlock Text="Assign samples to each GM pad, trim and normalize, then Save Kit to export JSON + WAV files for shared/PRESETS and shared/SAMPLES. Drop WAV files onto this page to import."
                                Classes="dim" TextWrapping="Wrap" Margin="0,12,0,0" />
                 </StackPanel>
             </Border>
