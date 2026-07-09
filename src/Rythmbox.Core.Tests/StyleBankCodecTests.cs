@@ -10,18 +10,47 @@ public class StyleBankCodecTests
     [Fact]
     public void Load_valid_style_parses_patterns_and_macros()
     {
-        var root = FindRepoRoot();
-        var stylePath = Path.Combine(root, "Content", "Styles", "Pop", "pop_8beat_basic", "style.json");
-        Assert.True(File.Exists(stylePath));
+        var dir = Path.Combine(Path.GetTempPath(), "rythmbox_style_valid_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
 
-        var style = StyleBankCodec.Load(stylePath);
+        try
+        {
+            var json = """
+            {
+              "id": "pop_8beat_basic",
+              "name": "Pop 8 Beat",
+              "category": "Pop",
+              "default_tempo": 120,
+              "macros": {
+                "complexity": 0.45,
+                "energy": 0.55,
+                "swing": 0.0,
+                "humanize": 0.12
+              },
+              "patterns": {
+                "intro_a": {
+                  "name": "Intro A",
+                  "type": "intro",
+                  "midi": "intro_a.mid"
+                }
+              }
+            }
+            """;
+            File.WriteAllText(Path.Combine(dir, "style.json"), json);
 
-        Assert.Equal("pop_8beat_basic", style.Id);
-        Assert.Equal("Pop 8 Beat", style.Name);
-        Assert.Equal("Pop", style.Category);
-        Assert.True(style.IsValid);
-        Assert.Contains("intro_a", style.Patterns.Keys);
-        Assert.Equal(0.45f, style.Macros.Complexity, precision: 2);
+            var style = StyleBankCodec.Load(Path.Combine(dir, "style.json"));
+
+            Assert.Equal("pop_8beat_basic", style.Id);
+            Assert.Equal("Pop 8 Beat", style.Name);
+            Assert.Equal("Pop", style.Category);
+            Assert.True(style.IsValid);
+            Assert.Contains("intro_a", style.Patterns.Keys);
+            Assert.Equal(0.45f, style.Macros.Complexity, precision: 2);
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
     }
 
     [Fact]
@@ -100,22 +129,6 @@ public class StyleBankCodecTests
         {
             Directory.Delete(dir, recursive: true);
         }
-    }
-
-    private static string FindRepoRoot()
-    {
-        var dir = AppContext.BaseDirectory;
-        for (var i = 0; i < 8 && !string.IsNullOrEmpty(dir); i++)
-        {
-            if (Directory.Exists(Path.Combine(dir, "Content", "Styles")))
-            {
-                return dir;
-            }
-
-            dir = Directory.GetParent(dir)?.FullName ?? string.Empty;
-        }
-
-        throw new InvalidOperationException("Could not locate repo root with Content/Styles.");
     }
 }
 

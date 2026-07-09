@@ -4,6 +4,8 @@ using CommunityToolkit.Mvvm.Input;
 using Rythmbox.App.Localization;
 using Rythmbox.Core.Engine;
 using Rythmbox.Core.Models;
+using Rythmbox.Core.Models.Styles;
+using Rythmbox.Core.Styles;
 
 namespace Rythmbox.App.ViewModels;
 
@@ -81,9 +83,19 @@ public sealed partial class PadMappingEntryViewModel : ViewModelBase
 
 public sealed partial class SettingsViewModel : ViewModelBase
 {
+    private static readonly TimeSignature[] MomentaryOptions =
+    [
+        new(2, 4),
+        new(3, 4),
+        new(6, 8),
+        new(5, 4),
+    ];
+
     private readonly PadMappingService _mapping;
     private readonly PadMidiRouter _padRouter;
     private readonly MidiInputService _midiInput;
+    private readonly MidiFootSwitchController _footSwitch;
+    private readonly PatternArrangerEngine _arranger;
     private readonly StatusViewModel _status;
     private readonly LocalizationService _i18n;
 
@@ -91,12 +103,16 @@ public sealed partial class SettingsViewModel : ViewModelBase
         PadMappingService mapping,
         PadMidiRouter padRouter,
         MidiInputService midiInput,
+        MidiFootSwitchController footSwitch,
+        PatternArrangerEngine arranger,
         StatusViewModel status,
         LocalizationService i18n)
     {
         _mapping = mapping;
         _padRouter = padRouter;
         _midiInput = midiInput;
+        _footSwitch = footSwitch;
+        _arranger = arranger;
         _status = status;
         _i18n = i18n;
 
@@ -134,6 +150,33 @@ public sealed partial class SettingsViewModel : ViewModelBase
     public string KeyboardModeLabel => _mapping.UseHomeRowMapping
         ? _i18n["status.padModeHome"]
         : _i18n["status.padModeNumbers"];
+
+    public string FootSwitchCcLabel => _i18n.Format("settings.footSwitchCc", _footSwitch.ControllerNumber);
+
+    public string FootSwitchSignatureLabel =>
+        _i18n.Format("settings.footSwitchSig", _arranger.MomentarySignature.ToString());
+
+    [RelayCommand]
+    private void FootSwitchCcPrev()
+    {
+        _footSwitch.ControllerNumber = Math.Clamp(_footSwitch.ControllerNumber - 1, 0, 127);
+        OnPropertyChanged(nameof(FootSwitchCcLabel));
+    }
+
+    [RelayCommand]
+    private void FootSwitchCcNext()
+    {
+        _footSwitch.ControllerNumber = Math.Clamp(_footSwitch.ControllerNumber + 1, 0, 127);
+        OnPropertyChanged(nameof(FootSwitchCcLabel));
+    }
+
+    [RelayCommand]
+    private void CycleFootSwitchSignature()
+    {
+        var index = Array.IndexOf(MomentaryOptions, _arranger.MomentarySignature);
+        _arranger.MomentarySignature = MomentaryOptions[(index + 1) % MomentaryOptions.Length];
+        OnPropertyChanged(nameof(FootSwitchSignatureLabel));
+    }
 
     [RelayCommand]
     private void ToggleMidi()
@@ -193,6 +236,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
         OnPropertyChanged(nameof(MidiEnabledLabel));
         OnPropertyChanged(nameof(MidiPortLabel));
         OnPropertyChanged(nameof(KeyboardModeLabel));
+        OnPropertyChanged(nameof(FootSwitchCcLabel));
+        OnPropertyChanged(nameof(FootSwitchSignatureLabel));
         foreach (var mapping in Mappings)
         {
             mapping.RefreshLabels();

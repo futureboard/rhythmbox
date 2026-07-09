@@ -25,6 +25,15 @@ public sealed class ArrangerSession
 
     public int CurrentBeat { get; set; } = 1;
 
+    /// <summary>The groove's base time signature (from the selected style).</summary>
+    public TimeSignature BaseTimeSignature { get; set; } = TimeSignature.FourFour;
+
+    /// <summary>The time signature of the bar currently playing (may differ during a momentary switch).</summary>
+    public TimeSignature CurrentTimeSignature { get; set; } = TimeSignature.FourFour;
+
+    /// <summary>True while a momentary time-signature switch is queued or counting down.</summary>
+    public bool TimeSignatureOverridePending { get; set; }
+
     public double CurrentTempo { get; set; } = 120;
 
     public RhythmMacros Macros { get; set; } = RhythmMacros.Default;

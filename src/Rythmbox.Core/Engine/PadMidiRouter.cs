@@ -24,10 +24,19 @@ public sealed class PadMidiRouter : IMidiControllable
 
     public event Action<int, int>? PadTriggered;
 
+    /// <summary>Raised for every Control Change received: (controllerNumber, value). Used for foot switches.</summary>
+    public event Action<int, int>? ControlChangeReceived;
+
     public void ProcessMidiMessage(MidiMessage message)
     {
         if (!IsEnabled)
         {
+            return;
+        }
+
+        if (message.Command == MidiCommand.ControlChange)
+        {
+            ControlChangeReceived?.Invoke(message.ControllerNumber, message.ControllerValue);
             return;
         }
 

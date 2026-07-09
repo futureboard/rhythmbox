@@ -13,9 +13,19 @@ public sealed class PatternArrangerEngine
     {
         _midiPlayer = midiPlayer;
         Session = new ArrangerSession();
+
+        TimeSig = new TimeSignatureController();
+        TimeSig.Changed += OnTimeSignatureChanged;
+        SyncTimeSignatureToSession();
     }
 
     public ArrangerSession Session { get; }
+
+    /// <summary>Manages the base signature and momentary switches (e.g. a foot-switch 2/4 bar).</summary>
+    public TimeSignatureController TimeSig { get; }
+
+    /// <summary>The signature applied when a momentary switch is triggered. Defaults to a 2/4 bar.</summary>
+    public TimeSignature MomentarySignature { get; set; } = new(2, 4);
 
     public event Action? SessionChanged;
 
@@ -29,6 +39,8 @@ public sealed class PatternArrangerEngine
         Session.Macros = style.Macros.Clone();
         Session.CurrentTempo = style.DefaultTempo;
         Session.LastError = style.IsValid ? null : string.Join("; ", style.ValidationErrors);
+        TimeSig.SetBase(TimeSignature.Parse(style.TimeSignature));
+        TimeSig.Reset();
         Notify();
     }
 
@@ -199,6 +211,25 @@ public sealed class PatternArrangerEngine
         }
 
         Notify();
+    }
+
+    /// <summary>Drop a momentary <see cref="MomentarySignature"/> bar (default 2/4), then return to base.</summary>
+    public void TriggerMomentarySwitch() => TimeSig.TriggerMomentary(MomentarySignature);
+
+    /// <summary>Called by the transport clock on each bar boundary so momentary overrides expire.</summary>
+    public void OnBarAdvanced() => TimeSig.AdvanceBar();
+
+    private void OnTimeSignatureChanged()
+    {
+        SyncTimeSignatureToSession();
+        Notify();
+    }
+
+    private void SyncTimeSignatureToSession()
+    {
+        Session.BaseTimeSignature = TimeSig.Base;
+        Session.CurrentTimeSignature = TimeSig.Current;
+        Session.TimeSignatureOverridePending = TimeSig.HasPendingOverride;
     }
 
     private void Notify() => SessionChanged?.Invoke();

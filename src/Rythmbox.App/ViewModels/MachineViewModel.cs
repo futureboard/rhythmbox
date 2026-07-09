@@ -21,6 +21,7 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
     private readonly TempoViewModel _tempo;
     private readonly DispatcherTimer _syncTimer;
     private bool _syncingMacros;
+    private int _lastBarIndex = -1;
 
     public MachineViewModel(
         PatternArrangerEngine arranger,
@@ -59,6 +60,7 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
         _syncTimer.Tick += (_, _) =>
         {
             _arranger.SyncTransport(_midiPlayer, _player.UserTempo);
+            AdvanceClock();
             SyncFromSession();
         };
         _syncTimer.Start();
@@ -115,6 +117,12 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private bool _exportMidiEnabled;
 
+    [ObservableProperty]
+    private string _timeSignatureLabel = "4/4";
+
+    [ObservableProperty]
+    private bool _timeSignatureSwitchPending;
+
     public bool HasLastError => !string.IsNullOrWhiteSpace(LastError);
 
     partial void OnLastErrorChanged(string? value) => OnPropertyChanged(nameof(HasLastError));
@@ -159,6 +167,17 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
     private void ExportMidi()
     {
         // TODO: export selected pattern MIDI to file.
+    }
+
+    /// <summary>Drop a momentary short bar (e.g. 2/4), then return to the base groove. Bound to the SIG button.</summary>
+    [RelayCommand]
+    private void SwitchTimeSignature() => RequestTimeSignatureSwitch();
+
+    /// <summary>Shared entry point for the UI button and the MIDI CC foot switch.</summary>
+    public void RequestTimeSignatureSwitch()
+    {
+        _arranger.TriggerMomentarySwitch();
+        SyncFromSession();
     }
 
     private void SelectStyle(StyleDefinition style)
@@ -215,6 +234,8 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
             ? s.GetPattern(pid)?.Name ?? pid
             : "—";
         TransportLabel = s.TransportState.ToString().ToUpperInvariant();
+        TimeSignatureLabel = s.CurrentTimeSignature.ToString();
+        TimeSignatureSwitchPending = s.TimeSignatureOverridePending;
         LastError = s.LastError;
 
         _syncingMacros = true;
@@ -231,6 +252,44 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
 
         ExportMidiEnabled = s.GetPattern(s.SelectedPatternId)?.HasMidiFile == true;
         OnPropertyChanged(nameof(PatternCurrentLabel));
+    }
+
+    /// <summary>
+    /// Derives bar boundaries from the playing position and the base meter so that momentary
+    /// time-signature overrides expire after a bar of playback. The audio loop itself is metered by
+    /// the pattern's MIDI file; this drives the arranger's logical bar counter and override lifetime.
+    /// </summary>
+    private void AdvanceClock()
+    {
+        var s = _arranger.Session;
+
+        if (s.TransportState != ArrangerTransportState.Playing || _player.NativeBpm <= 0)
+        {
+            _lastBarIndex = -1;
+            return;
+        }
+
+        var beatsPerBar = s.BaseTimeSignature.BeatsPerBar;
+        if (beatsPerBar <= 0)
+        {
+            beatsPerBar = 4;
+        }
+
+        var totalBeats = _midiPlayer.Position.TotalSeconds * _player.NativeBpm / 60.0;
+        var barIndex = (int)(totalBeats / beatsPerBar);
+
+        // First observation after (re)start, or a loop wrap that rewinds the position.
+        if (_lastBarIndex < 0 || barIndex < _lastBarIndex)
+        {
+            _lastBarIndex = barIndex;
+            return;
+        }
+
+        while (_lastBarIndex < barIndex)
+        {
+            _arranger.OnBarAdvanced();
+            _lastBarIndex++;
+        }
     }
 
     private void UpdateKitLabel()
