@@ -34,7 +34,6 @@ elif command -v pacman >/dev/null 2>&1; then
     git \
     gptfdisk \
     parted \
-    qemu-img \
     rsync \
     tar \
     wget \
