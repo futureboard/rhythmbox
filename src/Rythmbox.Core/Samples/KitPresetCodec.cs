@@ -66,12 +66,20 @@ public static class KitPresetCodec
                 var resolved = ResolveSamplePath(relPath, baseDir, samplesRoot);
                 if (resolved is not null && File.Exists(resolved))
                 {
-                    sample.FilePath = resolved;
-                    sample.Samples = WavCodec.LoadMono(resolved);
-                    sample.SampleRate = WavCodec.TargetSampleRate;
-                    if (sample.Gain != 1f)
+                    try
                     {
-                        WavCodec.ApplyGain(sample.Samples, sample.Gain);
+                        sample.FilePath = resolved;
+                        sample.Samples = WavCodec.LoadMono(resolved);
+                        sample.SampleRate = WavCodec.TargetSampleRate;
+                        if (sample.Gain != 1f)
+                        {
+                            WavCodec.ApplyGain(sample.Samples, sample.Gain);
+                        }
+                    }
+                    catch (Exception ex) when (ex is InvalidDataException or NotSupportedException)
+                    {
+                        sample.FilePath = null;
+                        sample.Samples = [];
                     }
                 }
             }

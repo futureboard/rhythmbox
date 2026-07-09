@@ -54,6 +54,10 @@
             </Grid>
         </Border>
 
-        <views:MixerSurfaceView Grid.Row="1" DataContext="{Binding Mixer}" />
+        <views:MixerSurfaceView DataContext="{Binding Mixer}" />
+
+        <views:MixerFxPanelView DockPanel.Dock="Bottom"
+                                DataContext="{Binding Mixer.SelectedChannelFx}"
+                                MaxHeight="220" />
     </DockPanel>
 </UserControl>

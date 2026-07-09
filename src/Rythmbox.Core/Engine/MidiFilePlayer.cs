@@ -98,10 +98,13 @@ public sealed class MidiFilePlayer : IDisposable
     /// <summary>Re-adds the sequencer to the current MasterMixer, used after an output device switch.</summary>
     public void ReattachToMixer()
     {
-        if (_sequencer is not null)
+        if (_sequencer is null)
         {
-            _engine.MasterMixer.AddComponent(_sequencer);
+            return;
         }
+
+        _engine.MasterMixer.RemoveComponent(_sequencer);
+        _engine.MasterMixer.AddComponent(_sequencer);
     }
 
     public void Play() => _sequencer?.Play();

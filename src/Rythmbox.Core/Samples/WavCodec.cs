@@ -25,6 +25,7 @@ public static class WavCodec
         int channels = 1;
         sampleRate = TargetSampleRate;
         short bitsPerSample = 16;
+        short blockAlign = 2;
         byte[]? data = null;
 
         var offset = 12;
@@ -44,6 +45,7 @@ public static class WavCodec
                 case "fmt ":
                     channels = BinaryPrimitives.ReadInt16LittleEndian(wavBytes.Slice(offset + 2, 2));
                     sampleRate = BinaryPrimitives.ReadInt32LittleEndian(wavBytes.Slice(offset + 4, 4));
+                    blockAlign = BinaryPrimitives.ReadInt16LittleEndian(wavBytes.Slice(offset + 12, 2));
                     bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(wavBytes.Slice(offset + 14, 2));
                     offset += chunkSize;
                     break;
@@ -62,6 +64,11 @@ public static class WavCodec
             {
                 break;
             }
+
+            if ((chunkSize & 1) != 0)
+            {
+                offset++;
+            }
         }
 
         if (data is null)
@@ -70,7 +77,7 @@ public static class WavCodec
             return [];
         }
 
-        var mono = DecodeToMono(data, channels, bitsPerSample);
+        var mono = DecodeToMono(data, channels, bitsPerSample, blockAlign);
         return sampleRate == targetSampleRate
             ? mono
             : Resample(mono, sampleRate, targetSampleRate);
@@ -119,30 +126,65 @@ public static class WavCodec
         File.WriteAllBytes(path, EncodeMono(samples, sampleRate));
     }
 
-    private static float[] DecodeToMono(byte[] data, int channels, short bitsPerSample)
+    private static float[] DecodeToMono(byte[] data, int channels, short bitsPerSample, short blockAlign)
     {
-        if (bitsPerSample != 16)
+        if (channels <= 0)
         {
-            throw new NotSupportedException($"Only 16-bit PCM WAV is supported (got {bitsPerSample}-bit).");
+            throw new InvalidDataException("WAV channel count must be positive.");
         }
 
-        var frameCount = data.Length / (2 * channels);
+        if (blockAlign <= 0)
+        {
+            blockAlign = (short)(channels * ((bitsPerSample + 7) / 8));
+        }
+
+        if (data.Length < blockAlign)
+        {
+            return [];
+        }
+
+        var frameCount = data.Length / blockAlign;
+        var bytesPerSample = blockAlign / channels;
         var mono = new float[frameCount];
 
         for (var i = 0; i < frameCount; i++)
         {
+            var frameOffset = i * blockAlign;
             float sum = 0;
+
             for (var ch = 0; ch < channels; ch++)
             {
-                var idx = (i * channels + ch) * 2;
-                var sample = (short)(data[idx] | (data[idx + 1] << 8));
-                sum += sample / (float)short.MaxValue;
+                var sampleOffset = frameOffset + (ch * bytesPerSample);
+                sum += ReadPcmSample(data, sampleOffset, bitsPerSample, bytesPerSample);
             }
 
             mono[i] = sum / channels;
         }
 
         return mono;
+    }
+
+    private static float ReadPcmSample(byte[] data, int offset, short bitsPerSample, int bytesPerSample)
+    {
+        return bitsPerSample switch
+        {
+            8 => (data[offset] - 128) / 128f,
+            16 => BinaryPrimitives.ReadInt16LittleEndian(data.AsSpan(offset, 2)) / (float)short.MaxValue,
+            24 => ReadInt24LittleEndian(data.AsSpan(offset, Math.Min(3, bytesPerSample))) / 8_388_608f,
+            32 => BinaryPrimitives.ReadInt32LittleEndian(data.AsSpan(offset, Math.Min(4, bytesPerSample))) / (float)int.MaxValue,
+            _ => throw new NotSupportedException($"Only 8/16/24/32-bit PCM WAV is supported (got {bitsPerSample}-bit)."),
+        };
+    }
+
+    private static int ReadInt24LittleEndian(ReadOnlySpan<byte> data)
+    {
+        var value = data[0] | (data[1] << 8) | (data[2] << 16);
+        if ((value & 0x800000) != 0)
+        {
+            value |= unchecked((int)0xFF000000);
+        }
+
+        return value;
     }
 
     private static float[] Resample(float[] input, int fromRate, int toRate)

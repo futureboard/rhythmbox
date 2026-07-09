@@ -1,14 +1,12 @@
 ﻿using Avalonia;
 using Avalonia.Media;
+using Avalonia.Win32;
 using System;
 
 namespace Rythmbox.App;
 
 sealed class Program
 {
-    // Initialization code. Don't use any Avalonia, third-party APIs or any
-    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-    // yet and stuff might break.
     [STAThread]
     public static int Main(string[] args)
     {
@@ -26,9 +24,9 @@ sealed class Program
         }
     }
 
-    // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
+    {
+        var builder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
 #if DEBUG
             .WithDeveloperTools()
@@ -38,4 +36,20 @@ sealed class Program
                 DefaultFamilyName = Localization.LocalizationService.BarlowAnuphanFont,
             })
             .LogToTrace();
+
+        if (OperatingSystem.IsWindows())
+        {
+            builder = builder.With(new Win32PlatformOptions
+            {
+                RenderingMode =
+                [
+                    Win32RenderingMode.AngleEgl,
+                    Win32RenderingMode.Wgl,
+                    Win32RenderingMode.Software,
+                ],
+            });
+        }
+
+        return builder;
+    }
 }

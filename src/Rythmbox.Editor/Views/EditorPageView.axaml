@@ -1,0 +1,95 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Rythmbox.Editor.ViewModels"
+             xmlns:views="using:Rythmbox.Editor.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="760"
+             x:Class="Rythmbox.Editor.Views.EditorPageView"
+             x:DataType="vm:EditorViewModel"
+             KeyDown="OnPageKeyDown">
+
+    <DockPanel LastChildFill="True">
+        <Border DockPanel.Dock="Top" Classes="headerBar" Padding="14,10">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Path Data="{StaticResource IconAudioLines}" Classes="icon accent small" />
+                    <TextBlock Text="EDITOR" Classes="dim" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                    <Button Command="{Binding NewPatternCommand}" Classes="toolbarBtn">New</Button>
+                    <Button Command="{Binding BrowseOpenMidiCommand}" Classes="toolbarBtn">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
+                            <TextBlock Text="Open…" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding BrowseSaveMidiCommand}" Classes="accent toolbarBtn">
+                        <TextBlock Text="Save…" Foreground="#1A1A1A" FontWeight="Bold" />
+                    </Button>
+                    <Button Command="{Binding ClearPatternCommand}" Classes="toolbarBtn">Clear</Button>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
+                    <ItemsControl ItemsSource="{Binding HotloadSlots}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:EditorKitHotloadSlotViewModel">
+                                <Button Command="{Binding LoadCommand}" ToolTip.Tip="{Binding ToolTip}" MaxWidth="82" Classes="toolbarBtn">
+                                    <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" FontSize="10" />
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Command="{Binding BrowseLoadKitCommand}" MaxWidth="240" Classes="toolbarBtn">
+                        <TextBlock Text="{Binding KitLabel}" TextTrimming="CharacterEllipsis" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border DockPanel.Dock="Top" Classes="panel" Margin="14,14,14,0" Padding="12">
+            <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,20,0">
+                    <TextBlock Text="BPM" Classes="dim" VerticalAlignment="Center" />
+                    <NumericUpDown Minimum="40" Maximum="240" Value="{Binding Bpm}" Width="90" FormatString="0.0" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,20,0">
+                    <TextBlock Text="BARS" Classes="dim" VerticalAlignment="Center" />
+                    <NumericUpDown Minimum="1" Maximum="8" Value="{Binding Bars}" Width="70" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,20,0">
+                    <TextBlock Text="GRID" Classes="dim" VerticalAlignment="Center" ToolTip.Tip="Steps per bar (16 = 16th notes)" />
+                    <NumericUpDown Minimum="4" Maximum="32" Increment="4" Value="{Binding StepsPerBar}" Width="70" />
+                </StackPanel>
+
+                <TextBlock Grid.Column="3" Text="{Binding FileLabel}" Classes="dim" VerticalAlignment="Center" />
+
+                <Button Grid.Column="4" Command="{Binding PlayPreviewCommand}" Classes="transportStop toolbarBtn" Margin="0,0,8,0" MinWidth="100">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Path Data="{StaticResource IconPlay}" Width="14" Height="14" Stretch="Uniform" Fill="White" Stroke="White" StrokeThickness="0"
+                              IsVisible="{Binding !IsPlaying}" />
+                        <Path Data="{StaticResource IconSquare}" Width="14" Height="14" Stretch="Uniform" Fill="White" Stroke="White" StrokeThickness="0"
+                              IsVisible="{Binding IsPlaying}" />
+                        <TextBlock Text="Preview" FontWeight="Bold" Foreground="White" />
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="5" Command="{Binding StopPreviewCommand}" Classes="toolbarBtn">Stop</Button>
+            </Grid>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Classes="footerBar" Margin="14,0,14,14">
+            <TextBlock Text="{Binding StatusText}" Classes="dim" FontSize="11" />
+        </Border>
+
+        <views:PianoRollView Margin="14" />
+    </DockPanel>
+</UserControl>

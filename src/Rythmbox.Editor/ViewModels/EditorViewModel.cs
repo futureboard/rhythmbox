@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Rythmbox.Core.Editing;
 using Rythmbox.Core.Engine;
 using Rythmbox.Core.Models;
+using Rythmbox.Core.Services;
 
 namespace Rythmbox.Editor.ViewModels;
 
@@ -18,10 +19,12 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
     private readonly PatternPreviewEngine _preview;
     private readonly AppPaths _paths;
     private readonly KitPresetService _presetService;
+    private readonly IFileDialogService _fileDialog;
     private string? _currentFilePath;
 
-    public EditorViewModel()
+    public EditorViewModel(IFileDialogService fileDialog)
     {
+        _fileDialog = fileDialog;
         _engine = new PlaybackEngine();
         _engine.Start();
         _kitPlayer = new KitSamplePlayer(_engine);
@@ -148,6 +151,53 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
         }
 
         StatusText = "Pattern cleared";
+    }
+
+    [RelayCommand]
+    private async Task BrowseOpenMidiAsync()
+    {
+        var path = await _fileDialog.PickFileAsync(
+            SuggestSaveFolder() ?? _paths.PresetDir,
+            "Open MIDI pattern",
+            [".mid", ".midi"]);
+
+        if (path is not null)
+        {
+            OpenFile(path);
+        }
+    }
+
+    [RelayCommand]
+    private async Task BrowseSaveMidiAsync()
+    {
+        var defaultName = _currentFilePath is not null
+            ? Path.GetFileName(_currentFilePath)
+            : "pattern.mid";
+
+        var path = await _fileDialog.SaveFileAsync(
+            SuggestSaveFolder() ?? _paths.PresetDir,
+            "Save MIDI pattern",
+            defaultName,
+            [".mid"]);
+
+        if (path is not null)
+        {
+            SaveTo(path);
+        }
+    }
+
+    [RelayCommand]
+    private async Task BrowseLoadKitAsync()
+    {
+        var path = await _fileDialog.PickFileAsync(
+            _paths.PresetDir,
+            "Load Drum Kit",
+            [".json", ".apak"]);
+
+        if (path is not null)
+        {
+            LoadKit(path);
+        }
     }
 
     [RelayCommand]

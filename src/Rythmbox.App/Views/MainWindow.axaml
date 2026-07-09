@@ -1,57 +1,61 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Rythmbox.App.ViewModels"
-        xmlns:views="using:Rythmbox.App.Views"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="720"
-        x:Class="Rythmbox.App.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="Rythmbox"
-        Width="1150" Height="720" MinWidth="980" MinHeight="640"
-        Background="{DynamicResource RythmboxPanelBrush}"
-        Focusable="True"
-        KeyDown="OnWindowKeyDown"
-        KeyUp="OnWindowKeyUp">
-
-    <DockPanel LastChildFill="True">
-        <views:HeaderView DockPanel.Dock="Top" />
-        <views:NavBarView DockPanel.Dock="Top" />
-        <views:FooterView DockPanel.Dock="Bottom" />
-
-        <Panel>
-            <views:MachinePageView IsVisible="{Binding IsMachinePage}" />
-            <views:PadsPageView IsVisible="{Binding IsPadsPage}" />
-
-            <views:MixerPageView IsVisible="{Binding IsMixerPage}" />
-            <views:SettingsView IsVisible="{Binding IsSettingsPage}" />
-            <views:PlaceholderPageView IsVisible="{Binding IsEditorPage}" Title="EDITOR — launch from navbar or build Rythmbox.Editor" />
-            <views:PlaceholderPageView IsVisible="{Binding IsMacroPage}" Title="MACRO — launches Sample Creator from navbar" />
-            <views:PlaceholderPageView IsVisible="{Binding IsChromePage}" Title="CHROME" />
-
-            <Border Classes="popupOverlay" IsVisible="{Binding Tempo.IsPickerOpen}" ZIndex="100">
-                <Border Classes="popupPanel" MaxWidth="320" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="TEMPO PRESETS" Classes="panelHeader" />
-                        <ListBox ItemsSource="{Binding Tempo.Presets}"
-                                 SelectedItem="{Binding Tempo.SelectedPresetInPicker}" MaxHeight="240" />
-                        <Button Content="Close" Command="{Binding Tempo.TogglePickerCommand}" HorizontalAlignment="Right" />
-                    </StackPanel>
-                </Border>
-            </Border>
-
-            <Border Classes="popupOverlay" IsVisible="{Binding SubLoops.IsOpen}" ZIndex="100">
-                <Border Classes="popupPanel" MaxWidth="480" MaxHeight="400" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <DockPanel LastChildFill="True">
-                        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
-                            <TextBlock Text="SUB LOOPS" Classes="panelHeader" />
-                            <Button Grid.Column="1" Command="{Binding SubLoops.CloseCommand}" Content="Close" />
-                        </Grid>
-                        <ListBox ItemsSource="{Binding SubLoops.SubLoops}" SelectedItem="{Binding SubLoops.SelectedSubLoop}" Classes="loopList" />
-                    </DockPanel>
-                </Border>
-            </Border>
-        </Panel>
-    </DockPanel>
-</Window>
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Rythmbox.App.ViewModels"
+        xmlns:views="using:Rythmbox.App.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="720"
+        x:Class="Rythmbox.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Rythmbox"
+        Width="1150" Height="720" MinWidth="980" MinHeight="640"
+        Background="{DynamicResource RythmboxPanelBrush}"
+        Focusable="True"
+        KeyDown="OnWindowKeyDown"
+        KeyUp="OnWindowKeyUp">
+
+    <DockPanel LastChildFill="True">
+        <views:HeaderView DockPanel.Dock="Top" />
+        <views:NavBarView DockPanel.Dock="Top" />
+        <views:FooterView DockPanel.Dock="Bottom" />
+
+        <Panel>
+            <views:HomePageView IsVisible="{Binding IsHomePage}" />
+            <views:MachinePageView IsVisible="{Binding IsMachinePage}" />
+            <views:PadsPageView IsVisible="{Binding IsPadsPage}" />
+
+            <views:MixerPageView IsVisible="{Binding IsMixerPage}" />
+            <views:SettingsView IsVisible="{Binding IsSettingsPage}" />
+            <views:EditorPageHostView IsVisible="{Binding IsEditorPage}" />
+            <views:SampleCreatorPageHostView IsVisible="{Binding IsMacroPage}" />
+            <views:FileManagerPageView IsVisible="{Binding IsFilesPage}" />
+            <views:PlaceholderPageView IsVisible="{Binding IsChromePage}" Title="CHROME" />
+
+            <views:FileManagerDialogView DataContext="{Binding FileDialog}" />
+
+            <Border Classes="popupOverlay" IsVisible="{Binding Tempo.IsPickerOpen}" ZIndex="100">
+                <Border Classes="popupPanel" MaxWidth="320" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="TEMPO PRESETS" Classes="panelHeader" />
+                        <ListBox ItemsSource="{Binding Tempo.Presets}"
+                                 SelectedItem="{Binding Tempo.SelectedPresetInPicker}" MaxHeight="240" />
+                        <Button Content="Close" Command="{Binding Tempo.TogglePickerCommand}" HorizontalAlignment="Right" />
+                    </StackPanel>
+                </Border>
+            </Border>
+
+            <Border Classes="popupOverlay" IsVisible="{Binding SubLoops.IsOpen}" ZIndex="100">
+                <Border Classes="popupPanel" MaxWidth="480" MaxHeight="400" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <DockPanel LastChildFill="True">
+                        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                            <TextBlock Text="SUB LOOPS" Classes="panelHeader" />
+                            <Button Grid.Column="1" Command="{Binding SubLoops.CloseCommand}" Content="Close" />
+                        </Grid>
+                        <ListBox ItemsSource="{Binding SubLoops.SubLoops}" SelectedItem="{Binding SubLoops.SelectedSubLoop}" Classes="loopList" />
+                    </DockPanel>
+                </Border>
+            </Border>
+        </Panel>
+    </DockPanel>
+</Window>

@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             xmlns:views="using:Rythmbox.App.Views"
+             mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="720"
+             x:Class="Rythmbox.App.Views.FileManagerDialogView"
+             x:DataType="vm:FileManagerDialogViewModel"
+             IsVisible="{Binding IsOpen}">
+    <Border Classes="popupOverlay" ZIndex="110">
+        <Border Classes="popupPanel" Width="720" Height="520" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <DockPanel LastChildFill="True">
+                <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+                    <TextBlock Text="{Binding Title}" Classes="panelHeader" />
+                    <Button Grid.Column="1" Command="{Binding CancelCommand}" Classes="toolbarBtn" Padding="8,4">
+                        <Path Data="{StaticResource IconX}" Classes="icon small" />
+                    </Button>
+                </Grid>
+
+                <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto,Auto" Margin="0,8,0,0">
+                    <TextBox Grid.Column="0" Text="{Binding FileName}" PlaceholderText="File name"
+                             IsVisible="{Binding ShowFileName}" Margin="0,0,8,0" />
+                    <Button Grid.Column="1" Command="{Binding CancelCommand}" Classes="toolbarBtn" Margin="0,0,6,0" Content="{Binding CancelLabel}" />
+                    <Button Grid.Column="2" Command="{Binding ConfirmCommand}" Classes="accent toolbarBtn" Content="{Binding ConfirmLabel}" />
+                </Grid>
+
+                <views:FileManagerBrowserView DataContext="{Binding Browser}" DoubleTapped="OnBrowserDoubleTapped" />
+            </DockPanel>
+        </Border>
+    </Border>
+</UserControl>

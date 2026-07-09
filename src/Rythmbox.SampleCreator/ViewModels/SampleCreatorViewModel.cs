@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Rythmbox.Core.Engine;
 using Rythmbox.Core.Models;
 using Rythmbox.Core.Samples;
+using Rythmbox.Core.Services;
 
 namespace Rythmbox.SampleCreator.ViewModels;
 
@@ -12,11 +13,13 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
     private readonly PlaybackEngine _engine;
     private readonly SamplePreviewPlayer _preview;
     private readonly AppPaths _paths;
+    private readonly IFileDialogService _fileDialog;
     private KitPreset _kit;
     private string? _presetPath;
 
-    public SampleCreatorViewModel()
+    public SampleCreatorViewModel(IFileDialogService fileDialog)
     {
+        _fileDialog = fileDialog;
         _engine = new PlaybackEngine();
         _engine.Start();
         _preview = new SamplePreviewPlayer(_engine);
@@ -113,6 +116,59 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
 
     [RelayCommand]
     private void StopPreview() => _preview.Stop();
+
+    [RelayCommand]
+    private async Task BrowseOpenPresetAsync()
+    {
+        var path = await _fileDialog.PickFileAsync(
+            SuggestPresetFolder(),
+            "Open kit preset",
+            [".json"]);
+
+        if (path is not null)
+        {
+            OpenPreset(path);
+        }
+    }
+
+    [RelayCommand]
+    private async Task BrowseSaveKitAsync()
+    {
+        var defaultName = _presetPath is not null
+            ? Path.GetFileName(_presetPath)
+            : $"{KitName}.json";
+
+        var path = await _fileDialog.SaveFileAsync(
+            SuggestPresetFolder(),
+            "Save kit preset",
+            defaultName,
+            [".json"]);
+
+        if (path is not null)
+        {
+            SavePreset(path);
+        }
+    }
+
+    [RelayCommand]
+    private async Task BrowseImportWavAsync()
+    {
+        if (SelectedPad is null)
+        {
+            StatusText = "Select a pad first";
+            return;
+        }
+
+        var path = await _fileDialog.PickFileAsync(
+            SuggestSamplesFolder(),
+            "Import WAV sample",
+            [".wav", ".wave"]);
+
+        if (path is not null)
+        {
+            ImportWavToSelected(path);
+        }
+    }
 
     public string? SuggestPresetFolder() => _paths.PresetDir;
 

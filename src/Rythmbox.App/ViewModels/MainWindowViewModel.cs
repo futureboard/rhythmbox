@@ -6,9 +6,12 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Rythmbox.App.Localization;
+using Rythmbox.App.Services;
 using Rythmbox.Core.Audio;
 using Rythmbox.Core.Engine;
 using Rythmbox.Core.Styles;
+using Rythmbox.Editor.ViewModels;
+using Rythmbox.SampleCreator.ViewModels;
 
 namespace Rythmbox.App.ViewModels;
 
@@ -62,7 +65,13 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
         Status = new StatusViewModel();
         Localization = new LocalizationViewModel(_localization);
-        KitBrowser = new KitBrowserViewModel(_kitPlayer, _kitPresets, _midiInput, _padRouter);
+
+        FileManager = new FileManagerViewModel(_paths);
+        FileManager.Initialize();
+        FileDialog = new FileManagerDialogViewModel(new FileManagerViewModel(_paths), Localization);
+        var fileDialogService = new AppFileDialogService(FileDialog);
+
+        KitBrowser = new KitBrowserViewModel(_kitPlayer, _kitPresets, _midiInput, _padRouter, fileDialogService);
         Player = new PlayerViewModel(_midiFilePlayer);
         MasterStrip = new MasterStripViewModel(_engine);
         Mixer = new MixerViewModel(_engine, _kitPlayer, _audioBackend, _localization);
@@ -85,6 +94,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
             _paths,
             _localization,
             Tempo);
+
+        Editor = new EditorViewModel(fileDialogService);
+        SampleCreator = new SampleCreatorViewModel(fileDialogService);
 
         // Foot switch: MIDI CC -> momentary time-signature switch. CC arrives on the MIDI thread,
         // so marshal the state change onto the UI thread before touching the arranger view models.
@@ -135,11 +147,21 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     public MachineViewModel Machine { get; }
 
+    public EditorViewModel Editor { get; }
+
+    public SampleCreatorViewModel SampleCreator { get; }
+
+    public FileManagerViewModel FileManager { get; }
+
+    public FileManagerDialogViewModel FileDialog { get; }
+
     [ObservableProperty]
-    private AppPage _currentPage = AppPage.Machine;
+    private AppPage _currentPage = AppPage.Home;
 
     [ObservableProperty]
     private string _clockText = string.Empty;
+
+    public bool IsHomePage => CurrentPage == AppPage.Home;
 
     public bool IsMachinePage => CurrentPage == AppPage.Machine;
 
@@ -153,94 +175,25 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     public bool IsMacroPage => CurrentPage == AppPage.Macro;
 
+    public bool IsFilesPage => CurrentPage == AppPage.Files;
+
     public bool IsChromePage => CurrentPage == AppPage.Chrome;
 
     partial void OnCurrentPageChanged(AppPage value)
     {
+        OnPropertyChanged(nameof(IsHomePage));
         OnPropertyChanged(nameof(IsMachinePage));
         OnPropertyChanged(nameof(IsPadsPage));
         OnPropertyChanged(nameof(IsMixerPage));
         OnPropertyChanged(nameof(IsSettingsPage));
         OnPropertyChanged(nameof(IsEditorPage));
         OnPropertyChanged(nameof(IsMacroPage));
+        OnPropertyChanged(nameof(IsFilesPage));
         OnPropertyChanged(nameof(IsChromePage));
     }
 
     [RelayCommand]
-    private void Navigate(AppPage page)
-    {
-        if (page == AppPage.Editor)
-        {
-            LaunchEditor();
-            return;
-        }
-
-        if (page == AppPage.Macro)
-        {
-            LaunchSampleCreator();
-            return;
-        }
-
-        CurrentPage = page;
-    }
-
-    private void LaunchEditor()
-    {
-        var editorExe = Path.Combine(AppContext.BaseDirectory, "Rythmbox.Editor.exe");
-        if (!File.Exists(editorExe))
-        {
-            editorExe = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "Rythmbox.Editor", "bin", "Debug", "net10.0", "Rythmbox.Editor.exe"));
-        }
-
-        if (!File.Exists(editorExe))
-        {
-            Status.Show("Rythmbox.Editor not found — build the Editor project first");
-            return;
-        }
-
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = editorExe,
-                UseShellExecute = true,
-            });
-            Status.Show("Launched Rythmbox Editor");
-        }
-        catch (Exception ex)
-        {
-            Status.Show($"Failed to launch Editor: {ex.Message}");
-        }
-    }
-
-    private void LaunchSampleCreator()
-    {
-        var exe = Path.Combine(AppContext.BaseDirectory, "Rythmbox.SampleCreator.exe");
-        if (!File.Exists(exe))
-        {
-            exe = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "Rythmbox.SampleCreator", "bin", "Debug", "net10.0", "Rythmbox.SampleCreator.exe"));
-        }
-
-        if (!File.Exists(exe))
-        {
-            Status.Show("Rythmbox.SampleCreator not found — build the SampleCreator project first");
-            return;
-        }
-
-        try
-        {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-            {
-                FileName = exe,
-                UseShellExecute = true,
-            });
-            Status.Show("Launched Rythmbox Sample Creator");
-        }
-        catch (Exception ex)
-        {
-            Status.Show($"Failed to launch Sample Creator: {ex.Message}");
-        }
-    }
+    private void Navigate(AppPage page) => CurrentPage = page;
 
     [RelayCommand]
     private void Quit()
@@ -352,6 +305,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _engine.DeviceChanged -= OnDeviceChanged;
         Machine.Dispose();
         Mixer.Dispose();
+        Editor.Dispose();
+        SampleCreator.Dispose();
         Player.Dispose();
         MasterStrip.Dispose();
         _midiFilePlayer.Dispose();

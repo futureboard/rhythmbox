@@ -2,7 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Rythmbox.App.Views.LogoView">
     <!-- Wordmark from src/Assets/logo.svg (934×94) -->
-    <Viewbox Stretch="Uniform" Height="16" VerticalAlignment="Center">
+    <Viewbox Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Left">
         <Canvas Width="934" Height="94">
             <Path Fill="White"
                   Data="M59.1357 0C82.4316 0 92.4159 10.4963 92.416 26.3682C92.416 38.4002 85.5037 46.7201 75.2637 49.6641V50.4326C84.6077 51.9686 89.9844 57.4729 89.9844 67.7129V83.585C89.9844 87.2967 90.1118 89.9847 91.1357 93.3125H64.8965C64.2565 90.6246 64.2559 87.4247 64.2559 83.8408V71.6807C64.2559 63.6167 61.0561 60.545 51.0723 60.5449H25.7275V93.3125H0V0H59.1357ZM25.7275 42.1123H50.6885C62.5919 42.1122 66.1756 37.3766 66.1758 30.3369C66.1758 22.0171 59.9042 19.4561 50.6885 19.4561H25.7275V42.1123Z" />

@@ -46,6 +46,13 @@ public sealed partial class MasterStripViewModel : ViewModelBase, IDisposable
             return;
         }
 
+        if (_engine.IsRunning
+            && _engine.CurrentDevice is { } active
+            && string.Equals(active.Name, device.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
         _engine.SetOutputDevice(device);
     }
 

@@ -1,0 +1,70 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="480"
+             x:Class="Rythmbox.App.Views.FileManagerBrowserView"
+             x:DataType="vm:FileManagerViewModel"
+             DoubleTapped="OnEntryDoubleTapped">
+    <DockPanel LastChildFill="True">
+        <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,8" Margin="0,0,0,8">
+            <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+                <Button Grid.Column="0" Command="{Binding GoUpCommand}" Classes="toolbarBtn" Margin="0,0,6,0"
+                        IsEnabled="{Binding CanGoUp}" ToolTip.Tip="Up">
+                    <Path Data="{StaticResource IconChevronUp}" Classes="icon small" />
+                </Button>
+                <Button Grid.Column="1" Command="{Binding RefreshCommand}" Classes="toolbarBtn" Margin="0,0,8,0" ToolTip.Tip="Refresh">
+                    <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
+                </Button>
+                <TextBox Grid.Column="2" Text="{Binding CurrentPath}" IsReadOnly="True" FontSize="11" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="3" Text="{Binding StatusText}" Classes="dim" FontSize="11" Margin="8,0,0,0" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <Grid ColumnDefinitions="140,*">
+            <Border Grid.Column="0" Classes="bankList" Margin="0,0,8,0">
+                <DockPanel LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Top" Text="LOCATIONS" Classes="panelHeader" Margin="8,8,8,6" />
+                    <ListBox ItemsSource="{Binding Shortcuts}" SelectedItem="{Binding SelectedShortcut}" Classes="loopList">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:FileShortcutViewModel">
+                                <TextBlock Text="{Binding Label}" FontSize="11" Padding="8,6" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <DockPanel Grid.Column="1" LastChildFill="True">
+                <Grid DockPanel.Dock="Top" ColumnDefinitions="*,80,120" Margin="8,0,8,6">
+                    <TextBlock Grid.Column="0" Text="Name" Classes="dim" FontSize="10" />
+                    <TextBlock Grid.Column="1" Text="Size" Classes="dim" FontSize="10" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="2" Text="Modified" Classes="dim" FontSize="10" HorizontalAlignment="Right" />
+                </Grid>
+
+                <ListBox ItemsSource="{Binding Entries}" SelectedItem="{Binding SelectedEntry}" Classes="loopList fileList">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:FileEntryViewModel">
+                            <Grid ColumnDefinitions="20,*,80,120">
+                                <Path Grid.Column="0"
+                                      Data="{StaticResource IconFolder}"
+                                      Classes="icon small"
+                                      IsVisible="{Binding IsDirectory}"
+                                      VerticalAlignment="Center" />
+                                <Path Grid.Column="0"
+                                      Data="{StaticResource IconFile}"
+                                      Classes="icon small"
+                                      IsVisible="{Binding !IsDirectory}"
+                                      VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="12" VerticalAlignment="Center" Margin="6,0,0,0" />
+                                <TextBlock Grid.Column="2" Text="{Binding SizeLabel}" Classes="dim" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="3" Text="{Binding ModifiedLabel}" Classes="dim" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</UserControl>

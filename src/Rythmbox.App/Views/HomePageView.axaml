@@ -1,0 +1,86 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             xmlns:views="using:Rythmbox.App.Views"
+             mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="720"
+             x:Class="Rythmbox.App.Views.HomePageView"
+             x:DataType="vm:MainWindowViewModel">
+    <Grid ColumnDefinitions="*,340" Margin="32,28">
+        <StackPanel Grid.Column="0" Spacing="24" VerticalAlignment="Center" MaxWidth="640">
+            <StackPanel Spacing="12">
+                <views:LogoView Height="52" HorizontalAlignment="Left" />
+                <TextBlock Text="{Binding Localization.HomeSubtitle}" Classes="dim" TextWrapping="Wrap" FontSize="14" MaxWidth="520" />
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto"
+                  ColumnSpacing="10" RowSpacing="10">
+                <Button Grid.Row="0" Grid.Column="0"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}"
+                        Classes="homeTile" HorizontalAlignment="Stretch">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{Binding Localization.NavMachine}" FontWeight="Bold" FontSize="14" />
+                        <TextBlock Text="{Binding Localization.HomeMachineHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Button>
+                <Button Grid.Row="0" Grid.Column="1"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Pads}"
+                        Classes="homeTile" HorizontalAlignment="Stretch">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{Binding Localization.NavPads}" FontWeight="Bold" FontSize="14" />
+                        <TextBlock Text="{Binding Localization.HomePadsHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Button>
+                <Button Grid.Row="1" Grid.Column="0"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Mixer}"
+                        Classes="homeTile" HorizontalAlignment="Stretch">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{Binding Localization.NavMixer}" FontWeight="Bold" FontSize="14" />
+                        <TextBlock Text="{Binding Localization.HomeMixerHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Button>
+                <Button Grid.Row="1" Grid.Column="1"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Editor}"
+                        Classes="homeTile" HorizontalAlignment="Stretch">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{Binding Localization.NavEditor}" FontWeight="Bold" FontSize="14" />
+                        <TextBlock Text="{Binding Localization.HomeEditorHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Button>
+                <Button Grid.Row="2" Grid.Column="0"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Macro}"
+                        Classes="homeTile" HorizontalAlignment="Stretch">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{Binding Localization.NavMacro}" FontWeight="Bold" FontSize="14" />
+                        <TextBlock Text="{Binding Localization.HomeMacroHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Button>
+                <Button Grid.Row="2" Grid.Column="1"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}"
+                        Classes="homeTile" HorizontalAlignment="Stretch">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{Binding Localization.NavSettings}" FontWeight="Bold" FontSize="14" />
+                        <TextBlock Text="{Binding Localization.HomeSettingsHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </StackPanel>
+
+        <Border Grid.Column="1" Classes="panel" Padding="16" VerticalAlignment="Center">
+            <StackPanel Spacing="12">
+                <TextBlock Text="{Binding Localization.HomeStatusTitle}" Classes="panelHeader" />
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{Binding Machine.KitLabel, StringFormat=Kit: {0}}" FontSize="12" />
+                    <TextBlock Text="{Binding Machine.DeviceLabel, StringFormat=Output: {0}}" FontSize="12" Classes="dim" />
+                    <TextBlock Text="{Binding Machine.TransportLabel, StringFormat=Transport: {0}}" FontSize="12" Classes="dim" />
+                    <TextBlock Text="{Binding LoopBrowser.TotalCount, StringFormat=Loops: {0}}" FontSize="12" Classes="dim" />
+                </StackPanel>
+                <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}"
+                        Classes="accent toolbarBtn" HorizontalAlignment="Stretch" Margin="0,8,0,0">
+                    <TextBlock Text="{Binding Localization.HomeStartPlaying}" FontWeight="Bold" Foreground="#1A1A1A" HorizontalAlignment="Center" />
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

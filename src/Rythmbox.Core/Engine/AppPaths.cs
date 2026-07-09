@@ -123,6 +123,7 @@ public sealed class AppPaths
         for (var i = 0; i < 8 && !string.IsNullOrEmpty(dir); i++)
         {
             if (Directory.Exists(Path.Combine(dir, "shared", "RYTHM"))
+                || Directory.Exists(Path.Combine(dir, "shared", "PRESETS"))
                 || Directory.Exists(Path.Combine(dir, "Content", "Styles")))
             {
                 return dir;

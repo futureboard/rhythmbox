@@ -29,6 +29,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Rythmbox.Editor\Services\StorageFileDialogService.cs" Link="Services\StorageFileDialogService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Rythmbox.Core\Rythmbox.Core.csproj" />
   </ItemGroup>
 </Project>

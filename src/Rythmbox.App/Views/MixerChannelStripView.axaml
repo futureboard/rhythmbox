@@ -37,6 +37,15 @@
                 </Grid>
             </Border>
 
+            <Border DockPanel.Dock="Top" Classes="mixerFxSlots" Padding="4,3" IsVisible="{Binding ShowFxSlots}">
+                <UniformGrid Columns="4" Rows="1">
+                    <ToggleButton Content="EQ" IsChecked="{Binding FxEqEnabled}" Classes="mixerFxSlot" Margin="0,0,2,0" />
+                    <ToggleButton Content="CP" IsChecked="{Binding FxCompEnabled}" Classes="mixerFxSlot" Margin="1,0,1,0" />
+                    <ToggleButton Content="DL" IsChecked="{Binding FxDelayEnabled}" Classes="mixerFxSlot" Margin="1,0,1,0" />
+                    <ToggleButton Content="RV" IsChecked="{Binding FxReverbEnabled}" Classes="mixerFxSlot" Margin="2,0,0,0" />
+                </UniformGrid>
+            </Border>
+
             <Border DockPanel.Dock="Bottom" Classes="mixerStripFooter" Padding="4,3">
                 <TextBlock Text="{Binding RouteName}" Classes="mixerStripRoute" TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" />
             </Border>
@@ -53,9 +62,9 @@
 
             <StackPanel DockPanel.Dock="Bottom" Spacing="4" Margin="4,6,4,4">
                 <Border HorizontalAlignment="Center" Classes="mixerDbPill" Classes.selected="{Binding IsSelected}">
-                    <StackPanel Orientation="Horizontal" Spacing="2">
-                        <TextBlock Text="{Binding GainDbValue}" Classes="mixerDbPillValue" />
-                        <TextBlock Text="dB" Classes="mixerDbPillUnit" />
+                    <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding GainDbValue}" Classes="mixerDbPillValue" VerticalAlignment="Center" />
+                        <TextBlock Text="dB" Classes="mixerDbPillUnit" VerticalAlignment="Center" />
                     </StackPanel>
                 </Border>
             </StackPanel>

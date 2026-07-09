@@ -1,0 +1,114 @@
+{
+  "name": "Acoustic Drum Kit",
+  "pads": [
+    {
+      "label": "Kick",
+      "gain": 1.0,
+      "midi_note": 36,
+      "sample": "SAMPLES/Kick_36.wav"
+    },
+    {
+      "label": "Snare",
+      "gain": 1.0,
+      "midi_note": 38,
+      "sample": "SAMPLES/Snare_38.wav"
+    },
+    {
+      "label": "C.Hat",
+      "gain": 1.0,
+      "midi_note": 42,
+      "choke_group": 1,
+      "sample": "SAMPLES/C.Hat_42.wav"
+    },
+    {
+      "label": "O.Hat",
+      "gain": 1.0,
+      "midi_note": 46,
+      "choke_group": 1,
+      "sample": "SAMPLES/O.Hat_46.wav"
+    },
+    {
+      "label": "Cym1",
+      "gain": 1.0,
+      "midi_note": 49,
+      "sample": "SAMPLES/Cym1_49.wav"
+    },
+    {
+      "label": "Cym2",
+      "gain": 1.0,
+      "midi_note": 57,
+      "sample": "SAMPLES/Cym2_57.wav"
+    },
+    {
+      "label": "H.Tom",
+      "gain": 1.0,
+      "midi_note": 50
+    },
+    {
+      "label": "M.Tom",
+      "gain": 1.0,
+      "midi_note": 47,
+      "sample": "SAMPLES/M.Tom_47.wav"
+    },
+    {
+      "label": "L.Tom",
+      "gain": 1.0,
+      "midi_note": 45,
+      "sample": "SAMPLES/L.Tom_45.wav"
+    },
+    {
+      "label": "F.Tom",
+      "gain": 1.0,
+      "midi_note": 41,
+      "sample": "SAMPLES/F.Tom_41.wav"
+    },
+    {
+      "label": "China",
+      "gain": 1.0,
+      "midi_note": 52,
+      "sample": "SAMPLES/China_52.wav"
+    },
+    {
+      "label": "Ride",
+      "gain": 1.0,
+      "midi_note": 51,
+      "sample": "SAMPLES/Ride_51.wav"
+    },
+    {
+      "label": "Rim",
+      "gain": 1.0,
+      "midi_note": 37,
+      "sample": "SAMPLES/Rim_37.wav"
+    },
+    {
+      "label": "Cowbell",
+      "gain": 1.0,
+      "midi_note": 56
+    },
+    {
+      "label": "L.Conga",
+      "gain": 1.0,
+      "midi_note": 64
+    },
+    {
+      "label": "Mt.Conga",
+      "gain": 1.0,
+      "midi_note": 63
+    },
+    {
+      "label": "H.Conga",
+      "gain": 1.0,
+      "midi_note": 62
+    },
+    {
+      "label": "Hi Bongo",
+      "gain": 1.0,
+      "midi_note": 60
+    },
+    {
+      "label": "Tamb",
+      "gain": 1.0,
+      "midi_note": 54
+    }
+  ]
+}

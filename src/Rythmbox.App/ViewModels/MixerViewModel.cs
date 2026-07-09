@@ -42,6 +42,7 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
 
         MasterChannel = CreateMasterStrip();
         BuildChannels();
+        BindFxPanel(MasterChannel);
 
         RefreshDevices();
         BackendLabel = _audioBackend.PlatformBackendId;
@@ -53,6 +54,8 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
     }
 
     public MixerChannelStripViewModel MasterChannel { get; }
+
+    public ChannelDspViewModel SelectedChannelFx { get; } = new();
 
     public ObservableCollection<MixerChannelStripViewModel> Channels { get; } = new();
 
@@ -81,6 +84,18 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
     {
         if (_suppressDeviceChange || value is not { } device)
         {
+            return;
+        }
+
+        var current = _engine.CurrentDevice;
+        if (_engine.IsRunning
+            && current is { } active
+            && string.Equals(active.Name, device.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            DeviceLabel = device.Name;
+            RouteLabel = device.Name;
+            MasterChannel.Channel.RouteName = device.Name;
+            MasterChannel.SyncFromChannel();
             return;
         }
 
@@ -128,6 +143,50 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
         }
 
         SelectedChannel = strip;
+        BindFxPanel(strip);
+    }
+
+    private void BindFxPanel(MixerChannelStripViewModel strip)
+    {
+        SelectedChannelFx.ChannelName = strip.Name;
+        ChannelDspSettings settings;
+        switch (strip.Kind)
+        {
+            case MixerChannelKind.Master:
+                SelectedChannelFx.Bind(s =>
+                {
+                    ApplyDspSettings(strip, s);
+                    strip.SetFxSlots(s);
+                });
+                settings = _kitPlayer.GetMasterDsp();
+                SelectedChannelFx.Load(settings);
+                break;
+            case MixerChannelKind.Group when Enum.TryParse<PadBus>(strip.Id, out var bus):
+                SelectedChannelFx.Bind(s =>
+                {
+                    ApplyDspSettings(strip, s);
+                    strip.SetFxSlots(s);
+                });
+                settings = _kitPlayer.GetBusDsp(bus);
+                SelectedChannelFx.Load(settings);
+                break;
+            case MixerChannelKind.DrumVoice when int.TryParse(strip.Id["pad_".Length..], out var note):
+                SelectedChannelFx.Bind(s =>
+                {
+                    ApplyDspSettings(strip, s);
+                    strip.SetFxSlots(s);
+                });
+                settings = _kitPlayer.GetPadDsp(note);
+                SelectedChannelFx.Load(settings);
+                break;
+            default:
+                SelectedChannelFx.Bind(_ => { });
+                settings = new ChannelDspSettings();
+                SelectedChannelFx.Load(settings);
+                break;
+        }
+
+        strip.SetFxSlots(settings);
     }
 
     [RelayCommand]
@@ -171,6 +230,55 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
                 {
                     _kitPlayer.SetPadMute(note, muted);
                 }
+                break;
+        }
+    }
+
+    private void OnFxSlotChanged(MixerChannelStripViewModel strip, MixerFxSlot slot, bool enabled)
+    {
+        ChannelDspSettings settings = strip.Kind switch
+        {
+            MixerChannelKind.Master => _kitPlayer.GetMasterDsp(),
+            MixerChannelKind.Group when Enum.TryParse<PadBus>(strip.Id, out var bus) => _kitPlayer.GetBusDsp(bus),
+            MixerChannelKind.DrumVoice when int.TryParse(strip.Id["pad_".Length..], out var note) => _kitPlayer.GetPadDsp(note),
+            _ => new ChannelDspSettings(),
+        };
+
+        switch (slot)
+        {
+            case MixerFxSlot.Eq:
+                settings.EqEnabled = enabled;
+                break;
+            case MixerFxSlot.Compressor:
+                settings.CompressorEnabled = enabled;
+                break;
+            case MixerFxSlot.Delay:
+                settings.DelayEnabled = enabled;
+                break;
+            case MixerFxSlot.Reverb:
+                settings.ReverbEnabled = enabled;
+                break;
+        }
+
+        ApplyDspSettings(strip, settings);
+        if (ReferenceEquals(SelectedChannel, strip))
+        {
+            SelectedChannelFx.Load(settings);
+        }
+    }
+
+    private void ApplyDspSettings(MixerChannelStripViewModel strip, ChannelDspSettings settings)
+    {
+        switch (strip.Kind)
+        {
+            case MixerChannelKind.Master:
+                _kitPlayer.SetMasterDsp(settings);
+                break;
+            case MixerChannelKind.Group when Enum.TryParse<PadBus>(strip.Id, out var bus):
+                _kitPlayer.SetBusDsp(bus, settings);
+                break;
+            case MixerChannelKind.DrumVoice when int.TryParse(strip.Id["pad_".Length..], out var note):
+                _kitPlayer.SetPadDsp(note, settings);
                 break;
         }
     }
@@ -233,7 +341,8 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
             _i18n,
             onSelect: SelectChannel,
             onGainChanged: OnGainChanged,
-            onMuteChanged: OnMuteChanged);
+            onMuteChanged: OnMuteChanged,
+            onFxSlotChanged: OnFxSlotChanged);
     }
 
     private MixerChannelStripViewModel CreateGroupStrip(PadBus bus, string label)
@@ -262,7 +371,8 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
             _i18n,
             onSelect: SelectChannel,
             onGainChanged: OnGainChanged,
-            onMuteChanged: OnMuteChanged);
+            onMuteChanged: OnMuteChanged,
+            onFxSlotChanged: OnFxSlotChanged);
     }
 
     private MixerChannelStripViewModel CreateDrumStrip(PercussionPad pad)
@@ -292,7 +402,8 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
             onSelect: SelectChannel,
             onGainChanged: OnGainChanged,
             onMuteChanged: OnMuteChanged,
-            onSoloChanged: OnSoloChanged);
+            onSoloChanged: OnSoloChanged,
+            onFxSlotChanged: OnFxSlotChanged);
     }
 
     private void PollMeters()
@@ -305,6 +416,19 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
         var rms = Math.Clamp(_engine.MasterLevelMeter.Rms, 0f, 1f);
         var peak = Math.Clamp(_engine.MasterLevelMeter.Peak, 0f, 1f);
         MasterChannel.UpdateMeter(MixerMeterState.FromMono(rms, peak));
+
+        foreach (var strip in Channels)
+        {
+            var meter = strip.Kind switch
+            {
+                MixerChannelKind.Group when Enum.TryParse<PadBus>(strip.Id, out var bus)
+                    => _kitPlayer.PollBusMeter(bus),
+                MixerChannelKind.DrumVoice when int.TryParse(strip.Id["pad_".Length..], out var note)
+                    => _kitPlayer.PollPadMeter(note),
+                _ => MixerMeterState.Disabled,
+            };
+            strip.UpdateMeter(meter);
+        }
     }
 
     private IEnumerable<MixerChannelStripViewModel> AllStrips()
@@ -319,7 +443,13 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
     public void RefreshAudioStatus()
     {
         BackendLabel = _audioBackend.PlatformBackendId;
-        DeviceLabel = _audioBackend.CurrentDeviceName ?? SelectedOutputDevice?.Name ?? _i18n["mixer.noDevice"];
+        DeviceLabel = _engine.CurrentDevice?.Name
+            ?? _audioBackend.CurrentDeviceName
+            ?? SelectedOutputDevice?.Name
+            ?? _i18n["mixer.noDevice"];
+        RouteLabel = DeviceLabel;
+        MasterChannel.Channel.RouteName = RouteLabel;
+        MasterChannel.SyncFromChannel();
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)

@@ -1,0 +1,9 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:editorViews="using:Rythmbox.Editor.Views"
+             xmlns:creatorViews="using:Rythmbox.SampleCreator.Views"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             x:Class="Rythmbox.App.Views.EditorPageHostView"
+             x:DataType="vm:MainWindowViewModel">
+    <editorViews:EditorPageView DataContext="{Binding Editor}" />
+</UserControl>

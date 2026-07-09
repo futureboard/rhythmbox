@@ -37,4 +37,14 @@ foreach ($project in $projects) {
         -o $publishDir
 }
 
+$sharedSource = Join-Path $root 'shared'
+$sharedDest = Join-Path $publishDir 'shared'
+if (Test-Path -LiteralPath $sharedSource) {
+    Write-Host "-> Copying shared content"
+    Copy-Item -LiteralPath $sharedSource -Destination $sharedDest -Recurse -Force
+}
+else {
+    Write-Warning "shared folder not found at $sharedSource"
+}
+
 Write-Host "Publish complete: $publishDir"

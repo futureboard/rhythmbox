@@ -22,14 +22,14 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                    <Button Click="OnNewClick">New</Button>
-                    <Button Click="OnOpenClick">
+                    <Button Command="{Binding NewPatternCommand}">New</Button>
+                    <Button Command="{Binding BrowseOpenMidiCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
                             <TextBlock Text="Open…" />
                         </StackPanel>
                     </Button>
-                    <Button Click="OnSaveClick" Classes="accent">
+                    <Button Command="{Binding BrowseSaveMidiCommand}" Classes="accent">
                         <TextBlock Text="Save…" Foreground="#1A1A1A" FontWeight="Bold" />
                     </Button>
                     <Button Command="{Binding ClearPatternCommand}">Clear</Button>
@@ -50,7 +50,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <Button Click="OnLoadKitClick" MaxWidth="240">
+                    <Button Command="{Binding BrowseLoadKitCommand}" MaxWidth="240">
                         <TextBlock Text="{Binding KitLabel}" TextTrimming="CharacterEllipsis" />
                     </Button>
                 </StackPanel>

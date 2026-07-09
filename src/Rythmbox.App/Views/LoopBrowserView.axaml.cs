@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Platform.Storage;
 using Rythmbox.App.ViewModels;
 
 namespace Rythmbox.App.Views;
@@ -14,24 +13,16 @@ public partial class LoopBrowserView : UserControl
 
     private async void OnBrowseFolderClick(object? sender, RoutedEventArgs e)
     {
-        var topLevel = TopLevel.GetTopLevel(this);
-        if (topLevel is null)
+        if (DataContext is not MainWindowViewModel viewModel)
         {
             return;
         }
 
-        var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-        {
-            Title = "Choose MIDI Loop Folder",
-            AllowMultiple = false,
-        });
+        var path = await viewModel.FileDialog.PickFolderAsync(
+            viewModel.LoopBrowser.RootFolder,
+            viewModel.Localization.FilesPickFolder);
 
-        if (folders.Count == 0)
-        {
-            return;
-        }
-
-        if (folders[0].TryGetLocalPath() is { } path && DataContext is MainWindowViewModel viewModel)
+        if (path is not null)
         {
             viewModel.SetLoopFolder(path);
         }

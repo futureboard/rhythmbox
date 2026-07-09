@@ -1,25 +1,18 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.Threading;
 using Rythmbox.Core.Audio;
 
 namespace Rythmbox.App.Views;
 
-/// <summary>
-/// Vertical DAW fader ported from Futureboard GPUI <c>fader.rs</c>.
-/// Drag-only value changes; double-click resets to 0 dB unity.
-/// </summary>
-public partial class MixerFaderView : UserControl
+/// <summary>GPU-friendly vertical fader — single <see cref="Control.Render"/> pass per frame.</summary>
+public sealed class MixerFaderView : Control
 {
     public const double ThumbRadius = 11;
     public const double TrackWidth = 3;
     public const double HitWidth = 28;
 
-    private readonly Canvas _canvas;
     private bool _isDragging;
     private double _dragStartNorm;
     private Point _dragStartPoint;
@@ -36,6 +29,11 @@ public partial class MixerFaderView : UserControl
     public static readonly StyledProperty<bool> IsFaderEnabledProperty =
         AvaloniaProperty.Register<MixerFaderView, bool>(nameof(IsFaderEnabled), true);
 
+    static MixerFaderView()
+    {
+        AffectsRender<MixerFaderView>(ValueProperty, IsFaderEnabledProperty);
+    }
+
     public double Value
     {
         get => GetValue(ValueProperty);
@@ -50,16 +48,9 @@ public partial class MixerFaderView : UserControl
 
     public MixerFaderView()
     {
-        InitializeComponent();
-        _canvas = new Canvas
-        {
-            Width = HitWidth,
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-        };
-
-        Content = _canvas;
         MinWidth = HitWidth;
         MinHeight = 130;
+        Width = HitWidth;
         Cursor = new Cursor(StandardCursorType.SizeNorthSouth);
 
         PointerPressed += OnPointerPressed;
@@ -67,51 +58,19 @@ public partial class MixerFaderView : UserControl
         PointerReleased += OnPointerReleased;
         PointerCaptureLost += OnPointerCaptureLost;
 
-        ValueProperty.Changed.AddClassHandler<MixerFaderView>((_, _) => RequestRedraw());
-        IsFaderEnabledProperty.Changed.AddClassHandler<MixerFaderView>((_, _) => RequestRedraw());
-
-        Loaded += (_, _) =>
-        {
-            ResolveThemeBrushes();
-            _canvas.SizeChanged += (_, _) => Redraw();
-            RequestRedraw();
-        };
+        Loaded += (_, _) => ResolveThemeBrushes();
     }
 
-    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    public override void Render(DrawingContext context)
     {
-        base.OnPropertyChanged(change);
-        if (change.Property == BoundsProperty)
-        {
-            RequestRedraw();
-        }
-    }
-
-    private void ResolveThemeBrushes()
-    {
-        _accentBrush = Application.Current?.FindResource("RythmboxAccentBrush") as IBrush
-                     ?? new SolidColorBrush(Color.Parse("#7B6BB8"));
-        _railBrush = new SolidColorBrush(Color.Parse("#2A2B33"));
-        _grooveBrush = new SolidColorBrush(Color.Parse("#14151A"));
-        _tickBrush = new SolidColorBrush(Color.Parse("#5A5C68"));
-        _thumbFillBrush = new SolidColorBrush(Color.Parse("#2E2F38"));
-        _thumbBorderBrush = new SolidColorBrush(Color.Parse("#4A4C58"));
-    }
-
-    private void RequestRedraw() => Dispatcher.UIThread.Post(Redraw);
-
-    private void Redraw()
-    {
-        if (_canvas.Bounds.Height <= 0)
+        ResolveThemeBrushes();
+        var width = Bounds.Width;
+        var height = Bounds.Height;
+        if (width <= 0 || height <= 0)
         {
             return;
         }
 
-        ResolveThemeBrushes();
-        _canvas.Children.Clear();
-
-        var width = _canvas.Bounds.Width;
-        var height = _canvas.Bounds.Height;
         var centerX = width / 2;
         var trackTop = ThumbRadius + 4;
         var trackBottom = height - ThumbRadius - 4;
@@ -119,100 +78,53 @@ public partial class MixerFaderView : UserControl
         var norm = Math.Clamp(Value, 0, 1);
         var thumbY = trackBottom - norm * trackHeight;
         var enabled = IsFaderEnabled;
+        var opacity = enabled ? 1.0 : 0.35;
 
-        // Rail background
-        _canvas.Children.Add(new Border
+        using (context.PushOpacity(opacity))
         {
-            Width = TrackWidth,
-            Height = trackHeight,
-            CornerRadius = new CornerRadius(TrackWidth),
-            Background = _railBrush,
-            BorderBrush = _grooveBrush,
-            BorderThickness = new Thickness(1),
-            [Canvas.LeftProperty] = centerX - TrackWidth / 2,
-            [Canvas.TopProperty] = trackTop,
-            Opacity = enabled ? 1 : 0.4,
-        });
+            var railRect = new Rect(centerX - TrackWidth / 2, trackTop, TrackWidth, trackHeight);
+            context.DrawRectangle(_railBrush, new Pen(_grooveBrush, 1), railRect);
 
-        // dB tick marks on rail
-        foreach (var (db, _) in MixerVolume.ScaleMarks)
-        {
-            var fraction = MixerVolume.DbToTopFraction(db);
-            var tickY = trackTop + fraction * trackHeight;
-            var tickWidth = db is 0 or MixerVolume.MaxDb ? 14 : 9;
-            _canvas.Children.Add(new Border
+            foreach (var (db, _) in MixerVolume.ScaleMarks)
             {
-                Width = tickWidth,
-                Height = 1,
-                Background = _tickBrush,
-                Opacity = db is 0 or MixerVolume.MaxDb ? 0.8 : 0.3,
-                [Canvas.LeftProperty] = centerX - tickWidth / 2,
-                [Canvas.TopProperty] = tickY,
-            });
-        }
+                var fraction = MixerVolume.DbToTopFraction(db);
+                var tickY = trackTop + fraction * trackHeight;
+                var tickWidth = db is 0 or MixerVolume.MaxDb ? 14 : 9;
+                var tickOpacity = db is 0 or MixerVolume.MaxDb ? 0.8 : 0.3;
+                using (context.PushOpacity(tickOpacity))
+                {
+                    context.DrawRectangle(_tickBrush, null, new Rect(centerX - tickWidth / 2, tickY, tickWidth, 1));
+                }
+            }
 
-        // Active fill below thumb (toward bottom = quieter side in inverted mapping)
-        var fillTop = thumbY;
-        var fillHeight = Math.Max(0, trackBottom - thumbY);
-        if (fillHeight > 0 && enabled)
-        {
-            _canvas.Children.Add(new Border
+            var fillHeight = Math.Max(0, trackBottom - thumbY);
+            if (fillHeight > 0 && enabled)
             {
-                Width = TrackWidth,
-                Height = fillHeight,
-                Background = _accentBrush,
-                Opacity = 0.55,
-                [Canvas.LeftProperty] = centerX - TrackWidth / 2,
-                [Canvas.TopProperty] = fillTop,
-            });
+                using (context.PushOpacity(0.55))
+                {
+                    context.DrawRectangle(_accentBrush, null, new Rect(centerX - TrackWidth / 2, thumbY, TrackWidth, fillHeight));
+                }
+            }
+
+            context.DrawEllipse(new SolidColorBrush(Color.FromArgb(60, 0, 0, 0)), null,
+                new Rect(centerX - ThumbRadius - 1, thumbY - ThumbRadius, ThumbRadius * 2 + 2, ThumbRadius * 2 + 2));
+            context.DrawEllipse(_thumbFillBrush, new Pen(_thumbBorderBrush, 1),
+                new Rect(centerX - ThumbRadius, thumbY - ThumbRadius, ThumbRadius * 2, ThumbRadius * 2));
+            context.DrawEllipse(null, new Pen(_accentBrush, 2),
+                new Rect(centerX - ThumbRadius + 3, thumbY - ThumbRadius + 3, ThumbRadius * 2 - 6, ThumbRadius * 2 - 6));
+            context.DrawEllipse(Brushes.White, null, new Rect(centerX - 2.5, thumbY - 2.5, 5, 5));
         }
+    }
 
-        // Thumb shadow
-        _canvas.Children.Add(new Ellipse
-        {
-            Width = ThumbRadius * 2 + 2,
-            Height = ThumbRadius * 2 + 2,
-            Fill = new SolidColorBrush(Color.FromArgb(60, 0, 0, 0)),
-            [Canvas.LeftProperty] = centerX - ThumbRadius - 1,
-            [Canvas.TopProperty] = thumbY - ThumbRadius,
-            Opacity = enabled ? 1 : 0.35,
-        });
-
-        // Thumb body
-        _canvas.Children.Add(new Ellipse
-        {
-            Width = ThumbRadius * 2,
-            Height = ThumbRadius * 2,
-            Fill = _thumbFillBrush,
-            Stroke = _thumbBorderBrush,
-            StrokeThickness = 1,
-            [Canvas.LeftProperty] = centerX - ThumbRadius,
-            [Canvas.TopProperty] = thumbY - ThumbRadius,
-            Opacity = enabled ? 1 : 0.35,
-        });
-
-        // Accent ring on thumb
-        _canvas.Children.Add(new Ellipse
-        {
-            Width = ThumbRadius * 2 - 6,
-            Height = ThumbRadius * 2 - 6,
-            Stroke = _accentBrush,
-            StrokeThickness = 2,
-            [Canvas.LeftProperty] = centerX - ThumbRadius + 3,
-            [Canvas.TopProperty] = thumbY - ThumbRadius + 3,
-            Opacity = enabled ? 0.95 : 0.35,
-        });
-
-        // Center grip dot
-        _canvas.Children.Add(new Ellipse
-        {
-            Width = 5,
-            Height = 5,
-            Fill = Brushes.White,
-            Opacity = enabled ? 0.85 : 0.25,
-            [Canvas.LeftProperty] = centerX - 2.5,
-            [Canvas.TopProperty] = thumbY - 2.5,
-        });
+    private void ResolveThemeBrushes()
+    {
+        _accentBrush ??= Application.Current?.FindResource("RythmboxAccentBrush") as IBrush
+                         ?? new SolidColorBrush(Color.Parse("#7B6BB8"));
+        _railBrush ??= new SolidColorBrush(Color.Parse("#2A2B33"));
+        _grooveBrush ??= new SolidColorBrush(Color.Parse("#14151A"));
+        _tickBrush ??= new SolidColorBrush(Color.Parse("#5A5C68"));
+        _thumbFillBrush ??= new SolidColorBrush(Color.Parse("#2E2F38"));
+        _thumbBorderBrush ??= new SolidColorBrush(Color.Parse("#4A4C58"));
     }
 
     private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -223,7 +135,7 @@ public partial class MixerFaderView : UserControl
         }
 
         e.Handled = true;
-        var point = e.GetPosition(_canvas);
+        var point = e.GetPosition(this);
 
         if (e.ClickCount >= 2)
         {
@@ -250,10 +162,10 @@ public partial class MixerFaderView : UserControl
         }
 
         e.Handled = true;
-        var point = e.GetPosition(_canvas);
+        var point = e.GetPosition(this);
         var fine = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
         var deltaY = point.Y - _dragStartPoint.Y;
-        var trackHeight = Math.Max(1, _canvas.Bounds.Height - (ThumbRadius + 4) * 2);
+        var trackHeight = Math.Max(1, Bounds.Height - (ThumbRadius + 4) * 2);
         var deltaNorm = -(deltaY / trackHeight);
 
         if (fine)
@@ -264,36 +176,19 @@ public partial class MixerFaderView : UserControl
         Value = Math.Clamp(_dragStartNorm + deltaNorm, 0, 1);
     }
 
-    private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
-    {
-        EndDrag();
-    }
+    private void OnPointerReleased(object? sender, PointerReleasedEventArgs e) => _isDragging = false;
 
-    private void OnPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
-    {
-        EndDrag();
-    }
-
-    private void EndDrag()
-    {
-        if (!_isDragging)
-        {
-            return;
-        }
-
-        _isDragging = false;
-    }
+    private void OnPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e) => _isDragging = false;
 
     private bool IsNearThumb(Point point)
     {
-        var height = _canvas.Bounds.Height;
         var trackTop = ThumbRadius + 4;
-        var trackBottom = height - ThumbRadius - 4;
+        var trackBottom = Bounds.Height - ThumbRadius - 4;
         var trackHeight = Math.Max(1, trackBottom - trackTop);
         var thumbY = trackBottom - Math.Clamp(Value, 0, 1) * trackHeight;
         return Math.Abs(point.Y - thumbY) <= ThumbRadius + 8;
     }
 
     private double PointerToNorm(double pointerY) =>
-        MixerVolume.PointerYToNorm(pointerY, 0, _canvas.Bounds.Height, ThumbRadius + 4);
+        MixerVolume.PointerYToNorm(pointerY, 0, Bounds.Height, ThumbRadius + 4);
 }

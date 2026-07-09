@@ -1,5 +1,7 @@
+using Rythmbox.Core.Audio.Dsp;
 using Rythmbox.Core.Formats;
 using Rythmbox.Core.Models;
+using Rythmbox.Core.Models.Mixer;
 using Rythmbox.Core.Samples;
 using SoundFlow.Abstracts;
 using SoundFlow.Midi.Enums;
@@ -43,6 +45,12 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         public int FadeOut;
     }
 
+    private sealed class LevelMeter
+    {
+        public float Peak;
+        public float Rms;
+    }
+
     private readonly PlaybackEngine _engine;
     private readonly object _voiceLock = new();
     private readonly Voice[] _voices = Enumerable.Range(0, MaxVoices).Select(_ => new Voice()).ToArray();
@@ -51,6 +59,12 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
     private readonly int[] _drumMap = Enumerable.Repeat(-1, 128).ToArray();
     private readonly int[] _chokeGroups = Enumerable.Repeat(0, GmPercussionMap.Pads.Count).ToArray();
     private readonly float[][] _buffers = new float[GmPercussionMap.Pads.Count][];
+    private readonly ChannelDspChain[] _padDsp = Enumerable.Range(0, GmPercussionMap.Pads.Count).Select(_ => new ChannelDspChain()).ToArray();
+    private readonly ChannelDspChain[] _busDsp = Enum.GetValues<PadBus>().Select(_ => new ChannelDspChain()).ToArray();
+    private readonly ChannelDspChain _masterDsp = new();
+    private readonly ReverbEffect _reverb = new();
+    private readonly LevelMeter[] _padMeters = Enumerable.Range(0, GmPercussionMap.Pads.Count).Select(_ => new LevelMeter()).ToArray();
+    private readonly Dictionary<PadBus, LevelMeter> _busMeters = Enum.GetValues<PadBus>().ToDictionary(bus => bus, _ => new LevelMeter());
     private bool _anyPadSoloed;
     private bool _addedToMixer;
 
@@ -143,7 +157,16 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         }
     }
 
-    public void ReattachToMixer() => EnsureInMixer();
+    public void ReattachToMixer()
+    {
+        if (_addedToMixer)
+        {
+            _engine.MasterMixer.RemoveComponent(this);
+            _addedToMixer = false;
+        }
+
+        EnsureInMixer();
+    }
 
     private void EnsureInMixer()
     {
@@ -152,6 +175,78 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
             _engine.MasterMixer.AddComponent(this);
             _addedToMixer = true;
         }
+    }
+
+    public ChannelDspSettings GetPadDsp(int note)
+    {
+        var padIndex = NoteToPadIndex(note);
+        return padIndex >= 0 ? _padDsp[padIndex].Settings.Clone() : new ChannelDspSettings();
+    }
+
+    public void SetPadDsp(int note, ChannelDspSettings settings)
+    {
+        var padIndex = NoteToPadIndex(note);
+        if (padIndex >= 0)
+        {
+            _padDsp[padIndex].Settings = settings.Clone();
+        }
+    }
+
+    public ChannelDspSettings GetBusDsp(PadBus bus) => _busDsp[(int)bus].Settings.Clone();
+
+    public void SetBusDsp(PadBus bus, ChannelDspSettings settings) =>
+        _busDsp[(int)bus].Settings = settings.Clone();
+
+    public ChannelDspSettings GetMasterDsp() => _masterDsp.Settings.Clone();
+
+    public void SetMasterDsp(ChannelDspSettings settings) => _masterDsp.Settings = settings.Clone();
+
+    public MixerMeterState PollPadMeter(int note)
+    {
+        var padIndex = NoteToPadIndex(note);
+        if (padIndex < 0)
+        {
+            return MixerMeterState.Disabled;
+        }
+
+        return TakeMeter(_padMeters[padIndex]);
+    }
+
+    public MixerMeterState PollBusMeter(PadBus bus) => TakeMeter(_busMeters[bus]);
+
+    private static MixerMeterState TakeMeter(LevelMeter meter)
+    {
+        var peak = meter.Peak;
+        var rms = meter.Rms;
+        meter.Peak = 0f;
+        meter.Rms *= 0.55f;
+
+        if (peak <= 0.0001f && rms <= 0.0001f)
+        {
+            return MixerMeterState.Disabled;
+        }
+
+        return MixerMeterState.FromMono(rms, peak, peak >= 0.98f);
+    }
+
+    private static void PushMeter(LevelMeter meter, float sample)
+    {
+        var abs = MathF.Abs(sample);
+        meter.Peak = MathF.Max(meter.Peak, abs);
+        meter.Rms = MathF.Max(meter.Rms * 0.9f, abs);
+    }
+
+    private static int NoteToPadIndex(int note)
+    {
+        for (var i = 0; i < GmPercussionMap.Pads.Count; i++)
+        {
+            if (GmPercussionMap.Pads[i].Note == note)
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     public void NoteOn(int channel, int note, int velocity) =>
@@ -327,11 +422,17 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         lock (_voiceLock)
         {
             var frameCount = outputBuffer.Length / channels;
+            var sampleRate = (float)WavCodec.TargetSampleRate;
+            _reverb.Size = _masterDsp.Settings.ReverbSize;
+            _reverb.Mix = Math.Clamp(_masterDsp.Settings.ReverbMix, 0f, 1f);
+            Span<float> busScratch = stackalloc float[Enum.GetValues<PadBus>().Length];
 
             for (var frame = 0; frame < frameCount; frame++)
             {
                 var sampleL = 0f;
                 var sampleR = 0f;
+                var reverbSend = 0f;
+                busScratch.Clear();
 
                 foreach (var voice in _voices)
                 {
@@ -361,9 +462,40 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
                         }
                     }
 
-                    sampleL += src;
-                    sampleR += src;
+                    var pad = GmPercussionMap.Pads[voice.PadIndex];
+                    _padDsp[voice.PadIndex].Process(ref src, sampleRate);
+                    reverbSend += _padDsp[voice.PadIndex].ReverbSend;
+
+                    var busIndex = (int)pad.Bus;
+                    busScratch[busIndex] += src;
+                    PushMeter(_padMeters[voice.PadIndex], src);
                 }
+
+                for (var busIndex = 0; busIndex < busScratch.Length; busIndex++)
+                {
+                    var busSample = busScratch[busIndex];
+                    if (MathF.Abs(busSample) <= 0.000001f)
+                    {
+                        continue;
+                    }
+
+                    var bus = (PadBus)busIndex;
+                    _busDsp[busIndex].Process(ref busSample, sampleRate);
+                    reverbSend += _busDsp[busIndex].ReverbSend;
+                    PushMeter(_busMeters[bus], busSample);
+
+                    sampleL += busSample;
+                    sampleR += busSample;
+                }
+
+                var wet = _reverb.Process(reverbSend);
+                sampleL += wet;
+                sampleR += wet;
+
+                var masterSample = (sampleL + sampleR) * 0.5f;
+                _masterDsp.Process(ref masterSample, sampleRate);
+                sampleL = masterSample;
+                sampleR = masterSample;
 
                 sampleL = MathF.Tanh(sampleL);
                 sampleR = MathF.Tanh(sampleR);

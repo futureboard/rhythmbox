@@ -9,6 +9,10 @@
     <Border Classes="navBar">
         <Grid ColumnDefinitions="*,Auto">
             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="0">
+                <Button Classes="navTab" Classes.active="{Binding IsHomePage}"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Home}">
+                    <TextBlock Text="{Binding Localization.NavHome}" FontSize="11" />
+                </Button>
                 <Button Classes="navTab" Classes.active="{Binding IsMachinePage}"
                         Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}">
                     <TextBlock Text="{Binding Localization.NavMachine}" FontSize="11" />
@@ -28,6 +32,10 @@
                 <Button Classes="navTab" Classes.active="{Binding IsMacroPage}"
                         Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Macro}">
                     <TextBlock Text="{Binding Localization.NavMacro}" FontSize="11" />
+                </Button>
+                <Button Classes="navTab" Classes.active="{Binding IsFilesPage}"
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Files}">
+                    <TextBlock Text="{Binding Localization.NavFiles}" FontSize="11" />
                 </Button>
                 <Button Classes="navTab" Classes.active="{Binding IsSettingsPage}"
                         Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}">

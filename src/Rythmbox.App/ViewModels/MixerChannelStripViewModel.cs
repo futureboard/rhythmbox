@@ -13,6 +13,7 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
     private readonly Action<MixerChannelStripViewModel, double>? _onGainChanged;
     private readonly Action<MixerChannelStripViewModel, bool>? _onMuteChanged;
     private readonly Action<MixerChannelStripViewModel, bool>? _onSoloChanged;
+    private readonly Action<MixerChannelStripViewModel, MixerFxSlot, bool>? _onFxSlotChanged;
     private readonly LocalizationService _i18n;
 
     public MixerChannelStripViewModel(
@@ -21,7 +22,8 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
         Action<MixerChannelStripViewModel>? onSelect = null,
         Action<MixerChannelStripViewModel, double>? onGainChanged = null,
         Action<MixerChannelStripViewModel, bool>? onMuteChanged = null,
-        Action<MixerChannelStripViewModel, bool>? onSoloChanged = null)
+        Action<MixerChannelStripViewModel, bool>? onSoloChanged = null,
+        Action<MixerChannelStripViewModel, MixerFxSlot, bool>? onFxSlotChanged = null)
     {
         Channel = channel;
         _i18n = i18n;
@@ -29,6 +31,7 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
         _onGainChanged = onGainChanged;
         _onMuteChanged = onMuteChanged;
         _onSoloChanged = onSoloChanged;
+        _onFxSlotChanged = onFxSlotChanged;
         Meter = MixerMeterViewModel.FromState(channel.Meter, _i18n);
         SyncFromChannel();
     }
@@ -100,6 +103,20 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
     [ObservableProperty]
     private MixerMeterViewModel _meter;
 
+    [ObservableProperty]
+    private bool _fxEqEnabled = true;
+
+    [ObservableProperty]
+    private bool _fxCompEnabled;
+
+    [ObservableProperty]
+    private bool _fxDelayEnabled = true;
+
+    [ObservableProperty]
+    private bool _fxReverbEnabled = true;
+
+    public bool ShowFxSlots => Kind != MixerChannelKind.Master;
+
     public string GainLabel => MixerVolume.FormatDb(FaderValue);
 
     public string GainDbLabel => MixerVolume.FormatDbWithUnit(FaderValue);
@@ -138,6 +155,50 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
     }
 
     partial void OnIsSelectedChanged(bool value) => Channel.IsSelected = value;
+
+    partial void OnFxEqEnabledChanged(bool value)
+    {
+        if (!_suppressFx)
+        {
+            _onFxSlotChanged?.Invoke(this, MixerFxSlot.Eq, value);
+        }
+    }
+
+    partial void OnFxCompEnabledChanged(bool value)
+    {
+        if (!_suppressFx)
+        {
+            _onFxSlotChanged?.Invoke(this, MixerFxSlot.Compressor, value);
+        }
+    }
+
+    partial void OnFxDelayEnabledChanged(bool value)
+    {
+        if (!_suppressFx)
+        {
+            _onFxSlotChanged?.Invoke(this, MixerFxSlot.Delay, value);
+        }
+    }
+
+    partial void OnFxReverbEnabledChanged(bool value)
+    {
+        if (!_suppressFx)
+        {
+            _onFxSlotChanged?.Invoke(this, MixerFxSlot.Reverb, value);
+        }
+    }
+
+    public void SetFxSlots(ChannelDspSettings settings)
+    {
+        _suppressFx = true;
+        FxEqEnabled = settings.EqEnabled;
+        FxCompEnabled = settings.CompressorEnabled;
+        FxDelayEnabled = settings.DelayEnabled;
+        FxReverbEnabled = settings.ReverbEnabled;
+        _suppressFx = false;
+    }
+
+    private bool _suppressFx;
 
     [RelayCommand]
     private void Select() => _onSelect?.Invoke(this);

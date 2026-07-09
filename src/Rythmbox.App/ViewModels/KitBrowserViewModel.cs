@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Rythmbox.Core.Engine;
 using Rythmbox.Core.Models;
+using Rythmbox.Core.Services;
 using SoundFlow.Midi.Structs;
 
 namespace Rythmbox.App.ViewModels;
@@ -13,18 +14,21 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
     private readonly KitPresetService _presetService;
     private readonly MidiInputService _midiInput;
     private readonly PadMidiRouter _padRouter;
+    private readonly IFileDialogService _fileDialog;
     private string? _presetDir;
 
     public KitBrowserViewModel(
         KitSamplePlayer kitPlayer,
         KitPresetService presetService,
         MidiInputService midiInput,
-        PadMidiRouter padRouter)
+        PadMidiRouter padRouter,
+        IFileDialogService fileDialog)
     {
         _kitPlayer = kitPlayer;
         _presetService = presetService;
         _midiInput = midiInput;
         _padRouter = padRouter;
+        _fileDialog = fileDialog;
         HotloadSlots = new ObservableCollection<KitHotloadSlotViewModel>(
             new[] { "A", "B", "C", "D" }.Select(name => new KitHotloadSlotViewModel(name, LoadHotloadSlot, AssignHotloadSlot)));
         RefreshMidiInputs();
@@ -123,6 +127,20 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
         if (SelectedKit is null && _kitPlayer.LoadedKitPath is { } loaded)
         {
             SelectedKit = Kits.FirstOrDefault(k => string.Equals(k.FilePath, loaded, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    [RelayCommand]
+    private async Task BrowseLoadKitAsync()
+    {
+        var path = await _fileDialog.PickFileAsync(
+            _presetDir,
+            "Load Drum Kit",
+            [".json", ".apak"]);
+
+        if (path is not null)
+        {
+            LoadKit(path);
         }
     }
 

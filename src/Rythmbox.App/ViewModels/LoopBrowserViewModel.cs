@@ -50,6 +50,8 @@ public sealed partial class LoopBrowserViewModel : ViewModelBase
 
     public int TotalCount => Loops.Count;
 
+    public string? RootFolder => _rootFolder;
+
     partial void OnSelectedBankChanged(LoopBankViewModel? value)
     {
         foreach (var bank in Banks)

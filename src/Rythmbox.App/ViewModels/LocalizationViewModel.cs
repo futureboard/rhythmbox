@@ -21,11 +21,13 @@ public sealed partial class LocalizationViewModel : ViewModelBase
 
     public bool IsThai => Language == AppLanguage.Thai;
 
+    [ObservableProperty] private string _navHome = string.Empty;
     [ObservableProperty] private string _navMachine = string.Empty;
     [ObservableProperty] private string _navPads = string.Empty;
     [ObservableProperty] private string _navMixer = string.Empty;
     [ObservableProperty] private string _navEditor = string.Empty;
     [ObservableProperty] private string _navMacro = string.Empty;
+    [ObservableProperty] private string _navFiles = string.Empty;
     [ObservableProperty] private string _navSettings = string.Empty;
     [ObservableProperty] private string _navScan = string.Empty;
     [ObservableProperty] private string _navSubOutput = string.Empty;
@@ -75,6 +77,31 @@ public sealed partial class LocalizationViewModel : ViewModelBase
     [ObservableProperty] private string _mixerMachine = string.Empty;
     [ObservableProperty] private string _mixerSelectOutput = string.Empty;
 
+    [ObservableProperty] private string _homeWelcome = string.Empty;
+    [ObservableProperty] private string _homeSubtitle = string.Empty;
+    [ObservableProperty] private string _homeMachineHint = string.Empty;
+    [ObservableProperty] private string _homePadsHint = string.Empty;
+    [ObservableProperty] private string _homeMixerHint = string.Empty;
+    [ObservableProperty] private string _homeEditorHint = string.Empty;
+    [ObservableProperty] private string _homeMacroHint = string.Empty;
+    [ObservableProperty] private string _homeSettingsHint = string.Empty;
+    [ObservableProperty] private string _homeStatusTitle = string.Empty;
+    [ObservableProperty] private string _homeStartPlaying = string.Empty;
+
+    [ObservableProperty] private string _filesTitle = string.Empty;
+    [ObservableProperty] private string _filesLocations = string.Empty;
+    [ObservableProperty] private string _filesName = string.Empty;
+    [ObservableProperty] private string _filesSize = string.Empty;
+    [ObservableProperty] private string _filesModified = string.Empty;
+    [ObservableProperty] private string _filesPickFolder = string.Empty;
+    [ObservableProperty] private string _filesPickFile = string.Empty;
+    [ObservableProperty] private string _filesSaveFile = string.Empty;
+    [ObservableProperty] private string _filesSelectFolder = string.Empty;
+    [ObservableProperty] private string _filesOpen = string.Empty;
+    [ObservableProperty] private string _filesSave = string.Empty;
+    [ObservableProperty] private string _filesCancel = string.Empty;
+    [ObservableProperty] private string _filesFileName = string.Empty;
+
     [ObservableProperty] private string _settingsTitle = string.Empty;
     [ObservableProperty] private string _settingsSubtitle = string.Empty;
     [ObservableProperty] private string _settingsLanguage = string.Empty;
@@ -120,11 +147,13 @@ public sealed partial class LocalizationViewModel : ViewModelBase
 
     private void RefreshAll()
     {
+        NavHome = _i18n["nav.home"];
         NavMachine = _i18n["nav.machine"];
         NavPads = _i18n["nav.pads"];
         NavMixer = _i18n["nav.mixer"];
         NavEditor = _i18n["nav.editor"];
         NavMacro = _i18n["nav.macro"];
+        NavFiles = _i18n["nav.files"];
         NavSettings = _i18n["nav.settings"];
         NavScan = _i18n["nav.scan"];
         NavSubOutput = _i18n["nav.subOutput"];
@@ -173,6 +202,31 @@ public sealed partial class LocalizationViewModel : ViewModelBase
         MixerRefresh = _i18n["mixer.refresh"];
         MixerMachine = _i18n["mixer.machine"];
         MixerSelectOutput = _i18n["mixer.selectOutput"];
+
+        HomeWelcome = _i18n["home.welcome"];
+        HomeSubtitle = _i18n["home.subtitle"];
+        HomeMachineHint = _i18n["home.machineHint"];
+        HomePadsHint = _i18n["home.padsHint"];
+        HomeMixerHint = _i18n["home.mixerHint"];
+        HomeEditorHint = _i18n["home.editorHint"];
+        HomeMacroHint = _i18n["home.macroHint"];
+        HomeSettingsHint = _i18n["home.settingsHint"];
+        HomeStatusTitle = _i18n["home.statusTitle"];
+        HomeStartPlaying = _i18n["home.startPlaying"];
+
+        FilesTitle = _i18n["files.title"];
+        FilesLocations = _i18n["files.locations"];
+        FilesName = _i18n["files.name"];
+        FilesSize = _i18n["files.size"];
+        FilesModified = _i18n["files.modified"];
+        FilesPickFolder = _i18n["files.pickFolder"];
+        FilesPickFile = _i18n["files.pickFile"];
+        FilesSaveFile = _i18n["files.saveFile"];
+        FilesSelectFolder = _i18n["files.selectFolder"];
+        FilesOpen = _i18n["files.open"];
+        FilesSave = _i18n["files.save"];
+        FilesCancel = _i18n["files.cancel"];
+        FilesFileName = _i18n["files.fileName"];
 
         SettingsTitle = _i18n["settings.title"];
         SettingsSubtitle = _i18n["settings.subtitle"];

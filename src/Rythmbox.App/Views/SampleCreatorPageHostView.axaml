@@ -1,0 +1,8 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:creatorViews="using:Rythmbox.SampleCreator.Views"
+             xmlns:vm="using:Rythmbox.App.ViewModels"
+             x:Class="Rythmbox.App.Views.SampleCreatorPageHostView"
+             x:DataType="vm:MainWindowViewModel">
+    <creatorViews:SampleCreatorPageView DataContext="{Binding SampleCreator}" />
+</UserControl>

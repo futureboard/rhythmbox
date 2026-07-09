@@ -22,14 +22,14 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                    <Button Click="OnNewClick">New Kit</Button>
-                    <Button Click="OnOpenClick">
+                    <Button Command="{Binding NewKitCommand}">New Kit</Button>
+                    <Button Command="{Binding BrowseOpenPresetCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
                             <TextBlock Text="Open Preset…" />
                         </StackPanel>
                     </Button>
-                    <Button Click="OnSaveClick" Classes="accent">
+                    <Button Command="{Binding BrowseSaveKitCommand}" Classes="accent">
                         <TextBlock Text="Save Kit…" Foreground="#1A1A1A" FontWeight="Bold" />
                     </Button>
                 </StackPanel>
@@ -86,25 +86,27 @@
 
             <!-- Actions -->
             <Border Grid.Column="2" Classes="panel">
-                <StackPanel Spacing="10" DataContext="{Binding SelectedPad}">
+                <StackPanel Spacing="10">
                     <TextBlock Text="ACTIONS" Classes="panelHeader" />
 
-                    <Button Click="OnImportWavClick" HorizontalAlignment="Stretch">
+                    <Button Command="{Binding BrowseImportWavCommand}" HorizontalAlignment="Stretch">
                         <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                             <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
                             <TextBlock Text="Import WAV…" />
                         </StackPanel>
                     </Button>
 
-                    <Button Command="{Binding PreviewCommand}" HorizontalAlignment="Stretch" Classes="transportStop">
-                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                            <Path Data="{StaticResource IconPlay}" Width="14" Height="14" Stretch="Uniform" Fill="White" Stroke="White" StrokeThickness="0" />
-                            <TextBlock Text="Preview Pad" FontWeight="Bold" Foreground="White" />
-                        </StackPanel>
-                    </Button>
+                    <StackPanel Spacing="10" DataContext="{Binding SelectedPad}">
+                        <Button Command="{Binding PreviewCommand}" HorizontalAlignment="Stretch" Classes="transportStop">
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <Path Data="{StaticResource IconPlay}" Width="14" Height="14" Stretch="Uniform" Fill="White" Stroke="White" StrokeThickness="0" />
+                                <TextBlock Text="Preview Pad" FontWeight="Bold" Foreground="White" />
+                            </StackPanel>
+                        </Button>
 
-                    <Button Command="{Binding NormalizeCommand}" HorizontalAlignment="Stretch">Normalize</Button>
-                    <Button Command="{Binding ClearCommand}" HorizontalAlignment="Stretch" Classes="danger">Clear Sample</Button>
+                        <Button Command="{Binding NormalizeCommand}" HorizontalAlignment="Stretch">Normalize</Button>
+                        <Button Command="{Binding ClearCommand}" HorizontalAlignment="Stretch" Classes="danger">Clear Sample</Button>
+                    </StackPanel>
 
                     <TextBlock Text="Assign samples to each GM pad, trim and normalize, then Save Kit to export JSON + WAV files for shared/PRESETS and shared/SAMPLES." Classes="dim" TextWrapping="Wrap" Margin="0,12,0,0" />
                 </StackPanel>

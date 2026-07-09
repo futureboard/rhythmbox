@@ -17,7 +17,7 @@
                         <Run Text="{Binding Machine.KitLabel}" FontWeight="SemiBold" />
                     </TextBlock>
                 </StackPanel>
-                <Button Grid.Column="1" Click="OnLoadKitClick" Padding="8,4" VerticalAlignment="Center">
+                <Button Grid.Column="1" Command="{Binding KitBrowser.BrowseLoadKitCommand}" Padding="8,4" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
                         <TextBlock Text="{Binding KitBrowser.LoadButtonLabel}" FontSize="11" />
