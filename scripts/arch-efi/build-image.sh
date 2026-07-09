@@ -11,6 +11,8 @@ HOSTNAME="${HOSTNAME:-rythmbox}"
 KIOSK_USER="${KIOSK_USER:-rythmbox}"
 ROOT_PASSWORD="${ROOT_PASSWORD:-rythmbox}"
 USER_PASSWORD="${USER_PASSWORD:-rythmbox}"
+FASTBOOT="${FASTBOOT:-1}"
+DEBUG_BOOT="${DEBUG_BOOT:-0}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORK_DIR="${REPO_ROOT}/${WORK_DIR}"
@@ -147,8 +149,8 @@ write_file "${MOUNT_DIR}/etc/vconsole.conf" "KEYMAP=us
 
 ROOT_UUID="$(blkid -s UUID -o value "${ROOT_PART}")"
 BOOT_UUID="$(blkid -s UUID -o value "${BOOT_PART}")"
-write_file "${MOUNT_DIR}/etc/fstab" "UUID=${ROOT_UUID} / ext4 rw,relatime 0 1
-UUID=${BOOT_UUID} /boot vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 2
+write_file "${MOUNT_DIR}/etc/fstab" "UUID=${ROOT_UUID} / ext4 rw,noatime,commit=60 0 1
+UUID=${BOOT_UUID} /boot vfat rw,noatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro 0 2
 "
 
 echo "Installing Arch packages"
@@ -201,17 +203,49 @@ fi
 PROFILE
 chroot_run "chown '${KIOSK_USER}:${KIOSK_USER}' '/home/${KIOSK_USER}/.bash_profile'"
 
+if [[ "${DEBUG_BOOT}" == "1" ]]; then
+  GRUB_TIMEOUT_VALUE=3
+  KERNEL_CMDLINE="console=tty0 console=ttyS0,115200n8 earlyprintk=serial,ttyS0,115200 loglevel=7 systemd.log_level=debug systemd.log_target=console"
+  GRUB_TERMINAL_INPUT_VALUE="console serial"
+  GRUB_TERMINAL_OUTPUT_VALUE="console serial"
+elif [[ "${FASTBOOT}" == "1" ]]; then
+  GRUB_TIMEOUT_VALUE=0
+  KERNEL_CMDLINE="quiet loglevel=3 rd.udev.log_level=3 systemd.show_status=false vt.global_cursor_default=0 nowatchdog"
+  GRUB_TERMINAL_INPUT_VALUE="console"
+  GRUB_TERMINAL_OUTPUT_VALUE="console"
+else
+  GRUB_TIMEOUT_VALUE=3
+  KERNEL_CMDLINE="quiet loglevel=3"
+  GRUB_TERMINAL_INPUT_VALUE="console"
+  GRUB_TERMINAL_OUTPUT_VALUE="console"
+fi
+
 write_file "${MOUNT_DIR}/etc/default/grub" "GRUB_DEFAULT=0
-GRUB_TIMEOUT=3
+GRUB_TIMEOUT=${GRUB_TIMEOUT_VALUE}
+GRUB_RECORDFAIL_TIMEOUT=0
 GRUB_DISTRIBUTOR=\"Rythmbox\"
-GRUB_CMDLINE_LINUX_DEFAULT=\"console=tty0 console=ttyS0,115200n8 earlyprintk=serial,ttyS0,115200 loglevel=7 systemd.log_level=debug systemd.log_target=console\"
+GRUB_CMDLINE_LINUX_DEFAULT=\"${KERNEL_CMDLINE}\"
 GRUB_CMDLINE_LINUX=\"\"
-GRUB_TERMINAL_INPUT=\"console serial\"
-GRUB_TERMINAL_OUTPUT=\"console serial\"
+GRUB_TERMINAL_INPUT=\"${GRUB_TERMINAL_INPUT_VALUE}\"
+GRUB_TERMINAL_OUTPUT=\"${GRUB_TERMINAL_OUTPUT_VALUE}\"
 GRUB_SERIAL_COMMAND=\"serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1\"
 "
 
-chroot_run "systemctl enable NetworkManager sshd systemd-timesyncd serial-getty@ttyS0 getty@tty1"
+mkdir -p "${MOUNT_DIR}/etc/systemd/system.conf.d" "${MOUNT_DIR}/etc/systemd/journald.conf.d"
+write_file "${MOUNT_DIR}/etc/systemd/system.conf.d/10-rythmbox-fastboot.conf" "[Manager]
+DefaultTimeoutStartSec=10s
+DefaultTimeoutStopSec=5s
+"
+write_file "${MOUNT_DIR}/etc/systemd/journald.conf.d/10-volatile.conf" "[Journal]
+Storage=volatile
+RuntimeMaxUse=16M
+"
+
+chroot_run "systemctl enable NetworkManager sshd systemd-timesyncd getty@tty1"
+if [[ "${DEBUG_BOOT}" == "1" ]]; then
+  chroot_run "systemctl enable serial-getty@ttyS0"
+fi
+chroot_run "systemctl mask NetworkManager-wait-online.service systemd-networkd-wait-online.service"
 chroot_run "grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=Rythmbox --removable --no-nvram"
 chroot_run "grub-mkconfig -o /boot/grub/grub.cfg"
 
