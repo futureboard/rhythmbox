@@ -110,6 +110,44 @@ configure_plymouth_initramfs() {
   chroot_run "plymouth-set-default-theme -R rythmbox"
 }
 
+optimize_image() {
+  echo "Optimizing image: removing toolchain, source tree, and caches"
+
+  if [[ -d "${REPO_ROOT}/shared" ]]; then
+    rsync -a "${REPO_ROOT}/shared/" "${MOUNT_DIR}/opt/rhythmbox/app/shared/"
+  elif [[ -d "${MOUNT_DIR}/opt/rhythmbox/source/shared" ]]; then
+    rsync -a "${MOUNT_DIR}/opt/rhythmbox/source/shared/" "${MOUNT_DIR}/opt/rhythmbox/app/shared/"
+  fi
+
+  chroot_run "rm -rf \
+    /opt/rhythmbox/source \
+    /root/.nuget \
+    /root/.dotnet \
+    /root/.local/share/NuGet \
+    /root/.cache \
+    /tmp/* \
+    /var/tmp/*"
+
+  chroot_run "pacman -Rns --noconfirm \
+    dotnet-sdk \
+    dotnet-runtime \
+    aspnet-runtime \
+    git \
+    efibootmgr \
+    || true"
+
+  chroot_run "pacman -Scc --noconfirm"
+  chroot_run "rm -rf /var/cache/pacman/pkg/*"
+
+  chroot_run "find /usr/share/man -type f -delete 2>/dev/null || true"
+  chroot_run "find /usr/share/doc -type f -delete 2>/dev/null || true"
+  chroot_run "find /usr/share/info -type f -delete 2>/dev/null || true"
+  chroot_run "find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US*' -exec rm -rf {} + 2>/dev/null || true"
+  chroot_run "find /opt/rhythmbox/app -name '*.pdb' -delete 2>/dev/null || true"
+
+  chroot_run "chown -R '${KIOSK_USER}:${KIOSK_USER}' /opt/rhythmbox"
+}
+
 require_root
 require_commands
 ensure_loop_devices
@@ -206,6 +244,8 @@ rsync -a --delete \
 chroot_run "cd /opt/rhythmbox/source && dotnet restore Rythmbox.slnx"
 chroot_run "cd /opt/rhythmbox/source && dotnet publish src/Rythmbox.App/Rythmbox.App.csproj -c Release -r linux-x64 --self-contained true -o /opt/rhythmbox/app"
 chroot_run "chown -R '${KIOSK_USER}:${KIOSK_USER}' /opt/rhythmbox"
+
+optimize_image
 
 write_file "${MOUNT_DIR}/home/${KIOSK_USER}/.xinitrc" "#!/bin/sh
 export RYTHMBOX_FULLSCREEN=1

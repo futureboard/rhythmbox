@@ -60,3 +60,5 @@ Variables:
 ## Notes
 
 The image installs NetworkManager and OpenSSH for remote maintenance. Linux shutdown/restart from the app uses `systemctl poweroff` and `systemctl reboot`; on the kiosk image the app user has passwordless sudo for maintenance tasks, but the app's systemctl calls normally work through logind/polkit in a local session.
+
+After `dotnet publish`, the build removes the source tree, .NET SDK/runtime packages, git, pacman package cache, NuGet caches, and non-English locales. The published self-contained app under `/opt/rhythmbox/app` is kept, along with `shared/` presets copied beside it. A `4G` image is usually enough after optimization; the default `8G` leaves headroom for growth.
