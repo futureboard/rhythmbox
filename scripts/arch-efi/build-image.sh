@@ -201,7 +201,17 @@ fi
 PROFILE
 chroot_run "chown '${KIOSK_USER}:${KIOSK_USER}' '/home/${KIOSK_USER}/.bash_profile'"
 
-chroot_run "systemctl enable NetworkManager sshd systemd-timesyncd getty@tty1"
+write_file "${MOUNT_DIR}/etc/default/grub" "GRUB_DEFAULT=0
+GRUB_TIMEOUT=3
+GRUB_DISTRIBUTOR=\"Rythmbox\"
+GRUB_CMDLINE_LINUX_DEFAULT=\"console=tty0 console=ttyS0,115200n8 earlyprintk=serial,ttyS0,115200 loglevel=7 systemd.log_level=debug systemd.log_target=console\"
+GRUB_CMDLINE_LINUX=\"\"
+GRUB_TERMINAL_INPUT=\"console serial\"
+GRUB_TERMINAL_OUTPUT=\"console serial\"
+GRUB_SERIAL_COMMAND=\"serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1\"
+"
+
+chroot_run "systemctl enable NetworkManager sshd systemd-timesyncd serial-getty@ttyS0 getty@tty1"
 chroot_run "grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=Rythmbox --removable --no-nvram"
 chroot_run "grub-mkconfig -o /boot/grub/grub.cfg"
 
