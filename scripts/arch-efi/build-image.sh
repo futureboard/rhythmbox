@@ -28,6 +28,18 @@ require_root() {
   fi
 }
 
+ensure_loop_devices() {
+  if [[ ! -e /dev/loop-control ]]; then
+    mknod /dev/loop-control c 10 237
+  fi
+
+  for index in {0..15}; do
+    if [[ ! -e "/dev/loop${index}" ]]; then
+      mknod "/dev/loop${index}" b 7 "${index}"
+    fi
+  done
+}
+
 require_commands() {
   local missing=0
   for cmd in blkid curl losetup mkfs.ext4 mkfs.vfat parted rsync tar truncate zstd; do
@@ -71,6 +83,7 @@ write_file() {
 
 require_root
 require_commands
+ensure_loop_devices
 
 mkdir -p "${DOWNLOAD_DIR}" "${ROOTFS_DIR}" "${MOUNT_DIR}"
 
