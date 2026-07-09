@@ -831,33 +831,8 @@
         <Setter Property="Foreground" Value="White" />
     </Style>
 
-    <Style Selector="Path.icon">
-        <Setter Property="Stretch" Value="Uniform" />
-        <Setter Property="Fill" Value="Transparent" />
-        <Setter Property="Stroke" Value="{DynamicResource RythmboxTextBrush}" />
-        <Setter Property="StrokeThickness" Value="2" />
-        <Setter Property="StrokeLineCap" Value="Round" />
-        <Setter Property="StrokeJoin" Value="Round" />
-        <Setter Property="Width" Value="16" />
-        <Setter Property="Height" Value="16" />
-    </Style>
-
-    <Style Selector="Path.icon.dim">
-        <Setter Property="Stroke" Value="{DynamicResource RythmboxDimTextBrush}" />
-    </Style>
-
-    <Style Selector="Path.icon.accent">
-        <Setter Property="Stroke" Value="{DynamicResource RythmboxAccentBrush}" />
-    </Style>
-
-    <Style Selector="Path.icon.danger">
-        <Setter Property="Stroke" Value="{DynamicResource RythmboxRedBrush}" />
-    </Style>
-
-    <Style Selector="Path.icon.small">
-        <Setter Property="Width" Value="13" />
-        <Setter Property="Height" Value="13" />
-    </Style>
+    <!-- Path.icon (+ .small/.dim/.accent/.danger) is defined once in the shared
+         Rythmbox.UI kit (Styles/Controls.axaml). Do not redefine it here. -->
 
     <Style Selector="Border.stepHeader">
         <Setter Property="Background" Value="#1A1B20" />
