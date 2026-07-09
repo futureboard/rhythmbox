@@ -8,7 +8,7 @@
              x:Class="Rythmbox.App.Views.MixerChannelStripView"
              x:DataType="vm:MixerChannelStripViewModel"
              Width="{Binding StripWidth}"
-             MinHeight="320">
+             MinHeight="340">
     <Border Classes="mixerStrip"
             Classes.selected="{Binding IsSelected}"
             Classes.group="{Binding Kind, Converter={x:Static vm:MixerUiConverters.IsGroupKind}}"

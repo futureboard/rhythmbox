@@ -6,6 +6,8 @@
 
     <Project Path="src/Rythmbox.Core/Rythmbox.Core.csproj" />
 
+    <Project Path="src/Rythmbox.UI/Rythmbox.UI.csproj" />
+
     <Project Path="src/Rythmbox.Editor/Rythmbox.Editor.csproj" />
 
     <Project Path="src/Rythmbox.SampleCreator/Rythmbox.SampleCreator.csproj" />

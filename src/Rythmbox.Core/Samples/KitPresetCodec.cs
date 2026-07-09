@@ -107,6 +107,11 @@ public static class KitPresetCodec
                         sample.VelocityLayers.Add(layer);
                     }
                 }
+
+                if (sample.HasVelocityLayers && sample.SampleRate <= 0)
+                {
+                    sample.SampleRate = WavCodec.TargetSampleRate;
+                }
             }
 
             if (padEl.TryGetProperty("sample", out var sampleEl) && sampleEl.GetString() is { Length: > 0 } relPath)
@@ -149,20 +154,65 @@ public static class KitPresetCodec
 
             if (pad.HasVelocityLayers)
             {
+                if (exportWavs)
+                {
+                    foreach (var layer in pad.VelocityLayers.Where(static layer => layer.HasSamples))
+                    {
+                        for (var rr = 0; rr < layer.RoundRobinSamples.Count; rr++)
+                        {
+                            var samples = layer.RoundRobinSamples[rr];
+                            if (samples.Length == 0)
+                            {
+                                continue;
+                            }
+
+                            while (layer.RoundRobinPaths.Count <= rr)
+                            {
+                                layer.RoundRobinPaths.Add(string.Empty);
+                            }
+
+                            var existingRel = layer.RoundRobinPaths[rr];
+                            string relative;
+                            if (!string.IsNullOrWhiteSpace(existingRel))
+                            {
+                                relative = existingRel.Replace('\\', '/');
+                            }
+                            else
+                            {
+                                var safeName = SanitizeFileName($"{pad.Label}_{pad.MidiNote}_v{layer.VelocityLow}-{layer.VelocityHigh}_rr{rr + 1}.wav");
+                                relative = $"SAMPLES/{safeName}";
+                            }
+
+                            var wavPath = ResolveExportWavPath(relative, samplesDir, jsonPath);
+                            Directory.CreateDirectory(Path.GetDirectoryName(wavPath) ?? samplesDir);
+                            WavCodec.SaveMono(wavPath, samples, pad.SampleRate > 0 ? pad.SampleRate : WavCodec.TargetSampleRate);
+                            layer.RoundRobinPaths[rr] = relative;
+                        }
+                    }
+                }
+
                 velocityLayers = pad.VelocityLayers
                     .Where(static layer => layer.HasSamples)
                     .Select(layer => new
                     {
                         velocity_low = layer.VelocityLow,
                         velocity_high = layer.VelocityHigh,
-                        round_robin = layer.RoundRobinPaths.Count > 0
-                            ? layer.RoundRobinPaths.ToArray()
-                            : layer.RoundRobinSamples.Select((_, index) => $"SAMPLES/{SanitizeFileName($"{pad.Label}_{pad.MidiNote}_rr{index + 1}.wav")}").ToArray(),
+                        round_robin = Enumerable.Range(0, layer.RoundRobinSamples.Count)
+                            .Select(index =>
+                            {
+                                if (index < layer.RoundRobinPaths.Count && !string.IsNullOrWhiteSpace(layer.RoundRobinPaths[index]))
+                                {
+                                    return layer.RoundRobinPaths[index].Replace('\\', '/');
+                                }
+
+                                return $"SAMPLES/{SanitizeFileName($"{pad.Label}_{pad.MidiNote}_rr{index + 1}.wav")}";
+                            })
+                            .ToArray(),
                     })
                     .ToArray();
             }
 
-            if (exportWavs && pad.HasAudio && !pad.HasVelocityLayers)
+            if (exportWavs && pad.Samples.Length > 0 && !pad.HasVelocityLayers)
             {
                 var safeName = SanitizeFileName($"{pad.Label}_{pad.MidiNote}.wav");
                 var wavPath = Path.Combine(samplesDir, safeName);
@@ -170,7 +220,7 @@ public static class KitPresetCodec
                 relativeSample = $"SAMPLES/{safeName}";
                 pad.FilePath = wavPath;
             }
-            else if (pad.FilePath is { Length: > 0 })
+            else if (!pad.HasVelocityLayers && pad.FilePath is { Length: > 0 })
             {
                 relativeSample = ToRelativeSamplePath(pad.FilePath);
             }
@@ -210,6 +260,25 @@ public static class KitPresetCodec
                 ? existing
                 : new DrumSample { Label = pad.Label, MidiNote = pad.Note });
         }
+    }
+
+    private static string ResolveExportWavPath(string relative, string samplesDir, string jsonPath)
+    {
+        relative = relative.Replace('\\', '/');
+        if (relative.StartsWith("SAMPLES/", StringComparison.OrdinalIgnoreCase))
+        {
+            relative = relative["SAMPLES/".Length..];
+        }
+
+        var underSamples = Path.Combine(samplesDir, relative.Replace('/', Path.DirectorySeparatorChar));
+        if (relative.Contains('/'))
+        {
+            return underSamples;
+        }
+
+        // Flat SAMPLES/name.wav — also try next to the preset for older layouts.
+        var nextToPreset = Path.Combine(Path.GetDirectoryName(jsonPath) ?? ".", "SAMPLES", relative);
+        return File.Exists(nextToPreset) ? nextToPreset : underSamples;
     }
 
     public static string? ResolveSamplePath(string relative, string presetDir, string? samplesRoot)

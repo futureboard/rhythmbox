@@ -41,16 +41,32 @@ public sealed partial class LocalizationViewModel : ViewModelBase
     [ObservableProperty] private string _headerDevice = string.Empty;
     [ObservableProperty] private string _headerScan = string.Empty;
     [ObservableProperty] private string _headerSettingsTip = string.Empty;
+    [ObservableProperty] private string _headerFullscreen = string.Empty;
+    [ObservableProperty] private string _headerTapTempo = string.Empty;
+    [ObservableProperty] private string _headerMore = string.Empty;
+    [ObservableProperty] private string _headerLoadKit = string.Empty;
+    [ObservableProperty] private string _headerScanTip = string.Empty;
+    [ObservableProperty] private string _headerFullscreenTip = string.Empty;
+    [ObservableProperty] private string _headerSubOutputTip = string.Empty;
+    [ObservableProperty] private string _headerAudioOff = string.Empty;
+    [ObservableProperty] private string _headerRescanKits = string.Empty;
+    [ObservableProperty] private string _headerOpenStylesFolder = string.Empty;
+    [ObservableProperty] private string _headerOpenKitsFolder = string.Empty;
+    [ObservableProperty] private string _headerOpenSamplesFolder = string.Empty;
 
     [ObservableProperty] private string _transportTitle = string.Empty;
+    [ObservableProperty] private string _transportPlay = string.Empty;
+    [ObservableProperty] private string _transportPause = string.Empty;
+    [ObservableProperty] private string _transportStop = string.Empty;
     [ObservableProperty] private string _transportLoop = string.Empty;
     [ObservableProperty] private string _transportMixer = string.Empty;
     [ObservableProperty] private string _transportScan = string.Empty;
     [ObservableProperty] private string _transportQuit = string.Empty;
     [ObservableProperty] private string _transportTapTempo = string.Empty;
     [ObservableProperty] private string _transportTimeSig = string.Empty;
-
-    [ObservableProperty] private string _headerTapTempo = string.Empty;
+    [ObservableProperty] private string _transportPlayTip = string.Empty;
+    [ObservableProperty] private string _transportStopTip = string.Empty;
+    [ObservableProperty] private string _transportLoopTip = string.Empty;
 
     [ObservableProperty] private string _arrangerTitle = string.Empty;
     [ObservableProperty] private string _arrangerStyle = string.Empty;
@@ -88,6 +104,16 @@ public sealed partial class LocalizationViewModel : ViewModelBase
     [ObservableProperty] private string _homeSettingsHint = string.Empty;
     [ObservableProperty] private string _homeStatusTitle = string.Empty;
     [ObservableProperty] private string _homeStartPlaying = string.Empty;
+    [ObservableProperty] private string _homeLoadStyle = string.Empty;
+    [ObservableProperty] private string _homeLoadKit = string.Empty;
+    [ObservableProperty] private string _homeOpenAudio = string.Empty;
+    [ObservableProperty] private string _homeNoStyle = string.Empty;
+    [ObservableProperty] private string _homeNoDevice = string.Empty;
+    [ObservableProperty] private string _homeKitLabel = string.Empty;
+    [ObservableProperty] private string _homeStyleLabel = string.Empty;
+    [ObservableProperty] private string _homePatternLabel = string.Empty;
+    [ObservableProperty] private string _homeDeviceLabel = string.Empty;
+    [ObservableProperty] private string _homeTransportLabel = string.Empty;
 
     [ObservableProperty] private string _filesTitle = string.Empty;
     [ObservableProperty] private string _filesLocations = string.Empty;
@@ -167,16 +193,32 @@ public sealed partial class LocalizationViewModel : ViewModelBase
         HeaderDevice = _i18n["header.device"];
         HeaderScan = _i18n["header.scan"];
         HeaderSettingsTip = _i18n["header.settingsTip"];
+        HeaderFullscreen = _i18n["header.fullscreen"];
+        HeaderTapTempo = _i18n["header.tapTempo"];
+        HeaderMore = _i18n["header.more"];
+        HeaderLoadKit = _i18n["header.loadKit"];
+        HeaderScanTip = _i18n["header.scanTip"];
+        HeaderFullscreenTip = _i18n["header.fullscreenTip"];
+        HeaderSubOutputTip = _i18n["header.subOutputTip"];
+        HeaderAudioOff = _i18n["header.audioOff"];
+        HeaderRescanKits = _i18n["header.rescanKits"];
+        HeaderOpenStylesFolder = _i18n["header.openStylesFolder"];
+        HeaderOpenKitsFolder = _i18n["header.openKitsFolder"];
+        HeaderOpenSamplesFolder = _i18n["header.openSamplesFolder"];
 
         TransportTitle = _i18n["transport.title"];
+        TransportPlay = _i18n["transport.play"];
+        TransportPause = _i18n["transport.pause"];
+        TransportStop = _i18n["transport.stop"];
         TransportLoop = _i18n["transport.loop"];
         TransportMixer = _i18n["transport.mixer"];
         TransportScan = _i18n["transport.scan"];
         TransportQuit = _i18n["transport.quit"];
         TransportTapTempo = _i18n["transport.tapTempo"];
         TransportTimeSig = _i18n["transport.timeSig"];
-
-        HeaderTapTempo = _i18n["header.tapTempo"];
+        TransportPlayTip = _i18n["transport.playTip"];
+        TransportStopTip = _i18n["transport.stopTip"];
+        TransportLoopTip = _i18n["transport.loopTip"];
 
         ArrangerTitle = _i18n["arranger.title"];
         ArrangerStyle = _i18n["arranger.style"];
@@ -214,6 +256,16 @@ public sealed partial class LocalizationViewModel : ViewModelBase
         HomeSettingsHint = _i18n["home.settingsHint"];
         HomeStatusTitle = _i18n["home.statusTitle"];
         HomeStartPlaying = _i18n["home.startPlaying"];
+        HomeLoadStyle = _i18n["home.loadStyle"];
+        HomeLoadKit = _i18n["home.loadKit"];
+        HomeOpenAudio = _i18n["home.openAudio"];
+        HomeNoStyle = _i18n["home.noStyle"];
+        HomeNoDevice = _i18n["home.noDevice"];
+        HomeKitLabel = _i18n["home.kitLabel"];
+        HomeStyleLabel = _i18n["home.styleLabel"];
+        HomePatternLabel = _i18n["home.patternLabel"];
+        HomeDeviceLabel = _i18n["home.deviceLabel"];
+        HomeTransportLabel = _i18n["home.transportLabel"];
 
         FilesTitle = _i18n["files.title"];
         FilesLocations = _i18n["files.locations"];

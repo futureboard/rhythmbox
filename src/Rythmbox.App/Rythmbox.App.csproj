@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Rythmbox.Core\Rythmbox.Core.csproj" />
+    <ProjectReference Include="..\Rythmbox.UI\Rythmbox.UI.csproj" />
     <ProjectReference Include="..\Rythmbox.Editor\Rythmbox.Editor.csproj" />
     <ProjectReference Include="..\Rythmbox.SampleCreator\Rythmbox.SampleCreator.csproj" />
   </ItemGroup>

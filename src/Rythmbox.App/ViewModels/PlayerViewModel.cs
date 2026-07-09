@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Rythmbox.App.Localization;
 using Rythmbox.Core.Engine;
 using SoundFlow.Enums;
 
@@ -10,12 +11,15 @@ namespace Rythmbox.App.ViewModels;
 public sealed partial class PlayerViewModel : ViewModelBase, IDisposable
 {
     private readonly MidiFilePlayer _player;
+    private readonly LocalizationService _i18n;
     private readonly DispatcherTimer _timer;
     private bool _isSyncingPosition;
 
-    public PlayerViewModel(MidiFilePlayer player)
+    public PlayerViewModel(MidiFilePlayer player, LocalizationService i18n)
     {
         _player = player;
+        _i18n = i18n;
+        _i18n.LanguageChanged += (_, _) => OnPropertyChanged(nameof(PlayPauseLabel));
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
         _timer.Tick += (_, _) => SyncFromEngine();
@@ -55,7 +59,7 @@ public sealed partial class PlayerViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private double _nativeBpm = 120.0;
 
-    public string PlayPauseLabel => IsPlaying ? "Pause" : "Play";
+    public string PlayPauseLabel => IsPlaying ? _i18n["transport.pause"] : _i18n["transport.play"];
 
     /// <summary>The distinct note numbers used anywhere in the currently loaded loop.</summary>
     public IReadOnlySet<int> UsedNoteNumbers => _player.UsedNoteNumbers;

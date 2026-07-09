@@ -50,17 +50,23 @@
                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
                                     MinHeight="0"
-                                    Classes="pad" Classes.used="{Binding IsUsedInLoop}">
+                                    Classes="pad"
+                                    Classes.used="{Binding IsUsedInLoop}"
+                                    Classes.pressed="{Binding IsPressed}"
+                                    Classes.empty="{Binding !HasSample}">
                                 <StackPanel Spacing="2" VerticalAlignment="Center" Margin="6,8">
                                     <TextBlock Text="{Binding Label}" Classes="padLabel" HorizontalAlignment="Center" />
-                                    <TextBlock Text="{Binding NoteDetail}" Classes="padNumber" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding SampleDetail}" Classes="padNumber" HorizontalAlignment="Center" />
+                                    <Ellipse Width="5" Height="5" HorizontalAlignment="Center" Margin="0,2,0,0"
+                                             Classes="padSampleDot"
+                                             Classes.hasSample="{Binding HasSample}" />
                                 </StackPanel>
                             </Button>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <Border Grid.Column="1" Classes="panel" Padding="8">
+                <Border Grid.Column="1" Classes="panel hotloadRack" Padding="8">
                     <DockPanel LastChildFill="True">
                         <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,8">
                             <TextBlock Text="DRUM PRESET" Classes="panelHeader" FontSize="11" />
@@ -83,17 +89,32 @@
                             </ItemsControl.ItemContainerTheme>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:KitHotloadSlotViewModel">
-                                    <Button Command="{Binding LoadCommand}"
+                                    <Button Command="{Binding ActivateCommand}"
                                             ToolTip.Tip="{Binding ToolTip}"
                                             HorizontalAlignment="Stretch"
                                             VerticalAlignment="Stretch"
                                             HorizontalContentAlignment="Stretch"
                                             VerticalContentAlignment="Stretch"
-                                            Padding="6"
-                                            Margin="0,0,0,6">
-                                        <Grid ColumnDefinitions="32,*">
-                                            <TextBlock Grid.Column="0" Text="{Binding SlotName}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Kit.Name, FallbackValue='Empty'}" Classes="dim" FontSize="10" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                            Padding="6,8"
+                                            Margin="0,0,0,6"
+                                            Classes="hotloadSlot"
+                                            Classes.empty="{Binding IsEmpty}"
+                                            Classes.active="{Binding IsActive}">
+                                        <Button.ContextFlyout>
+                                            <MenuFlyout>
+                                                <MenuItem Header="Change kit…" Command="{Binding ChangeCommand}" />
+                                                <MenuItem Header="Clear slot" Command="{Binding ClearCommand}" />
+                                            </MenuFlyout>
+                                        </Button.ContextFlyout>
+                                        <Grid ColumnDefinitions="32,*" RowDefinitions="Auto,Auto">
+                                            <TextBlock Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
+                                                       Text="{Binding SlotName}" FontSize="18" FontWeight="Bold"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding KitLabel}"
+                                                       Classes="hotloadSlotLabel" TextWrapping="Wrap"
+                                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Bottom" />
+                                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Click to assign"
+                                                       Classes="hotloadSlotHint" IsVisible="{Binding IsEmpty}" />
                                         </Grid>
                                     </Button>
                                 </DataTemplate>

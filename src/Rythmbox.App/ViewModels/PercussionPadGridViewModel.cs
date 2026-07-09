@@ -12,13 +12,16 @@ public sealed partial class PercussionPadGridViewModel : ViewModelBase
     public const int GridColumns = 4;
     public const int GridRows = 5;
 
+    private readonly KitSamplePlayer _kitPlayer;
     private readonly PlayerViewModel _player;
 
     public PercussionPadGridViewModel(KitSamplePlayer kitPlayer, PlayerViewModel player)
     {
+        _kitPlayer = kitPlayer;
         _player = player;
         Pads = GmPercussionMap.Pads.Select(pad => new PadViewModel(pad, kitPlayer)).ToList();
         CurrentPagePads = new ObservableCollection<PadViewModel>(BuildCurrentPagePads());
+        RefreshSampleState();
 
         _player.PropertyChanged += (_, e) =>
         {
@@ -76,6 +79,23 @@ public sealed partial class PercussionPadGridViewModel : ViewModelBase
         if ((uint)index < (uint)Pads.Count)
         {
             Pads[index].Release();
+        }
+    }
+
+    public void AnimatePad(int index)
+    {
+        if ((uint)index < (uint)Pads.Count)
+        {
+            Pads[index].AnimateHit();
+        }
+    }
+
+    public void RefreshSampleState()
+    {
+        var hasSample = _kitPlayer.PadHasSample;
+        for (var i = 0; i < Pads.Count && i < hasSample.Count; i++)
+        {
+            Pads[i].HasSample = hasSample[i];
         }
     }
 

@@ -7,86 +7,127 @@
              mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="44"
              x:Class="Rythmbox.App.Views.HeaderView"
              x:DataType="vm:MainWindowViewModel">
+    <!--
+      Slim global header — always-needed controls only.
+      Style/Pattern live on Machine/Home. Scan/Sub/Fullscreen live in overflow.
+    -->
     <Border Classes="headerBar">
-        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+        <Grid ColumnDefinitions="Auto,*,Auto" MinHeight="34">
 
-            <views:LogoView Grid.Column="0" Height="10" VerticalAlignment="Center" />
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" Margin="12,0,0,0" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="{Binding Localization.HeaderStyle}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.StyleLabel}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" MaxWidth="140" TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="{Binding Localization.HeaderPattern}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.PatternLabel}" FontSize="11" VerticalAlignment="Center" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="{Binding Localization.HeaderKit}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.KitLabel}" FontSize="11" VerticalAlignment="Center" />
-                </StackPanel>
+            <!-- Left: logo + mode -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,12,0">
+                <views:LogoView Height="11" VerticalAlignment="Center" Width="88" />
+                <Border Width="1" Height="14" Background="{DynamicResource RythmboxPanelBorderBrush}" />
+                <TextBlock Text="{Binding CurrentPageTitle}" FontSize="12" FontWeight="SemiBold"
+                           Foreground="{DynamicResource RythmboxAccentBrush}" VerticalAlignment="Center"
+                           MaxWidth="96" TextTrimming="CharacterEllipsis"
+                           ToolTip.Tip="{Binding CurrentPageTitle}" />
             </StackPanel>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="{Binding ClockText}" Classes="mono" FontSize="12" VerticalAlignment="Center" />
-                </StackPanel>
-                <Button Command="{Binding Tempo.TogglePickerCommand}" Padding="8,4">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <TextBlock Text="{Binding Localization.HeaderTempo}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding Tempo.TempoLabel}" Classes="mono" FontSize="12" VerticalAlignment="Center" />
+            <!-- Center: transport + tempo + tap + timer -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button Command="{Binding Player.PlayPauseCommand}"
+                        Classes="transportPlay"
+                        Classes.playing="{Binding Player.IsPlaying}"
+                        ToolTip.Tip="{Binding Localization.TransportPlayTip}"
+                        MinWidth="32" Padding="8,3">
+                    <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                        <Path Data="{StaticResource IconSquare}" Width="10" Height="10" Stretch="Uniform"
+                              Fill="{Binding $parent[Button].Foreground}"
+                              IsVisible="{Binding Player.IsPlaying}" />
+                        <Path Data="{StaticResource IconPlay}" Width="10" Height="10" Stretch="Uniform"
+                              Fill="{Binding $parent[Button].Foreground}"
+                              IsVisible="{Binding !Player.IsPlaying}" />
+                        <TextBlock Text="{Binding Player.PlayPauseLabel}" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
-                <Button Command="{Binding Tempo.TapTempoCommand}" Padding="8,4" ToolTip.Tip="Tap tempo (T)"
-                        Classes.tapActive="{Binding Tempo.IsAwaitingTap}">
-                    <TextBlock Text="{Binding Localization.HeaderTapTempo}" FontSize="11" FontWeight="SemiBold" />
+                <Button Command="{Binding Player.StopCommand}" Classes="icon" Padding="6,3"
+                        ToolTip.Tip="{Binding Localization.TransportStopTip}" MinWidth="28">
+                    <Path Data="{StaticResource IconSquare}" Width="9" Height="9" Stretch="Uniform"
+                          Fill="{DynamicResource RythmboxTextBrush}" />
                 </Button>
-                <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                <ToggleButton IsChecked="{Binding Player.IsLooping}" Classes="transportLoop" Padding="6,3"
+                              ToolTip.Tip="{Binding Localization.TransportLoopTip}">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <Path Data="{StaticResource IconRepeat}" Classes="icon small" />
+                        <TextBlock Text="{Binding Localization.TransportLoop}" FontSize="10" FontWeight="SemiBold" />
+                    </StackPanel>
+                </ToggleButton>
+                <Border Width="1" Height="16" Background="{DynamicResource RythmboxPanelBorderBrush}" Margin="2,0" />
+                <Button Command="{Binding Tempo.TogglePickerCommand}" Padding="6,3"
+                        ToolTip.Tip="{Binding Localization.HeaderTempo}">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <TextBlock Text="{Binding Localization.HeaderTempo}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Tempo.TempoLabel}" Classes="mono" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding Tempo.TapTempoCommand}" Padding="6,3"
+                        ToolTip.Tip="{Binding Localization.HeaderTapTempo}"
+                        Classes.tapActive="{Binding Tempo.IsAwaitingTap}">
+                    <TextBlock Text="{Binding Localization.HeaderTapTempo}" FontSize="10" FontWeight="SemiBold"
+                               MaxWidth="64" TextTrimming="CharacterEllipsis" />
+                </Button>
+                <StackPanel Orientation="Horizontal" Spacing="3" VerticalAlignment="Center">
                     <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led0}" />
                     <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led1}" />
                     <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led2}" />
                     <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led3}" />
                 </StackPanel>
+                <TextBlock Text="{Binding ClockText}" Classes="mono dim" FontSize="11" VerticalAlignment="Center" Margin="4,0,0,0" />
             </StackPanel>
 
-            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center" Margin="8,0">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="{Binding Localization.HeaderBackend}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.BackendLabel}" FontSize="11" VerticalAlignment="Center" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="4" MaxWidth="160">
-                    <TextBlock Text="{Binding Localization.HeaderDevice}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.DeviceLabel}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                </StackPanel>
-            </StackPanel>
+            <!-- Right: kit + audio chip + overflow -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12,0,0,0">
+                <Button Command="{Binding KitBrowser.BrowseLoadKitCommand}"
+                        Padding="8,3" MaxWidth="140" MinWidth="72"
+                        ToolTip.Tip="{Binding Machine.KitLabel}">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="{Binding Localization.HeaderKit}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Machine.KitLabel}" FontSize="11" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis" MaxWidth="100" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
 
-            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0" VerticalAlignment="Center">
-                <Button Command="{Binding Machine.StyleBank.RescanCommand}" Padding="8,4" ToolTip.Tip="Rescan style library">
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
-                        <TextBlock Text="{Binding Localization.HeaderScan}" FontSize="11" />
-                    </StackPanel>
-                </Button>
-                <Button Command="{Binding KitBrowser.BrowseLoadKitCommand}" MaxWidth="180" Padding="8,4">
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
-                        <TextBlock Text="{Binding KitBrowser.LoadButtonLabel}" TextTrimming="CharacterEllipsis" FontSize="11" />
-                    </StackPanel>
-                </Button>
-                <Button Click="OnToggleFullscreenClick" Padding="8,4" ToolTip.Tip="Toggle fullscreen (F11)">
-                    <TextBlock Text="FULL" FontSize="10" FontWeight="SemiBold" />
-                </Button>
-                <Button Padding="8,4" ToolTip.Tip="Power">
+                <Border Classes="audioStatusChip"
+                        ToolTip.Tip="{Binding Machine.DeviceLabel}">
+                    <TextBlock Text="{Binding Machine.AudioStatusChip}" FontSize="10" FontWeight="SemiBold"
+                               MaxWidth="72" TextTrimming="CharacterEllipsis" />
+                </Border>
+
+                <Button Classes="icon" Padding="6,3" MinWidth="28"
+                        ToolTip.Tip="{Binding Localization.HeaderMore}">
                     <Button.Flyout>
-                        <MenuFlyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedRight">
+                            <MenuItem Header="{Binding Localization.HeaderScan}"
+                                      Command="{Binding Machine.StyleBank.RescanCommand}" />
+                            <MenuItem Header="{Binding Localization.HeaderRescanKits}"
+                                      Command="{Binding KitBrowser.RescanCommand}" />
+                            <MenuItem Header="{Binding Localization.NavSubOutput}"
+                                      Command="{Binding SubLoops.ToggleCommand}" />
+                            <MenuItem Header="{Binding Localization.HeaderFullscreen}"
+                                      Click="OnToggleFullscreenMenuClick" />
+                            <Separator />
+                            <MenuItem Header="{Binding Localization.HomeOpenAudio}"
+                                      Command="{Binding NavigateCommand}"
+                                      CommandParameter="{x:Static vm:AppPage.Settings}" />
+                            <MenuItem Header="{Binding Localization.HeaderOpenStylesFolder}"
+                                      Command="{Binding OpenStylesFolderCommand}" />
+                            <MenuItem Header="{Binding Localization.HeaderOpenKitsFolder}"
+                                      Command="{Binding OpenKitsFolderCommand}" />
+                            <MenuItem Header="{Binding Localization.HeaderOpenSamplesFolder}"
+                                      Command="{Binding OpenSamplesFolderCommand}" />
+                            <Separator />
+                            <MenuItem Header="{Binding Localization.NavSettings}"
+                                      Command="{Binding NavigateCommand}"
+                                      CommandParameter="{x:Static vm:AppPage.Settings}" />
+                            <MenuItem Header="{Binding Localization.TransportQuit}"
+                                      Command="{Binding QuitCommand}" />
+                            <Separator />
                             <MenuItem Header="Shutdown" Command="{Binding ShutdownComputerCommand}" />
                             <MenuItem Header="Restart" Command="{Binding RestartComputerCommand}" />
-                            <MenuItem Header="Exit" Command="{Binding QuitCommand}" />
                         </MenuFlyout>
                     </Button.Flyout>
-                    <Path Data="{StaticResource IconPower}" Classes="icon small danger" />
-                </Button>
-                <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}" Padding="8,4" ToolTip.Tip="{Binding Localization.HeaderSettingsTip}">
-                    <Path Data="{StaticResource IconSlidersHorizontal}" Classes="icon small" />
+                    <Path Data="{StaticResource IconMoreHorizontal}" Classes="icon small" />
                 </Button>
             </StackPanel>
 

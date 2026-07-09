@@ -2,7 +2,7 @@ using Rythmbox.Core.Models;
 
 namespace Rythmbox.Core.Samples;
 
-/// <summary>Runtime pad playback: velocity layers, round-robin, and fallback sample.</summary>
+/// <summary>Runtime pad playback: velocity layers, round-robin, and optional single-sample fallback.</summary>
 public sealed class PadPlaybackState
 {
     private int[] _roundRobinCounters = [];
@@ -14,13 +14,12 @@ public sealed class PadPlaybackState
     public bool HasAudio =>
         FallbackBuffer.Length > 0 || VelocityLayers.Any(static layer => layer.Buffers.Length > 0);
 
-    public static PadPlaybackState FromSample(DrumSample? sample, string fallbackLabel)
+    public static PadPlaybackState FromSample(DrumSample? sample)
     {
         var state = new PadPlaybackState();
 
         if (sample is null)
         {
-            state.FallbackBuffer = ProceduralDrumSynth.ForLabel(fallbackLabel, WavCodec.TargetSampleRate);
             return state;
         }
 
@@ -43,10 +42,6 @@ public sealed class PadPlaybackState
         if (sample.HasAudio)
         {
             state.FallbackBuffer = sample.Samples;
-        }
-        else if (layers.Length == 0)
-        {
-            state.FallbackBuffer = ProceduralDrumSynth.ForLabel(sample.Label.Length > 0 ? sample.Label : fallbackLabel, WavCodec.TargetSampleRate);
         }
 
         return state;

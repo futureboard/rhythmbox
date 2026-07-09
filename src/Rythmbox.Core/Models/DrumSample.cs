@@ -24,7 +24,7 @@ public sealed class DrumSample
 
     public int SampleRate { get; set; } = 48_000;
 
-    public bool HasAudio => Samples.Length > 0;
+    public bool HasAudio => Samples.Length > 0 || HasVelocityLayers;
 
     public TimeSpan Duration => SampleRate > 0
         ? TimeSpan.FromSeconds((double)Samples.Length / SampleRate)

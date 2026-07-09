@@ -11,6 +11,8 @@ namespace Rythmbox.Editor.ViewModels;
 
 public sealed partial class EditorViewModel : ViewModelBase, IDisposable
 {
+    private static readonly string[] HotloadSlotNames = ["A", "B", "C", "D"];
+
     private const int MinDrumNote = 1;
     private const int MaxDrumNote = 127;
 
@@ -18,9 +20,9 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
     private readonly KitSamplePlayer _kitPlayer;
     private readonly PatternPreviewEngine _preview;
     private readonly AppPaths _paths;
-    private readonly KitPresetService _presetService;
     private readonly IFileDialogService _fileDialog;
     private string? _currentFilePath;
+    private string? _loadedKitPath;
 
     public EditorViewModel(IFileDialogService fileDialog)
     {
@@ -30,9 +32,16 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
         _kitPlayer = new KitSamplePlayer(_engine);
         _preview = new PatternPreviewEngine(_kitPlayer);
         _paths = new AppPaths();
-        _presetService = new KitPresetService();
+
+        var stored = KitHotloadSlotStore.Load(HotloadSlotNames);
         HotloadSlots = new ObservableCollection<EditorKitHotloadSlotViewModel>(
-            new[] { "A", "B", "C", "D" }.Select(name => new EditorKitHotloadSlotViewModel(name, LoadHotloadSlot)));
+            HotloadSlotNames.Select(name => new EditorKitHotloadSlotViewModel(
+                name,
+                stored.GetValueOrDefault(name),
+                ActivateHotloadSlot,
+                ChangeHotloadSlot,
+                ClearHotloadSlot)));
+
         Pattern = new DrumPattern();
 
         _preview.StepAdvanced += OnPreviewStep;
@@ -234,37 +243,75 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
     public void LoadKit(string path)
     {
         _kitPlayer.LoadKit(path, _paths.SamplesDir);
+        _loadedKitPath = path;
         IsKitLoaded = true;
         KitLabel = _kitPlayer.KitName;
         StatusText = $"Kit: {KitLabel}";
+        RefreshHotloadActiveState();
     }
 
-    private void LoadHotloadSlot(EditorKitHotloadSlotViewModel slot)
+    private async Task ActivateHotloadSlot(EditorKitHotloadSlotViewModel slot)
     {
-        if (slot.Kit is null)
+        if (slot.IsEmpty)
+        {
+            await ChangeHotloadSlot(slot);
+            return;
+        }
+
+        if (!File.Exists(slot.KitPath))
+        {
+            slot.KitPath = null;
+            PersistHotloadSlots();
+            await ChangeHotloadSlot(slot);
+            return;
+        }
+
+        LoadKit(slot.KitPath!);
+    }
+
+    private async Task ChangeHotloadSlot(EditorKitHotloadSlotViewModel slot)
+    {
+        var path = await _fileDialog.PickFileAsync(
+            _paths.PresetDir,
+            $"Select kit for slot {slot.SlotName}",
+            [".json", ".apak"]);
+
+        if (path is null)
         {
             return;
         }
 
-        LoadKit(slot.Kit.FilePath);
+        slot.KitPath = path;
+        PersistHotloadSlots();
+        LoadKit(path);
     }
 
-    private void RefreshHotloadSlots()
+    private void ClearHotloadSlot(EditorKitHotloadSlotViewModel slot)
     {
-        var kits = _presetService.Scan(_paths.PresetDir);
-        for (var i = 0; i < HotloadSlots.Count; i++)
+        slot.KitPath = null;
+        PersistHotloadSlots();
+    }
+
+    private void PersistHotloadSlots()
+    {
+        KitHotloadSlotStore.Save(HotloadSlots.ToDictionary(static s => s.SlotName, static s => s.KitPath));
+    }
+
+    private void RefreshHotloadActiveState()
+    {
+        foreach (var slot in HotloadSlots)
         {
-            HotloadSlots[i].Kit = i < kits.Count ? kits[i] : null;
+            slot.IsActive = !slot.IsEmpty
+                && _loadedKitPath is not null
+                && string.Equals(slot.KitPath, _loadedKitPath, StringComparison.OrdinalIgnoreCase);
         }
     }
 
     private void TryLoadDefaultKit()
     {
-        RefreshHotloadSlots();
-
         if (!Directory.Exists(_paths.PresetDir))
         {
-            _kitPlayer.LoadProceduralGmKit();
+            _kitPlayer.LoadEmptyGmKit();
             IsKitLoaded = true;
             KitLabel = _kitPlayer.KitName;
             return;
@@ -286,7 +333,7 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        _kitPlayer.LoadProceduralGmKit();
+        _kitPlayer.LoadEmptyGmKit();
         IsKitLoaded = true;
         KitLabel = _kitPlayer.KitName;
     }
@@ -430,25 +477,54 @@ public sealed partial class EditorViewModel : ViewModelBase, IDisposable
 
 public sealed partial class EditorKitHotloadSlotViewModel : ViewModelBase
 {
-    private readonly Action<EditorKitHotloadSlotViewModel> _load;
+    private readonly Func<EditorKitHotloadSlotViewModel, Task> _activate;
+    private readonly Func<EditorKitHotloadSlotViewModel, Task> _change;
+    private readonly Action<EditorKitHotloadSlotViewModel> _clear;
 
-    public EditorKitHotloadSlotViewModel(string slotName, Action<EditorKitHotloadSlotViewModel> load)
+    public EditorKitHotloadSlotViewModel(
+        string slotName,
+        string? kitPath,
+        Func<EditorKitHotloadSlotViewModel, Task> activate,
+        Func<EditorKitHotloadSlotViewModel, Task> change,
+        Action<EditorKitHotloadSlotViewModel> clear)
     {
         SlotName = slotName;
-        _load = load;
+        _kitPath = kitPath;
+        _activate = activate;
+        _change = change;
+        _clear = clear;
     }
 
     public string SlotName { get; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmpty))]
+    [NotifyPropertyChangedFor(nameof(KitLabel))]
     [NotifyPropertyChangedFor(nameof(DisplayName))]
     [NotifyPropertyChangedFor(nameof(ToolTip))]
-    private KitPresetEntry? _kit;
+    private string? _kitPath;
 
-    public string DisplayName => Kit is null ? SlotName : $"{SlotName}: {Kit.Name}";
+    [ObservableProperty]
+    private bool _isActive;
 
-    public string ToolTip => Kit is null ? $"No kit assigned to slot {SlotName}" : $"Load {Kit.Name}";
+    public bool IsEmpty => string.IsNullOrWhiteSpace(KitPath);
+
+    public string KitLabel => IsEmpty
+        ? "Select…"
+        : Path.GetFileNameWithoutExtension(KitPath!) ?? "Kit";
+
+    public string DisplayName => IsEmpty ? SlotName : $"{SlotName}: {KitLabel}";
+
+    public string ToolTip => IsEmpty
+        ? $"Click to select a kit for slot {SlotName}"
+        : $"Load {KitLabel}";
 
     [RelayCommand]
-    private void Load() => _load(this);
+    private Task Activate() => _activate(this);
+
+    [RelayCommand]
+    private Task Change() => _change(this);
+
+    [RelayCommand]
+    private void Clear() => _clear(this);
 }

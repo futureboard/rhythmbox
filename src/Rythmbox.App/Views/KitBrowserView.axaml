@@ -27,14 +27,23 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:KitHotloadSlotViewModel">
-                        <StackPanel Margin="2" Spacing="2">
-                            <Button Command="{Binding LoadCommand}" ToolTip.Tip="{Binding ToolTip}" HorizontalAlignment="Stretch" Padding="6,4">
-                                <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" FontSize="10" HorizontalAlignment="Center" />
-                            </Button>
-                            <Button Command="{Binding AssignCommand}" HorizontalAlignment="Stretch" Padding="4,1" ToolTip.Tip="Assign selected kit">
-                                <TextBlock Text="Set" FontSize="9" HorizontalAlignment="Center" Classes="dim" />
-                            </Button>
-                        </StackPanel>
+                        <Button Command="{Binding ActivateCommand}"
+                                ToolTip.Tip="{Binding ToolTip}"
+                                HorizontalAlignment="Stretch"
+                                Padding="6,5"
+                                Margin="2"
+                                Classes="hotloadSlot"
+                                Classes.empty="{Binding IsEmpty}"
+                                Classes.active="{Binding IsActive}">
+                            <Button.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuItem Header="Change kit…" Command="{Binding ChangeCommand}" />
+                                    <MenuItem Header="Clear slot" Command="{Binding ClearCommand}" />
+                                </MenuFlyout>
+                            </Button.ContextFlyout>
+                            <TextBlock Text="{Binding KitLabel}" TextTrimming="CharacterEllipsis"
+                                       FontSize="10" HorizontalAlignment="Center" Classes="hotloadSlotLabel" />
+                        </Button>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

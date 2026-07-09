@@ -34,5 +34,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Rythmbox.Core\Rythmbox.Core.csproj" />
+    <ProjectReference Include="..\Rythmbox.UI\Rythmbox.UI.csproj" />
   </ItemGroup>
 </Project>

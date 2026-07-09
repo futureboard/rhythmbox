@@ -4,12 +4,32 @@
              xmlns:vm="using:Rythmbox.SampleCreator.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="120"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="140"
              x:Class="Rythmbox.SampleCreator.Views.WaveformView"
              x:DataType="vm:PadSampleViewModel">
-    <Border Classes="waveformPanel">
-        <views:WaveformCanvas Peaks="{Binding WaveformPeaks}"
-                              TrimStart="{Binding TrimStart}"
-                              TrimEnd="{Binding TrimEnd}" />
+    <Border Classes="waveformPanel" MinHeight="120">
+        <Panel>
+            <views:WaveformCanvas Peaks="{Binding WaveformPeaks}"
+                                  TrimStart="{Binding TrimStart}"
+                                  TrimEnd="{Binding TrimEnd}"
+                                  IsVisible="{Binding HasAudio}" />
+            <Border IsVisible="{Binding !HasAudio}"
+                    Background="{DynamicResource RbInputBgBrush}"
+                    BorderBrush="{DynamicResource RythmboxBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="2"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch">
+                <StackPanel Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16">
+                    <TextBlock Text="Drop WAV here or click Import WAV"
+                               FontSize="13" FontWeight="SemiBold"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource RythmboxSecondaryTextBrush}" />
+                    <TextBlock Text="Assign a sample to this pad to edit trim, gain, and pitch"
+                               Classes="dim" FontSize="11"
+                               HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                </StackPanel>
+            </Border>
+        </Panel>
     </Border>
 </UserControl>

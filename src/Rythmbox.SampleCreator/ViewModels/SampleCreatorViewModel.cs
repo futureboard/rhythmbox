@@ -127,17 +127,22 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
             : $"Imported {imported} of {wavPaths.Count} (ran out of pads)";
     }
 
-    public void PreviewPad(PadSampleViewModel pad)
+    public void PreviewPad(PadSampleViewModel pad) => pad.PreviewCommand.Execute(null);
+
+    public void PreviewBuffer(float[] samples, float gain, float pitchSemitones, string name)
     {
-        if (!pad.HasAudio)
+        if (samples.Length == 0)
         {
-            StatusText = $"{pad.Label} has no sample";
+            StatusText = $"{name} has no sample";
             return;
         }
 
-        _preview.Play(pad.Sample);
-        StatusText = $"Previewing {pad.Label}";
+        _preview.Play(samples, gain, pitchSemitones, name);
+        StatusText = $"Previewing {name}";
     }
+
+    public Task<string?> PickWavAsync() =>
+        _fileDialog.PickFileAsync(SuggestSamplesFolder(), "Import WAV sample", [".wav", ".wave"]);
 
     internal void NotifyKitEdited(string? status = null)
     {
@@ -202,11 +207,7 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        var path = await _fileDialog.PickFileAsync(
-            SuggestSamplesFolder(),
-            "Import WAV sample",
-            [".wav", ".wave"]);
-
+        var path = await PickWavAsync();
         if (path is not null)
         {
             ImportWavToSelected(path);
@@ -221,6 +222,10 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
     {
         RebuildPads();
         SyncFromSession();
+        var loaded = _kitSession.PresetPath is { } path
+            ? Path.GetFileName(path)
+            : _kitSession.KitName;
+        StatusText = $"Loaded {loaded}";
     }
 
     private void OnLiveKitUpdated() => SyncFromSession();
@@ -233,23 +238,20 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
 
     private void RebuildPads()
     {
+        var previousNote = SelectedPad?.Sample.MidiNote;
         Pads.Clear();
         var kit = _kitSession.WorkingKit;
         for (var i = 0; i < kit.Pads.Count; i++)
         {
             kit.Pads[i].PitchSemitones = 0f;
-            var vm = new PadSampleViewModel(this, kit.Pads[i], i);
-            vm.Gain = kit.Pads[i].Gain;
-            vm.Pitch = 0;
-            if (kit.Pads[i].FilePath is { } fp)
-            {
-                vm.FileName = Path.GetFileName(fp);
-            }
-
+            var sample = kit.Pads[i];
+            var vm = new PadSampleViewModel(this, sample, i);
             Pads.Add(vm);
         }
 
-        SelectedPad = Pads.FirstOrDefault();
+        SelectedPad = previousNote is { } note
+            ? Pads.FirstOrDefault(p => p.Sample.MidiNote == note) ?? Pads.FirstOrDefault()
+            : Pads.FirstOrDefault();
     }
 
     private void SyncKitFromPads()

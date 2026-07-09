@@ -44,8 +44,15 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:EditorKitHotloadSlotViewModel">
-                                <Button Command="{Binding LoadCommand}" ToolTip.Tip="{Binding ToolTip}" MaxWidth="82" Padding="6,4">
-                                    <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" FontSize="10" />
+                                <Button Command="{Binding ActivateCommand}" ToolTip.Tip="{Binding ToolTip}" MaxWidth="96" Padding="6,4"
+                                        Classes="toolbarBtn hotloadSlot" Classes.empty="{Binding IsEmpty}" Classes.active="{Binding IsActive}">
+                                    <Button.ContextFlyout>
+                                        <MenuFlyout>
+                                            <MenuItem Header="Change kit…" Command="{Binding ChangeCommand}" />
+                                            <MenuItem Header="Clear slot" Command="{Binding ClearCommand}" />
+                                        </MenuFlyout>
+                                    </Button.ContextFlyout>
+                                    <TextBlock Text="{Binding KitLabel}" TextTrimming="CharacterEllipsis" FontSize="10" />
                                 </Button>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>

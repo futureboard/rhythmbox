@@ -30,7 +30,7 @@ public sealed class PadPlaybackStateTests
             ],
         };
 
-        var state = PadPlaybackState.FromSample(sample, "Kick");
+        var state = PadPlaybackState.FromSample(sample);
 
         var softA = state.SelectBuffer(20);
         var softB = state.SelectBuffer(20);
@@ -62,11 +62,19 @@ public sealed class PadPlaybackStateTests
             ],
         };
 
-        var state = PadPlaybackState.FromSample(sample, "Tamb");
+        var state = PadPlaybackState.FromSample(sample);
         var buffer = state.SelectBuffer(100);
 
         Assert.NotNull(buffer);
         Assert.Equal(0.5f, buffer![0], 3);
+    }
+
+    [Fact]
+    public void FromSample_null_or_empty_has_no_audio()
+    {
+        Assert.False(PadPlaybackState.FromSample(null).HasAudio);
+        Assert.False(PadPlaybackState.FromSample(new DrumSample { Label = "Kick" }).HasAudio);
+        Assert.Null(PadPlaybackState.FromSample(null).SelectBuffer(100));
     }
 
     private static float[] CreateTone(float value) => [value, value, value];

@@ -22,22 +22,44 @@ public sealed class SamplePreviewPlayer : IDisposable
 
     public void Play(DrumSample sample)
     {
-        Stop();
+        float[]? buffer = null;
+        if (sample.Samples.Length > 0)
+        {
+            buffer = sample.Samples;
+        }
+        else if (sample.HasVelocityLayers)
+        {
+            buffer = sample.VelocityLayers
+                .SelectMany(static layer => layer.RoundRobinSamples)
+                .FirstOrDefault(static samples => samples.Length > 0);
+        }
 
-        if (!sample.HasAudio)
+        if (buffer is null || buffer.Length == 0)
         {
             return;
         }
 
-        var buffer = (float[])sample.Samples.Clone();
-        if (MathF.Abs(sample.PitchSemitones) > 0.001f)
+        Play(buffer, sample.Gain, sample.PitchSemitones, sample.Label);
+    }
+
+    public void Play(float[] monoSamples, float gain = 1f, float pitchSemitones = 0f, string name = "Preview")
+    {
+        Stop();
+
+        if (monoSamples.Length == 0)
         {
-            buffer = WavCodec.PitchShift(buffer, sample.PitchSemitones);
+            return;
         }
 
-        if (sample.Gain != 1f)
+        var buffer = (float[])monoSamples.Clone();
+        if (MathF.Abs(pitchSemitones) > 0.001f)
         {
-            WavCodec.ApplyGain(buffer, sample.Gain);
+            buffer = WavCodec.PitchShift(buffer, pitchSemitones);
+        }
+
+        if (gain != 1f)
+        {
+            WavCodec.ApplyGain(buffer, gain);
         }
 
         // Engine format is stereo (DvdHq); mono buffers must be interleaved L/R or playback runs ~1 octave high.
@@ -45,7 +67,7 @@ public sealed class SamplePreviewPlayer : IDisposable
         var provider = new RawDataProvider(buffer, WavCodec.TargetSampleRate);
         _player = new SoundPlayer(_engine.RawEngine, _engine.Format, provider)
         {
-            Name = sample.Label,
+            Name = name,
         };
         _player.PlaybackEnded += OnPlaybackEnded;
         _engine.MasterMixer.AddComponent(_player);

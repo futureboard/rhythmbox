@@ -42,6 +42,13 @@
                             <TextBlock Text="{Binding Localization.MixerRefresh}" FontSize="11" />
                         </StackPanel>
                     </Button>
+                    <Button Command="{Binding SubLoops.ToggleCommand}" Padding="8,4"
+                            ToolTip.Tip="{Binding Localization.HeaderSubOutputTip}">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <Path Data="{StaticResource IconRepeat}" Classes="icon small" />
+                            <TextBlock Text="{Binding Localization.NavSubOutput}" FontSize="11" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
 
                 <Button Grid.Column="2" Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}"

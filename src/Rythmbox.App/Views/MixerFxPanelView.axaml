@@ -3,75 +3,71 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Rythmbox.App.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="180"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="200"
              x:Class="Rythmbox.App.Views.MixerFxPanelView"
              x:DataType="vm:ChannelDspViewModel">
-    <Border Classes="mixerFxPanel" Padding="12,10">
+    <Border Classes="mixerFxPanel" Padding="14,10">
         <StackPanel Spacing="10">
             <TextBlock Text="{Binding ChannelName, StringFormat=FX — {0}}" Classes="panelHeader" FontSize="12" />
 
-            <Grid ColumnDefinitions="*,*,*,*,*" RowDefinitions="Auto,Auto">
-                <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4" Margin="0,0,8,0">
+            <TextBlock Text="INPUT &amp; EQ" Classes="mixerFxSection" />
+            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="10">
+                <StackPanel Grid.Column="0" Spacing="4">
                     <TextBlock Text="Trim" Classes="dim" FontSize="10" />
                     <Slider Minimum="-24" Maximum="12" Value="{Binding TrimGainDb}" TickFrequency="3" />
-                    <TextBlock Text="{Binding TrimGainDb, StringFormat={}{0:0.0} dB}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding TrimGainDb, StringFormat={}{0:0.0} dB}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                 </StackPanel>
-
-                <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4" Margin="0,0,8,0">
+                <StackPanel Grid.Column="1" Spacing="4">
                     <TextBlock Text="EQ Low" Classes="dim" FontSize="10" />
                     <Slider Minimum="-12" Maximum="12" Value="{Binding LowGainDb}" />
-                    <TextBlock Text="{Binding LowGainDb, StringFormat={}{0:0.0} dB}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding LowGainDb, StringFormat={}{0:0.0} dB}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                 </StackPanel>
-
-                <StackPanel Grid.Row="0" Grid.Column="2" Spacing="4" Margin="0,0,8,0">
+                <StackPanel Grid.Column="2" Spacing="4">
                     <TextBlock Text="EQ Mid" Classes="dim" FontSize="10" />
                     <Slider Minimum="-12" Maximum="12" Value="{Binding MidGainDb}" />
-                    <TextBlock Text="{Binding MidGainDb, StringFormat={}{0:0.0} dB}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding MidGainDb, StringFormat={}{0:0.0} dB}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                 </StackPanel>
-
-                <StackPanel Grid.Row="0" Grid.Column="3" Spacing="4" Margin="0,0,8,0">
+                <StackPanel Grid.Column="3" Spacing="4">
                     <TextBlock Text="EQ High" Classes="dim" FontSize="10" />
                     <Slider Minimum="-12" Maximum="12" Value="{Binding HighGainDb}" />
-                    <TextBlock Text="{Binding HighGainDb, StringFormat={}{0:0.0} dB}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding HighGainDb, StringFormat={}{0:0.0} dB}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                 </StackPanel>
-
-                <StackPanel Grid.Row="0" Grid.Column="4" Spacing="4">
+                <StackPanel Grid.Column="4" Spacing="4">
                     <TextBlock Text="Compressor" Classes="dim" FontSize="10" />
                     <ToggleSwitch Content="On" IsChecked="{Binding CompressorEnabled}" />
                     <Slider Minimum="-48" Maximum="0" Value="{Binding CompressorThresholdDb}" IsEnabled="{Binding CompressorEnabled}" />
-                    <TextBlock Text="{Binding CompressorThresholdDb, StringFormat=Thr {0:0} dB}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding CompressorThresholdDb, StringFormat=Thr {0:0} dB}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                 </StackPanel>
+            </Grid>
 
-                <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4" Margin="0,8,8,0">
+            <TextBlock Text="DYNAMICS &amp; TIME FX" Classes="mixerFxSection" Margin="0,4,0,0" />
+            <Grid ColumnDefinitions="*,*,*,*,*" ColumnSpacing="10">
+                <StackPanel Grid.Column="0" Spacing="4">
                     <TextBlock Text="Comp Ratio" Classes="dim" FontSize="10" />
                     <Slider Minimum="1" Maximum="12" Value="{Binding CompressorRatio}" IsEnabled="{Binding CompressorEnabled}" />
-                    <TextBlock Text="{Binding CompressorRatio, StringFormat={}{0:0.0}:1}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding CompressorRatio, StringFormat={}{0:0.0}:1}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                 </StackPanel>
-
-                <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4" Margin="0,8,8,0">
+                <StackPanel Grid.Column="1" Spacing="4">
                     <TextBlock Text="Delay Time" Classes="dim" FontSize="10" />
                     <Slider Minimum="0" Maximum="750" Value="{Binding DelayTimeMs}" />
-                    <TextBlock Text="{Binding DelayTimeMs, StringFormat={}{0:0} ms}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding DelayTimeMs, StringFormat={}{0:0} ms}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                 </StackPanel>
-
-                <StackPanel Grid.Row="1" Grid.Column="2" Spacing="4" Margin="0,8,8,0">
+                <StackPanel Grid.Column="2" Spacing="4">
                     <TextBlock Text="Delay FB" Classes="dim" FontSize="10" />
                     <Slider Minimum="0" Maximum="90" Value="{Binding DelayFeedback}" />
-                    <TextBlock Text="{Binding DelayFeedback, StringFormat={}{0:0}%}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding DelayFeedback, StringFormat={}{0:0}%}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                 </StackPanel>
-
-                <StackPanel Grid.Row="1" Grid.Column="3" Spacing="4" Margin="0,8,8,0">
+                <StackPanel Grid.Column="3" Spacing="4">
                     <TextBlock Text="Delay Mix" Classes="dim" FontSize="10" />
                     <Slider Minimum="0" Maximum="100" Value="{Binding DelayMix}" />
-                    <TextBlock Text="{Binding DelayMix, StringFormat={}{0:0}%}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding DelayMix, StringFormat={}{0:0}%}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                 </StackPanel>
-
-                <StackPanel Grid.Row="1" Grid.Column="4" Spacing="4" Margin="0,8,0,0">
+                <StackPanel Grid.Column="4" Spacing="4">
                     <TextBlock Text="Reverb" Classes="dim" FontSize="10" />
                     <Slider Minimum="0" Maximum="100" Value="{Binding ReverbMix}" />
-                    <TextBlock Text="{Binding ReverbMix, StringFormat=Mix {0:0}%}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding ReverbMix, StringFormat=Mix {0:0}%}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                     <Slider Minimum="0" Maximum="100" Value="{Binding ReverbSize}" />
-                    <TextBlock Text="{Binding ReverbSize, StringFormat=Size {0:0}%}" FontSize="10" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding ReverbSize, StringFormat=Size {0:0}%}" FontSize="10" HorizontalAlignment="Center" Classes="mono" />
                 </StackPanel>
             </Grid>
         </StackPanel>

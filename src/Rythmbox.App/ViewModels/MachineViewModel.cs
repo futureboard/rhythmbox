@@ -88,13 +88,49 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
     private string _kitLabel = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AudioStatusChip))]
     private string _backendLabel = PlatformAudioBackend.PreferredBackendId;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AudioStatusChip))]
     private string _deviceLabel = "—";
 
     [ObservableProperty]
     private string _transportLabel = "STOPPED";
+
+    /// <summary>Compact header chip: backend id, short device name, or Audio: Off.</summary>
+    public string AudioStatusChip
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(DeviceLabel)
+                || DeviceLabel == "—"
+                || DeviceLabel == _i18n["machine.noDevice"])
+            {
+                return _i18n["header.audioOff"];
+            }
+
+            if (!string.IsNullOrWhiteSpace(BackendLabel))
+            {
+                return BackendLabel;
+            }
+
+            return ShortenDeviceName(DeviceLabel);
+        }
+    }
+
+    private static string ShortenDeviceName(string name)
+    {
+        // Drop common Windows prefixes / parenthetical suffixes for a compact chip.
+        var shortName = name;
+        const string speakersPrefix = "Speakers (";
+        if (shortName.StartsWith(speakersPrefix, StringComparison.OrdinalIgnoreCase) && shortName.EndsWith(')'))
+        {
+            shortName = shortName[speakersPrefix.Length..^1];
+        }
+
+        return shortName.Length <= 18 ? shortName : shortName[..17] + "…";
+    }
 
     [ObservableProperty]
     private double _complexity;
@@ -303,6 +339,7 @@ public sealed partial class MachineViewModel : ViewModelBase, IDisposable
     {
         BackendLabel = _audioBackend.PlatformBackendId;
         DeviceLabel = _audioBackend.CurrentDeviceName ?? _i18n["machine.noDevice"];
+        OnPropertyChanged(nameof(AudioStatusChip));
     }
 
     private void RefreshLocalizedLabels()

@@ -67,6 +67,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
         Status = new StatusViewModel();
         Localization = new LocalizationViewModel(_localization);
+        _localization.LanguageChanged += (_, _) => OnPropertyChanged(nameof(CurrentPageTitle));
 
         FileManager = new FileManagerViewModel(_paths);
         FileManager.Initialize();
@@ -74,7 +75,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         var fileDialogService = new AppFileDialogService(FileDialog);
 
         KitBrowser = new KitBrowserViewModel(_kitSession, _kitPresets, _midiInput, _padRouter, fileDialogService);
-        Player = new PlayerViewModel(_midiFilePlayer);
+        Player = new PlayerViewModel(_midiFilePlayer, _localization);
         MasterStrip = new MasterStripViewModel(_engine);
         Mixer = new MixerViewModel(_engine, _kitPlayer, _audioBackend, _localization);
         LoopBrowser = new LoopBrowserViewModel(_loopLibrary, Player);
@@ -99,6 +100,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
         Editor = new EditorViewModel(fileDialogService);
         SampleCreator = new SampleCreatorViewModel(fileDialogService, _kitSession, _engine);
+
+        _kitSession.LiveKitUpdated += OnKitSessionUpdated;
+        _kitSession.StructureChanged += OnKitSessionUpdated;
+        _padRouter.PadTriggered += OnPadTriggered;
 
         // Foot switch: MIDI CC -> momentary time-signature switch. CC arrives on the MIDI thread,
         // so marshal the state change onto the UI thread before touching the arranger view models.
@@ -181,6 +186,20 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     public bool IsChromePage => CurrentPage == AppPage.Chrome;
 
+    public string CurrentPageTitle => CurrentPage switch
+    {
+        AppPage.Home => Localization.NavHome,
+        AppPage.Machine => Localization.NavMachine,
+        AppPage.Pads => Localization.NavPads,
+        AppPage.Mixer => Localization.NavMixer,
+        AppPage.Editor => Localization.NavEditor,
+        AppPage.Macro => Localization.NavMacro,
+        AppPage.Files => Localization.NavFiles,
+        AppPage.Settings => Localization.NavSettings,
+        AppPage.Chrome => "Chrome",
+        _ => Localization.NavHome,
+    };
+
     partial void OnCurrentPageChanged(AppPage value)
     {
         OnPropertyChanged(nameof(IsHomePage));
@@ -192,10 +211,42 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(IsMacroPage));
         OnPropertyChanged(nameof(IsFilesPage));
         OnPropertyChanged(nameof(IsChromePage));
+        OnPropertyChanged(nameof(CurrentPageTitle));
     }
 
     [RelayCommand]
     private void Navigate(AppPage page) => CurrentPage = page;
+
+    [RelayCommand]
+    private void OpenStylesFolder() => OpenFolder(_paths.StylesDir);
+
+    [RelayCommand]
+    private void OpenKitsFolder() => OpenFolder(_paths.PresetDir);
+
+    [RelayCommand]
+    private void OpenSamplesFolder() => OpenFolder(_paths.SamplesDir);
+
+    private void OpenFolder(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+        {
+            Status.Show("Folder not found");
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = path,
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            Status.Show($"Could not open folder: {ex.Message}");
+        }
+    }
 
     [RelayCommand]
     private void Quit()
@@ -285,6 +336,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         KitBrowser.SetPresetDirectory(_paths.PresetDir);
         _kitSession.TryLoadDefaultPreset();
         KitBrowser.SyncFromSession();
+        PadGrid.RefreshSampleState();
 
         if (_midiInput.ConnectByIndex(0, _padRouter))
         {
@@ -301,11 +353,24 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         Mixer.RefreshAudioStatus();
     }
 
+    private void OnKitSessionUpdated()
+    {
+        Dispatcher.UIThread.Post(PadGrid.RefreshSampleState);
+    }
+
+    private void OnPadTriggered(int padIndex, int velocity)
+    {
+        Dispatcher.UIThread.Post(() => PadGrid.AnimatePad(padIndex));
+    }
+
     public void Dispose()
     {
         _clockTimer.Stop();
         _beatTimer.Stop();
         _engine.DeviceChanged -= OnDeviceChanged;
+        _kitSession.LiveKitUpdated -= OnKitSessionUpdated;
+        _kitSession.StructureChanged -= OnKitSessionUpdated;
+        _padRouter.PadTriggered -= OnPadTriggered;
         Machine.Dispose();
         Mixer.Dispose();
         Editor.Dispose();

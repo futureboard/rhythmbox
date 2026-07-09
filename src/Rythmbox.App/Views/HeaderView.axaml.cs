@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 
 namespace Rythmbox.App.Views;
 
@@ -9,7 +10,9 @@ public partial class HeaderView : UserControl
         InitializeComponent();
     }
 
-    private void OnToggleFullscreenClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void OnToggleFullscreenMenuClick(object? sender, RoutedEventArgs e) => ToggleFullscreen();
+
+    private void ToggleFullscreen()
     {
         if (TopLevel.GetTopLevel(this) is Window window)
         {

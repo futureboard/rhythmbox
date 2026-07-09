@@ -7,58 +7,50 @@
              x:Class="Rythmbox.App.Views.NavBarView"
              x:DataType="vm:MainWindowViewModel">
     <Border Classes="navBar">
-        <Grid ColumnDefinitions="*,Auto">
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="0">
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                      HorizontalAlignment="Stretch">
+            <StackPanel Orientation="Horizontal" Spacing="0">
                 <Button Classes="navTab" Classes.active="{Binding IsHomePage}"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Home}">
-                    <TextBlock Text="{Binding Localization.NavHome}" FontSize="11" />
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Home}"
+                        ToolTip.Tip="{Binding Localization.NavHome}">
+                    <TextBlock Text="{Binding Localization.NavHome}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </Button>
                 <Button Classes="navTab" Classes.active="{Binding IsMachinePage}"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}">
-                    <TextBlock Text="{Binding Localization.NavMachine}" FontSize="11" />
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}"
+                        ToolTip.Tip="{Binding Localization.NavMachine}">
+                    <TextBlock Text="{Binding Localization.NavMachine}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </Button>
                 <Button Classes="navTab" Classes.active="{Binding IsPadsPage}"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Pads}">
-                    <TextBlock Text="{Binding Localization.NavPads}" FontSize="11" />
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Pads}"
+                        ToolTip.Tip="{Binding Localization.NavPads}">
+                    <TextBlock Text="{Binding Localization.NavPads}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </Button>
                 <Button Classes="navTab" Classes.active="{Binding IsMixerPage}"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Mixer}">
-                    <TextBlock Text="{Binding Localization.NavMixer}" FontSize="11" />
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Mixer}"
+                        ToolTip.Tip="{Binding Localization.NavMixer}">
+                    <TextBlock Text="{Binding Localization.NavMixer}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </Button>
                 <Button Classes="navTab" Classes.active="{Binding IsEditorPage}"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Editor}">
-                    <TextBlock Text="{Binding Localization.NavEditor}" FontSize="11" />
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Editor}"
+                        ToolTip.Tip="{Binding Localization.NavEditor}">
+                    <TextBlock Text="{Binding Localization.NavEditor}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </Button>
                 <Button Classes="navTab" Classes.active="{Binding IsMacroPage}"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Macro}">
-                    <TextBlock Text="{Binding Localization.NavMacro}" FontSize="11" />
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Macro}"
+                        ToolTip.Tip="{Binding Localization.NavMacro}">
+                    <TextBlock Text="{Binding Localization.NavMacro}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </Button>
                 <Button Classes="navTab" Classes.active="{Binding IsFilesPage}"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Files}">
-                    <TextBlock Text="{Binding Localization.NavFiles}" FontSize="11" />
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Files}"
+                        ToolTip.Tip="{Binding Localization.NavFiles}">
+                    <TextBlock Text="{Binding Localization.NavFiles}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </Button>
                 <Button Classes="navTab" Classes.active="{Binding IsSettingsPage}"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}">
-                    <TextBlock Text="{Binding Localization.NavSettings}" FontSize="11" />
+                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}"
+                        ToolTip.Tip="{Binding Localization.NavSettings}">
+                    <TextBlock Text="{Binding Localization.NavSettings}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </Button>
             </StackPanel>
-
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="0">
-                <Button Command="{Binding Machine.StyleBank.RescanCommand}" Padding="10,6" CornerRadius="0"
-                        BorderThickness="1,0,0,0" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}">
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
-                        <TextBlock Text="{Binding Localization.NavScan}" FontSize="11" />
-                    </StackPanel>
-                </Button>
-                <Button Command="{Binding SubLoops.ToggleCommand}" Padding="10,6" CornerRadius="0"
-                        BorderThickness="1,0,0,0" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}">
-                    <StackPanel Orientation="Horizontal" Spacing="4">
-                        <Path Data="{StaticResource IconRepeat}" Classes="icon small" />
-                        <TextBlock Text="{Binding Localization.NavSubOutput}" FontSize="11" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-        </Grid>
+        </ScrollViewer>
     </Border>
 </UserControl>

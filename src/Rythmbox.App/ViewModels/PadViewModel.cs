@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Rythmbox.Core.Engine;
@@ -8,7 +9,10 @@ namespace Rythmbox.App.ViewModels;
 /// <summary>A single percussion pad button: a fixed GM note that can be triggered live or highlighted when used by the loaded loop.</summary>
 public sealed partial class PadViewModel : ViewModelBase
 {
+    private static readonly TimeSpan FlashDuration = TimeSpan.FromMilliseconds(90);
+
     private readonly KitSamplePlayer? _kitPlayer;
+    private DispatcherTimer? _flashTimer;
 
     private PadViewModel(PercussionPad pad, KitSamplePlayer? kitPlayer, bool isPlaceholder)
     {
@@ -42,6 +46,16 @@ public sealed partial class PadViewModel : ViewModelBase
 
     public string NoteDetail => IsPlaceholder ? string.Empty : $"{NoteName} / {Pad.Note}";
 
+    public string SampleDetail => IsPlaceholder
+        ? string.Empty
+        : HasSample
+            ? NoteDetail
+            : "Click to assign";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SampleDetail))]
+    private bool _hasSample;
+
     [ObservableProperty]
     private bool _isUsedInLoop;
 
@@ -55,24 +69,25 @@ public sealed partial class PadViewModel : ViewModelBase
             return;
         }
 
-        if (IsPressed)
-        {
-            return;
-        }
-
-        IsPressed = true;
+        Flash();
         _kitPlayer.TriggerPad(Pad.Index, 110f / 127f);
     }
 
     public void Release()
     {
-        if (!IsPressed)
+        StopFlashTimer();
+        IsPressed = false;
+    }
+
+    /// <summary>Visual hit feedback only (audio already handled by MIDI/router).</summary>
+    public void AnimateHit()
+    {
+        if (IsPlaceholder)
         {
             return;
         }
 
-        IsPressed = false;
-        // One-shot samples; release is visual only.
+        Flash();
     }
 
     [RelayCommand]
@@ -84,6 +99,32 @@ public sealed partial class PadViewModel : ViewModelBase
         }
 
         Press();
-        Release();
+    }
+
+    private void Flash()
+    {
+        IsPressed = true;
+        StopFlashTimer();
+        _flashTimer = new DispatcherTimer { Interval = FlashDuration };
+        _flashTimer.Tick += OnFlashTick;
+        _flashTimer.Start();
+    }
+
+    private void OnFlashTick(object? sender, EventArgs e)
+    {
+        StopFlashTimer();
+        IsPressed = false;
+    }
+
+    private void StopFlashTimer()
+    {
+        if (_flashTimer is null)
+        {
+            return;
+        }
+
+        _flashTimer.Stop();
+        _flashTimer.Tick -= OnFlashTick;
+        _flashTimer = null;
     }
 }

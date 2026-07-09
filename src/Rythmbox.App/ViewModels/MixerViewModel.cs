@@ -20,7 +20,7 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
     public const int DrumStripWidth = 84;
     public const int GroupStripWidth = 96;
     public const int MasterStripWidth = 180;
-    public const double StripMinHeight = 320;
+    public const double StripMinHeight = 340;
 
     private readonly PlaybackEngine _engine;
     private readonly KitSamplePlayer _kitPlayer;

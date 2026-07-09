@@ -85,7 +85,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
 
         _busMix = Enum.GetValues<PadBus>().ToDictionary(bus => bus, _ => new BusMixState());
 
-        LoadProceduralGmKit();
+        LoadEmptyGmKit();
     }
 
     public string? LoadedKitPath { get; private set; }
@@ -105,7 +105,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         ApplyKit(kit, presetPath);
     }
 
-    public void LoadProceduralGmKit()
+    public void LoadEmptyGmKit()
     {
         ApplyKit(KitPresetCodec.CreateDefaultGmKit(), null);
     }
@@ -131,7 +131,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
                 var gmPad = GmPercussionMap.Pads[i];
                 kitByNote.TryGetValue(gmPad.Note, out var sample);
 
-                _padPlayback[i] = PadPlaybackState.FromSample(sample, gmPad.Label);
+                _padPlayback[i] = PadPlaybackState.FromSample(sample);
                 _chokeGroups[i] = sample?.ChokeGroup ?? 0;
                 _pitchSemitones[i] = sample?.PitchSemitones ?? 0f;
                 _padGains[i] = sample?.Gain ?? 1f;
