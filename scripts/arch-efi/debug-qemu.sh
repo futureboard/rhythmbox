@@ -19,6 +19,8 @@ ALLOW_REBOOT="${ALLOW_REBOOT:-0}"
 QEMU_TRACE="${QEMU_TRACE:-guest_errors,unimp}"
 QEMU_ACCEL="${QEMU_ACCEL:-kvm:tcg}"
 QEMU_DISPLAY="${QEMU_DISPLAY:-gtk,gl=off}"
+DISPLAY_WIDTH="${DISPLAY_WIDTH:-1600}"
+DISPLAY_HEIGHT="${DISPLAY_HEIGHT:-900}"
 ALLOW_WINDOWS_QEMU="${ALLOW_WINDOWS_QEMU:-0}"
 AUTO_INSTALL="${AUTO_INSTALL:-0}"
 CHECK_ONLY="${CHECK_ONLY:-0}"
@@ -258,6 +260,7 @@ QEMU debug boot
   Image:      ${IMAGE_PATH}
   Memory:     ${MEMORY} MiB
   CPUs:       ${CPUS}
+  Display:    ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}
   SSH:        localhost:${SSH_PORT} -> guest:22
   Serial log: ${SERIAL_LOG}
   Debugcon:   ${DEBUGCON_LOG}
@@ -286,7 +289,7 @@ QEMU_ARGS=(
   -drive "file=${IMAGE_PATH},if=virtio,format=raw,cache=writeback"
   -netdev "user,id=net0,hostfwd=tcp::${SSH_PORT}-:22"
   -device virtio-net-pci,netdev=net0
-  -device virtio-vga
+  -device "virtio-vga,xres=${DISPLAY_WIDTH},yres=${DISPLAY_HEIGHT}"
   -display "${QEMU_DISPLAY}"
   -device intel-hda
   -device hda-duplex
