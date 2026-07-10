@@ -1,6 +1,6 @@
 # Arch Linux EFI image builder
 
-Builds a bootable x86_64 Arch Linux GPT/EFI disk image that auto-starts `Rythmbox.App` in fullscreen kiosk mode.
+Builds a bootable x86_64 Arch Linux GPT/EFI disk image that auto-starts `Rythmbox.App` fullscreen on **DRM/KMS** — no X server, no Wayland compositor. The app renders directly to the framebuffer.
 
 ## Host setup
 
@@ -45,17 +45,31 @@ Variables:
 - `KIOSK_USER` - autologin user, default `rythmbox`
 - `ROOT_PASSWORD` - root password in the image, default `rythmbox`
 - `USER_PASSWORD` - kiosk user password, default `rythmbox`
-- `FASTBOOT` - `1` hides boot logs and shows Plymouth splash, default `1`
-- `DEBUG_BOOT` - `1` enables verbose console/serial boot logs and disables Plymouth
+- `FASTBOOT` - `1` firmware-style silent boot: no GRUB menu, no boot text, Plymouth splash only, default `1`
+- `DEBUG_BOOT` - `1` enables verbose console/serial boot logs, a GRUB menu, and disables Plymouth
 
 ## Boot behavior
 
-- EFI boots with GRUB installed as removable media (`EFI/BOOT/BOOTX64.EFI`).
-- **Fastboot** (`FASTBOOT=1`, default) shows a Plymouth splash with `scripts/arch-efi/splash.png` instead of kernel boot logs.
-- Set `DEBUG_BOOT=1` to disable Plymouth and keep serial/console boot logs for troubleshooting.
-- TTY1 auto-logins as `rythmbox`.
-- `startx` launches `/opt/rhythmbox/app/Rythmbox.App`.
-- `RYTHMBOX_FULLSCREEN=1` starts the Avalonia window fullscreen.
+Firmware-style silent boot — the display shows only the splash, then the app. No GRUB menu, kernel log, or login prompt appears on screen.
+
+- EFI boots with GRUB installed as removable media (`EFI/BOOT/BOOTX64.EFI`); the menu is hidden with a 0s timeout (`FASTBOOT=1`).
+- **Fastboot** (default) shows a Plymouth splash (`scripts/arch-efi/splash.png`); kernel/systemd text is diverted to tty3 (**Alt+F3** for diagnostics), not the primary display.
+- Plymouth is held for the whole boot and handed off to the app with `--retain-splash`, so the splash stays frozen on screen until the first app frame replaces it — no flicker to a console.
+- TTY1 auto-logins as `rythmbox` (no prompt, no banner) and launches `/opt/rhythmbox/start-kiosk.sh`.
+- `start-kiosk.sh` renders on DRM/KMS: it sets `RYTHMBOX_DRM=1` and runs `Rythmbox.App --drm`.
+- Set `DEBUG_BOOT=1` to disable Plymouth and keep serial/console boot logs + a visible GRUB menu for troubleshooting.
+
+### DRM/KMS overrides
+
+The kiosk launcher honors these environment variables (see `start-kiosk.sh`):
+
+- `RYTHMBOX_DRM=1` - use the DRM/KMS framebuffer backend (set automatically).
+- `RYTHMBOX_DRM_CARD` - DRM device node, default `/dev/dri/card0`.
+- `RYTHMBOX_DRM_SCALE` - output scaling factor, default `1.0`.
+
+## No X11 / Wayland
+
+The image ships **no X server, no xinit/startx, and no display manager** — login and rendering are DRM/KMS-only. The build also strips any X server/session packages that could be pulled in transitively. Note that mesa's `libx11`/`libxcb` *client* libraries remain (they are hard mesa dependencies needed for GPU/EGL rendering) but are inert with no X server present.
 
 ## Notes
 

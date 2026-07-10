@@ -136,6 +136,12 @@ optimize_image() {
     efibootmgr \
     || true"
 
+  # Guarantee an X-free image: strip any X server / session / utility that may have
+  # been pulled in transitively. The kiosk logs in and renders on DRM/KMS only.
+  # (mesa's libx11/libxcb *client* libs are hard mesa deps and stay, but are unused
+  # with no X server present.)
+  chroot_run "pacman -Rns --noconfirm xorg-server xorg-server-common xorg-xinit xorg-xrandr xorg-xauth xterm 2>/dev/null || true"
+
   chroot_run "pacman -Scc --noconfirm"
   chroot_run "rm -rf /var/cache/pacman/pkg/*"
 
