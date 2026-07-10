@@ -24,6 +24,7 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            // Classic desktop (Windows / X11 / Wayland windowed): host the view in a window.
             var mainWindow = new MainWindow
             {
                 WindowState = string.Equals(Environment.GetEnvironmentVariable("RYTHMBOX_FULLSCREEN"), "1", StringComparison.Ordinal)
@@ -32,7 +33,12 @@ public partial class App : Application
             };
             desktop.MainWindow = mainWindow;
             desktop.ShutdownRequested += (_, _) => mainWindow.DisposeRuntime();
-            mainWindow.Opened += async (_, _) => await mainWindow.InitializeRuntimeAsync();
+        }
+        else if (ApplicationLifetime is ISingleViewApplicationLifetime singleView)
+        {
+            // Single-view lifetime, e.g. DRM/KMS on embedded Linux: no window, the
+            // MainView is rendered directly onto the framebuffer surface.
+            singleView.MainView = new MainView();
         }
 
         base.OnFrameworkInitializationCompleted();

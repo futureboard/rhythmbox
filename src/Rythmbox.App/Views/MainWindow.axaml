@@ -10,70 +10,7 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="Rythmbox"
         Width="1150" Height="720" MinWidth="980" MinHeight="640"
-        Background="{DynamicResource RythmboxBackgroundBrush}"
-        Focusable="True"
-        KeyDown="OnWindowKeyDown"
-        KeyUp="OnWindowKeyUp">
+        Background="{DynamicResource RythmboxBackgroundBrush}">
 
-    <Grid>
-    <DockPanel x:Name="AppShell" IsVisible="False" LastChildFill="True">
-        <views:HeaderView DockPanel.Dock="Top" />
-        <views:NavBarView DockPanel.Dock="Top" />
-        <views:FooterView DockPanel.Dock="Bottom" />
-
-        <Panel>
-            <views:HomePageView IsVisible="{Binding IsHomePage}" />
-            <views:MachinePageView IsVisible="{Binding IsMachinePage}" />
-            <views:PadsPageView IsVisible="{Binding IsPadsPage}" />
-
-            <views:MixerPageView IsVisible="{Binding IsMixerPage}" />
-            <views:SettingsView IsVisible="{Binding IsSettingsPage}" />
-            <views:EditorPageHostView IsVisible="{Binding IsEditorPage}" />
-            <views:SampleCreatorPageHostView IsVisible="{Binding IsMacroPage}" />
-            <views:FileManagerPageView IsVisible="{Binding IsFilesPage}" />
-            <views:PlaceholderPageView IsVisible="{Binding IsChromePage}" Title="CHROME" />
-
-            <views:FileManagerDialogView DataContext="{Binding FileDialog}" />
-
-            <Border Classes="popupOverlay" IsVisible="{Binding Tempo.IsPickerOpen}" ZIndex="100">
-                <Border Classes="popupPanel" MaxWidth="320" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="TEMPO PRESETS" Classes="panelHeader" />
-                        <ListBox ItemsSource="{Binding Tempo.Presets}"
-                                 SelectedItem="{Binding Tempo.SelectedPresetInPicker}" MaxHeight="240" />
-                        <Button Content="Close" Command="{Binding Tempo.TogglePickerCommand}" HorizontalAlignment="Right" />
-                    </StackPanel>
-                </Border>
-            </Border>
-
-            <Border Classes="popupOverlay" IsVisible="{Binding SubLoops.IsOpen}" ZIndex="100">
-                <Border Classes="popupPanel" MaxWidth="480" MaxHeight="400" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <DockPanel LastChildFill="True">
-                        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
-                            <TextBlock Text="SUB LOOPS" Classes="panelHeader" />
-                            <Button Grid.Column="1" Command="{Binding SubLoops.CloseCommand}" Content="Close" />
-                        </Grid>
-                        <ListBox ItemsSource="{Binding SubLoops.SubLoops}" SelectedItem="{Binding SubLoops.SelectedSubLoop}" Classes="loopList" />
-                    </DockPanel>
-                </Border>
-            </Border>
-        </Panel>
-    </DockPanel>
-
-    <!-- The runtime initializes behind this in the same native window. -->
-    <Border x:Name="SplashOverlay" Classes="splashSurface" ZIndex="1000">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="320" Spacing="14">
-            <views:LogoView Height="34" HorizontalAlignment="Center" />
-            <StackPanel Spacing="3" HorizontalAlignment="Center">
-                <TextBlock Text="RHYTHM WORKSTATION" Classes="panelHeader" FontSize="12" HorizontalAlignment="Center" />
-                <TextBlock Text="Preparing your performance environment" Classes="dim" FontSize="11" HorizontalAlignment="Center" />
-            </StackPanel>
-            <Border Classes="splashProgressFrame">
-                <ProgressBar Classes="splashProgress" IsIndeterminate="True" />
-            </Border>
-            <TextBlock x:Name="SplashStatus" Text="Loading runtime…" Classes="splashStatus"
-                       HorizontalAlignment="Center" TextAlignment="Center" />
-        </StackPanel>
-    </Border>
-    </Grid>
+    <views:MainView x:Name="RootView" />
 </Window>

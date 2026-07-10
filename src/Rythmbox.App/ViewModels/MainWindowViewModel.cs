@@ -36,12 +36,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly DispatcherTimer _clockTimer;
     private readonly LocalizationService _localization;
     private readonly DispatcherTimer _beatTimer;
+    private readonly UiPreferencesService _uiPreferences;
 
     public MainWindowViewModel(Action<string>? bootProgress = null)
     {
         bootProgress?.Invoke("Loading localization and runtime…");
         _localization = new LocalizationService();
         _localization.SetLanguage(AppLanguage.English);
+
+        _uiPreferences = new UiPreferencesService();
+        _uiPreferences.Load();
+        _appScale = _uiPreferences.AppScale;
 
         bootProgress?.Invoke("Starting audio engine…");
         _engine = new PlaybackEngine();
@@ -175,6 +180,32 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     private string _clockText = string.Empty;
+
+    [ObservableProperty]
+    private double _appScale = UiPreferencesService.DefaultScale;
+
+    /// <summary>In-app UI zoom expressed as a percentage, e.g. "100%".</summary>
+    public string AppScaleLabel => $"{AppScale * 100:0}%";
+
+    partial void OnAppScaleChanged(double value)
+    {
+        OnPropertyChanged(nameof(AppScaleLabel));
+    }
+
+    [RelayCommand]
+    private void IncreaseAppScale() => SetAppScale(AppScale + UiPreferencesService.ScaleStep);
+
+    [RelayCommand]
+    private void DecreaseAppScale() => SetAppScale(AppScale - UiPreferencesService.ScaleStep);
+
+    [RelayCommand]
+    private void ResetAppScale() => SetAppScale(UiPreferencesService.DefaultScale);
+
+    private void SetAppScale(double value)
+    {
+        _uiPreferences.SetAppScale(value);
+        AppScale = _uiPreferences.AppScale;
+    }
 
     public bool IsHomePage => CurrentPage == AppPage.Home;
 

@@ -135,6 +135,9 @@ public sealed partial class LocalizationViewModel : ViewModelBase
     [ObservableProperty] private string _settingsLanguageDesc = string.Empty;
     [ObservableProperty] private string _settingsLangEnglish = string.Empty;
     [ObservableProperty] private string _settingsLangThai = string.Empty;
+    [ObservableProperty] private string _settingsAppScale = string.Empty;
+    [ObservableProperty] private string _settingsAppScaleDesc = string.Empty;
+    [ObservableProperty] private string _settingsAppScaleReset = string.Empty;
     [ObservableProperty] private string _settingsMidiController = string.Empty;
     [ObservableProperty] private string _settingsKeyboardMapping = string.Empty;
     [ObservableProperty] private string _settingsPlayStop = string.Empty;
@@ -288,6 +291,9 @@ public sealed partial class LocalizationViewModel : ViewModelBase
         SettingsLanguageDesc = _i18n["settings.languageDesc"];
         SettingsLangEnglish = _i18n["settings.langEnglish"];
         SettingsLangThai = _i18n["settings.langThai"];
+        SettingsAppScale = _i18n["settings.appScale"];
+        SettingsAppScaleDesc = _i18n["settings.appScaleDesc"];
+        SettingsAppScaleReset = _i18n["settings.appScaleReset"];
         SettingsMidiController = _i18n["settings.midiController"];
         SettingsKeyboardMapping = _i18n["settings.keyboardMapping"];
         SettingsPlayStop = _i18n["settings.playStop"];
