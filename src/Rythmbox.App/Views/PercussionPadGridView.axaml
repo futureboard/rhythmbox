@@ -6,11 +6,12 @@
              mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="320"
              x:Class="Rythmbox.App.Views.PercussionPadGridView"
              x:DataType="vm:MainWindowViewModel">
-    <Border Classes="region regionFill">
+    <Border Classes="region regionFill" Padding="14">
         <DockPanel LastChildFill="True">
-            <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,6" Margin="0,0,0,6">
+            <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,10" Margin="0,0,0,10">
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="PERFORM" Classes="dim" FontSize="9" FontWeight="Bold" LetterSpacing="1" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding Localization.DrumPadsTitle}" Classes="panelHeader" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding Localization.DrumPadsVoices}" Classes="dim" VerticalAlignment="Center" />
                     </StackPanel>
@@ -25,7 +26,7 @@
                 </Grid>
             </Border>
 
-            <Grid ColumnDefinitions="*,132" ColumnSpacing="10">
+            <Grid ColumnDefinitions="*,156" ColumnSpacing="12">
                 <ItemsControl Grid.Column="0"
                               ItemsSource="{Binding PadGrid.CurrentPagePads}"
                               HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -66,11 +67,11 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <Border Grid.Column="1" Classes="panel hotloadRack" Padding="8">
+                <Border Grid.Column="1" Classes="panel hotloadRack" Padding="10">
                     <DockPanel LastChildFill="True">
                         <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,8">
-                            <TextBlock Text="DRUM PRESET" Classes="panelHeader" FontSize="11" />
-                            <TextBlock Text="RACK" Classes="dim" FontSize="10" />
+                            <TextBlock Text="KIT SLOTS" Classes="panelHeader" FontSize="10" />
+                            <TextBlock Text="ASSIGN / RECALL" Classes="dim" FontSize="9" />
                         </StackPanel>
 
                         <ItemsControl ItemsSource="{Binding KitBrowser.HotloadSlots}">

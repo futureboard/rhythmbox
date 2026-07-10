@@ -77,6 +77,16 @@ public class WavCodecTests
     }
 
     [Fact]
+    public void BuildWaveformEnvelope_caps_resolution_without_appending_empty_peaks()
+    {
+        var peaks = WavCodec.BuildWaveformEnvelope([-0.5f, 0.25f, 0.75f], peakCount: 32);
+
+        Assert.Equal(3, peaks.Length);
+        Assert.InRange(peaks[0].Min, -0.51f, -0.49f);
+        Assert.InRange(peaks[2].Max, 0.74f, 0.76f);
+    }
+
+    [Fact]
     public void TryReadSamplerRootNote_reads_smpl_chunk_but_is_not_applied_by_decode()
     {
         var wav = CreatePcmWavWithSmplRootNote(sampleRate: 48_000, rootNote: 60);

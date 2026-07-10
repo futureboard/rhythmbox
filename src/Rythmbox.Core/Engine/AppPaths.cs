@@ -1,23 +1,25 @@
 namespace Rythmbox.Core.Engine;
 
 /// <summary>
-/// Resolves RhythmLive content folders under Documents, with dev-repo fallbacks.
+/// Resolves Rythmbox content under Documents/Futureboard Studio/Rhythmbox,
+/// with development-repository fallbacks for bundled content.
 /// </summary>
 public sealed class AppPaths
 {
     public const string ProductFolderName = "Futureboard Studio";
-    public const string AppFolderName = "Rhythmlive";
+    public const string AppFolderName = "Rhythmbox";
 
     public AppPaths()
     {
-        var rhythmliveDir = Path.Combine(
+        var applicationDataDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             ProductFolderName,
             AppFolderName);
 
-        StylesDir = EnsureDirectory(Path.Combine(rhythmliveDir, "Styles"));
-        PresetDir = EnsureDirectory(Path.Combine(rhythmliveDir, "Presets"));
-        SamplesDir = EnsureDirectory(Path.Combine(rhythmliveDir, "Samplepacks"));
+        ApplicationDataDir = EnsureDirectory(applicationDataDir);
+        StylesDir = EnsureDirectory(Path.Combine(ApplicationDataDir, "Styles"));
+        PresetDir = EnsureDirectory(Path.Combine(ApplicationDataDir, "Presets"));
+        SamplesDir = EnsureDirectory(Path.Combine(ApplicationDataDir, "Samplepacks"));
         KitsDir = SamplesDir;
         UserStylesDir = StylesDir;
 
@@ -76,6 +78,8 @@ public sealed class AppPaths
 
     public string? SubMidiDir { get; }
 
+    public string ApplicationDataDir { get; }
+
     public string PresetDir { get; }
 
     public string SamplesDir { get; }
@@ -90,7 +94,7 @@ public sealed class AppPaths
 
     public bool HasStyleLibrary => Directory.Exists(StylesDir) && HasStyleContent(StylesDir);
 
-    public static string RhythmliveRoot =>
+    public static string ApplicationDataRoot =>
         Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
             ProductFolderName,

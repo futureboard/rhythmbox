@@ -37,14 +37,17 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly LocalizationService _localization;
     private readonly DispatcherTimer _beatTimer;
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(Action<string>? bootProgress = null)
     {
+        bootProgress?.Invoke("Loading localization and runtime…");
         _localization = new LocalizationService();
         _localization.SetLanguage(AppLanguage.English);
 
+        bootProgress?.Invoke("Starting audio engine…");
         _engine = new PlaybackEngine();
         _engine.Start();
 
+        bootProgress?.Invoke("Preparing application data…");
         _paths = new AppPaths();
         _kitPlayer = new KitSamplePlayer(_engine);
         _kitSession = new KitSession(_kitPlayer, _paths);
@@ -59,6 +62,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _tempoPresets = new TempoPresetService();
         _tempoPresets.Load(_paths.PresetDir);
 
+        bootProgress?.Invoke("Loading MIDI, kits, and performance services…");
         _styleBank = new StyleBankService();
         _arranger = new PatternArrangerEngine(_midiFilePlayer);
         _audioBackend = new MiniAudioPlaybackBackend(_engine);
@@ -74,6 +78,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         FileDialog = new FileManagerDialogViewModel(new FileManagerViewModel(_paths), Localization);
         var fileDialogService = new AppFileDialogService(FileDialog);
 
+        bootProgress?.Invoke("Building workspace controls…");
         KitBrowser = new KitBrowserViewModel(_kitSession, _kitPresets, _midiInput, _padRouter, fileDialogService);
         Player = new PlayerViewModel(_midiFilePlayer, _localization);
         MasterStrip = new MasterStripViewModel(_engine);
@@ -121,7 +126,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _beatTimer.Tick += (_, _) => BeatLeds.Refresh();
         _beatTimer.Start();
 
-        InitializeFromPaths();
+        InitializeFromPaths(bootProgress);
+        bootProgress?.Invoke("Ready");
     }
 
     public StatusViewModel Status { get; }
@@ -325,8 +331,9 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         Tempo.Nudge(largeStep ? delta * 10 : delta);
     }
 
-    private void InitializeFromPaths()
+    private void InitializeFromPaths(Action<string>? bootProgress)
     {
+        bootProgress?.Invoke("Loading loops and kit content…");
         if (_paths.HasRythmLibrary && _paths.RythmDir is not null)
         {
             LoopBrowser.SetFolder(_paths.RythmDir);
@@ -340,6 +347,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         KitBrowser.SyncFromSession();
         PadGrid.RefreshSampleState();
 
+        bootProgress?.Invoke("Connecting MIDI input…");
         if (_midiInput.ConnectByIndex(0, _padRouter))
         {
             KitBrowser.IsMidiConnected = true;

@@ -7,14 +7,17 @@
              mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="720"
              x:Class="Rythmbox.App.Views.FileManagerPageView"
              x:DataType="vm:MainWindowViewModel">
-    <Border Classes="region" Margin="8">
+    <Border Classes="region" Margin="12">
         <DockPanel LastChildFill="True">
-            <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
-                <TextBlock Text="{Binding Localization.FilesTitle}" Classes="panelHeader" VerticalAlignment="Center" />
+            <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+                <StackPanel Spacing="2">
+                    <TextBlock Text="BROWSER" Classes="dim" FontSize="9" FontWeight="Bold" LetterSpacing="1" />
+                    <TextBlock Text="{Binding Localization.FilesTitle}" Classes="panelHeader" VerticalAlignment="Center" FontSize="12" />
+                </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
                     <Button Command="{Binding Machine.StyleBank.RescanCommand}" Classes="toolbarBtn" Padding="8,4"
                             ToolTip.Tip="{Binding Localization.HeaderScanTip}">
-                        <StackPanel Orientation="Horizontal" Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
                             <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
                             <TextBlock Text="{Binding Localization.HeaderScan}" FontSize="11" />
                         </StackPanel>

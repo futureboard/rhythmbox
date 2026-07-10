@@ -7,9 +7,12 @@
              x:Class="Rythmbox.App.Views.NavBarView"
              x:DataType="vm:MainWindowViewModel">
     <Border Classes="navBar">
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                      HorizontalAlignment="Stretch">
-            <StackPanel Orientation="Horizontal" Spacing="0">
+        <Grid ColumnDefinitions="Auto,*">
+            <TextBlock Text="MODE" Classes="dim" FontSize="9" FontWeight="Bold"
+                       LetterSpacing="1" VerticalAlignment="Center" Margin="4,0,12,0" />
+            <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                          HorizontalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal" Spacing="4">
                 <Button Classes="navTab" Classes.active="{Binding IsHomePage}"
                         Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Home}"
                         ToolTip.Tip="{Binding Localization.NavHome}">
@@ -50,7 +53,8 @@
                         ToolTip.Tip="{Binding Localization.NavSettings}">
                     <TextBlock Text="{Binding Localization.NavSettings}" FontSize="11" TextTrimming="CharacterEllipsis" />
                 </Button>
-            </StackPanel>
-        </ScrollViewer>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
     </Border>
 </UserControl>

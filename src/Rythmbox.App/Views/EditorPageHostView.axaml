@@ -4,24 +4,5 @@
              xmlns:vm="using:Rythmbox.App.ViewModels"
              x:Class="Rythmbox.App.Views.EditorPageHostView"
              x:DataType="vm:MainWindowViewModel">
-    <DockPanel LastChildFill="True">
-        <!-- Session summary lives here (not in global header). -->
-        <Border DockPanel.Dock="Top" Classes="region regionBottom" Padding="10,6">
-            <StackPanel Orientation="Horizontal" Spacing="16">
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="{Binding Localization.HeaderStyle}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.StyleLabel}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
-                               MaxWidth="220" TextTrimming="CharacterEllipsis"
-                               ToolTip.Tip="{Binding Machine.StyleLabel}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="4">
-                    <TextBlock Text="{Binding Localization.HeaderPattern}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding Machine.PatternLabel}" FontSize="11" VerticalAlignment="Center"
-                               MaxWidth="160" TextTrimming="CharacterEllipsis"
-                               ToolTip.Tip="{Binding Machine.PatternLabel}" />
-                </StackPanel>
-            </StackPanel>
-        </Border>
-        <editorViews:EditorPageView DataContext="{Binding Editor}" />
-    </DockPanel>
+    <editorViews:EditorPageView DataContext="{Binding Editor}" />
 </UserControl>

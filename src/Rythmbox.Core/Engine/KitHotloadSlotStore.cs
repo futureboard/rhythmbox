@@ -2,12 +2,12 @@ using System.Text.Json;
 
 namespace Rythmbox.Core.Engine;
 
-/// <summary>Persists user-assigned drum kit hotload slots (A–D) under Documents/Rhythmlive.</summary>
+/// <summary>Persists user-assigned drum kit hotload slots (A–D) under the Rythmbox application-data folder.</summary>
 public static class KitHotloadSlotStore
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
-    private static string StorePath => Path.Combine(AppPaths.RhythmliveRoot, "hotload-slots.json");
+    private static string StorePath => Path.Combine(AppPaths.ApplicationDataRoot, "hotload-slots.json");
 
     public static IReadOnlyDictionary<string, string?> Load(IReadOnlyList<string> slotNames)
     {
@@ -42,7 +42,7 @@ public static class KitHotloadSlotStore
 
     public static void Save(IReadOnlyDictionary<string, string?> slots)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(StorePath) ?? AppPaths.RhythmliveRoot);
+        Directory.CreateDirectory(Path.GetDirectoryName(StorePath) ?? AppPaths.ApplicationDataRoot);
         File.WriteAllText(StorePath, JsonSerializer.Serialize(slots, JsonOptions));
     }
 }

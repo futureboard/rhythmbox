@@ -48,18 +48,18 @@ public sealed partial class FileManagerViewModel : ViewModelBase
 
     public string GetDefaultStartPath()
     {
-        if (_paths.SharedDir is not null && Directory.Exists(_paths.SharedDir))
+        if (Directory.Exists(_paths.ApplicationDataDir))
         {
-            return _paths.SharedDir;
+            return _paths.ApplicationDataDir;
         }
 
-        var appDir = AppContext.BaseDirectory;
-        if (Directory.Exists(appDir))
+        var userDirectory = GetUserDirectory();
+        if (Directory.Exists(userDirectory))
         {
-            return appDir;
+            return userDirectory;
         }
 
-        return AppPaths.RhythmliveRoot;
+        return AppContext.BaseDirectory;
     }
 
     public void SetExtensionFilter(IReadOnlyList<string>? extensions)
@@ -128,37 +128,20 @@ public sealed partial class FileManagerViewModel : ViewModelBase
     private void BuildShortcuts()
     {
         Shortcuts.Clear();
-        AddShortcut("RhythmLive", AppPaths.RhythmliveRoot);
+        AddShortcut("User Folder", GetUserDirectory());
+        AddShortcut("Application Data", _paths.ApplicationDataDir);
 
-        if (_paths.SharedDir is { } shared && Directory.Exists(shared))
+        if (OperatingSystem.IsWindows())
         {
-            AddShortcut("shared", shared);
+            AddWindowsDriveShortcuts();
         }
-
-        if (_paths.PresetDir is { } presets && Directory.Exists(presets))
+        else if (OperatingSystem.IsLinux())
         {
-            AddShortcut("Presets", presets);
+            AddShortcutIfExists("Media", "/run/media");
         }
-
-        if (_paths.SamplesDir is { } samples && Directory.Exists(samples))
+        else if (OperatingSystem.IsMacOS())
         {
-            AddShortcut("Samples", samples);
-        }
-
-        if (_paths.StylesDir is { } styles && Directory.Exists(styles))
-        {
-            AddShortcut("Styles", styles);
-        }
-
-        if (_paths.RythmDir is { } rythm && Directory.Exists(rythm))
-        {
-            AddShortcut("RYTHM", rythm);
-        }
-
-        var appDir = AppContext.BaseDirectory;
-        if (Directory.Exists(appDir))
-        {
-            AddShortcut("App", appDir);
+            AddShortcutIfExists("Volumes", "/Volumes");
         }
     }
 
@@ -170,6 +153,47 @@ public sealed partial class FileManagerViewModel : ViewModelBase
         }
 
         Shortcuts.Add(new FileShortcutViewModel(label, path));
+    }
+
+    private void AddWindowsDriveShortcuts()
+    {
+        foreach (var drive in DriveInfo.GetDrives().OrderBy(drive => drive.Name, StringComparer.OrdinalIgnoreCase))
+        {
+            try
+            {
+                if (!drive.IsReady)
+                {
+                    continue;
+                }
+
+                var label = drive.Name.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                AddShortcut(label, drive.RootDirectory.FullName);
+            }
+            catch (IOException)
+            {
+                // Removable and optical drives can disappear while the list is built.
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Keep the remaining drives usable when one root is restricted.
+            }
+        }
+    }
+
+    private static string GetUserDirectory()
+    {
+        var userDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return string.IsNullOrWhiteSpace(userDirectory)
+            ? Environment.GetEnvironmentVariable("HOME") ?? AppContext.BaseDirectory
+            : userDirectory;
+    }
+
+    private void AddShortcutIfExists(string label, string path)
+    {
+        if (Directory.Exists(path))
+        {
+            AddShortcut(label, path);
+        }
     }
 
     private void LoadDirectory(string fullPath)

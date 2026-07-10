@@ -9,10 +9,11 @@ namespace Rythmbox.SampleCreator.Views;
 /// <summary>GPU-friendly waveform — symmetric min/max envelope (BBC audiowaveform / NAudio MaxPeakProvider).</summary>
 public sealed class WaveformCanvas : Control
 {
-    private static readonly IBrush PeakBrush = new SolidColorBrush(Color.Parse("#FF8C1A"));
-    private static readonly IBrush CenterLineBrush = new SolidColorBrush(Color.Parse("#3A3B44"));
-    private static readonly IBrush TrimOverlayBrush = new SolidColorBrush(Color.FromArgb(96, 0, 0, 0));
-    private static readonly IPen TrimMarkerPen = new Pen(new SolidColorBrush(Color.Parse("#FF8C1A")), 2);
+    private static readonly IBrush PeakBrush = new SolidColorBrush(Color.Parse("#F5A000"));
+    private static readonly IBrush CenterLineBrush = new SolidColorBrush(Color.Parse("#303731"));
+    private static readonly IBrush TrimOverlayBrush = new SolidColorBrush(Color.FromArgb(122, 0, 0, 0));
+    private static readonly IPen PeakPen = new Pen(PeakBrush, 1);
+    private static readonly IPen TrimMarkerPen = new Pen(new SolidColorBrush(Color.Parse("#F5A000")), 1.5);
 
     public static readonly StyledProperty<IReadOnlyList<WaveformPeak>?> PeaksProperty =
         AvaloniaProperty.Register<WaveformCanvas, IReadOnlyList<WaveformPeak>?>(nameof(Peaks));
@@ -63,8 +64,7 @@ public sealed class WaveformCanvas : Control
         var width = bounds.Width;
         var height = bounds.Height;
         var midY = height / 2;
-        var barWidth = Math.Max(2, width / peaks.Count - 1);
-        var step = barWidth + 1;
+        var columnCount = Math.Max(1, (int)Math.Ceiling(width));
 
         var maxAbs = 0f;
         foreach (var peak in peaks)
@@ -76,14 +76,24 @@ public sealed class WaveformCanvas : Control
 
         context.DrawLine(new Pen(CenterLineBrush, 1), new Point(0, midY), new Point(width, midY));
 
-        for (var i = 0; i < peaks.Count; i++)
+        for (var column = 0; column < columnCount; column++)
         {
-            var peak = peaks[i];
-            var x = i * step;
-            var yTop = midY - peak.Max * scale;
-            var yBottom = midY - peak.Min * scale;
-            var barHeight = Math.Max(1, yBottom - yTop);
-            context.FillRectangle(PeakBrush, new Rect(x, yTop, barWidth, barHeight), 1);
+            var start = (int)((long)column * peaks.Count / columnCount);
+            var end = (int)((long)(column + 1) * peaks.Count / columnCount);
+            end = Math.Max(start + 1, Math.Min(end, peaks.Count));
+
+            var min = 0f;
+            var max = 0f;
+            for (var i = start; i < end; i++)
+            {
+                min = Math.Min(min, peaks[i].Min);
+                max = Math.Max(max, peaks[i].Max);
+            }
+
+            var x = (column + 0.5) * width / columnCount;
+            var yTop = midY - max * scale;
+            var yBottom = midY - min * scale;
+            context.DrawLine(PeakPen, new Point(x, yTop), new Point(x, Math.Max(yTop + 1, yBottom)));
         }
 
         var trimStart = Math.Clamp(TrimStart, 0, 1);

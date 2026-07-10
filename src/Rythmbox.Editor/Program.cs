@@ -26,12 +26,9 @@ sealed class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
-#if DEBUG
-            .WithDeveloperTools()
-#endif
             .With(new FontManagerOptions
             {
-                DefaultFamilyName = "avares://Rythmbox.Editor/Assets/Fonts#Barlow",
+                DefaultFamilyName = "avares://Rythmbox.Editor/Assets/Fonts#Barlow, avares://Rythmbox.Editor/Assets/Fonts#Anuphan",
             })
             .LogToTrace();
 }

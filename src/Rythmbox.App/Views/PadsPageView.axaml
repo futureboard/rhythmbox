@@ -9,17 +9,18 @@
              x:DataType="vm:MainWindowViewModel">
     <!-- Pads mode: assignment + audition focus (Machine keeps arranger/style bank). -->
     <Grid RowDefinitions="Auto,*">
-        <Border Grid.Row="0" Classes="region regionBottom" Padding="12,8">
+        <Border Grid.Row="0" Classes="region regionBottom" Padding="14,10">
             <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Spacing="2">
-                    <TextBlock Text="PADS" Classes="panelHeader" />
+                <StackPanel Spacing="3">
+                    <TextBlock Text="PERFORM / PADS" Classes="dim" FontSize="9" FontWeight="Bold" LetterSpacing="1" />
+                    <TextBlock Text="PADS" Classes="panelHeader" FontSize="12" />
                     <TextBlock Classes="dim" FontSize="11" TextWrapping="Wrap">
-                        Audition and assign kit samples. Use Machine for styles, patterns, and performance.
+                        Trigger sounds instantly, then assign or recall a kit from the rack.
                     </TextBlock>
                     <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <TextBlock Text="Kit:" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding Machine.KitLabel}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Machine.KitLabel}" FontSize="11" FontWeight="Medium" VerticalAlignment="Center" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <TextBlock Text="Device:" Classes="dim" FontSize="10" VerticalAlignment="Center" />
@@ -29,16 +30,16 @@
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <Button Command="{Binding KitBrowser.BrowseLoadKitCommand}" Padding="10,6" Classes="accent">
+                    <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Macro}"
+                            Padding="10,6" Classes="secondary">
+                        <TextBlock Text="Open Kit Builder" FontSize="11" />
+                    </Button>
+                    <Button Command="{Binding KitBrowser.BrowseLoadKitCommand}" Padding="12,6" Classes="accent">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
                             <TextBlock Text="{Binding KitBrowser.LoadButtonLabel}" FontSize="11" FontWeight="Bold"
                                        Foreground="{DynamicResource RythmboxOnAccentBrush}" />
                         </StackPanel>
-                    </Button>
-                    <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Macro}"
-                            Padding="10,6" Classes="secondary">
-                        <TextBlock Text="Open Kit Builder" FontSize="11" />
                     </Button>
                 </StackPanel>
             </Grid>

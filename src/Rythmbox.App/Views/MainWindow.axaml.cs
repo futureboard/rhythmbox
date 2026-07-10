@@ -1,14 +1,81 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Threading;
 using Rythmbox.App.ViewModels;
 
 namespace Rythmbox.App.Views;
 
 public partial class MainWindow : Window
 {
+    private MainWindowViewModel? _viewModel;
+    private bool _isBooting;
+    private bool _isClosing;
+
     public MainWindow()
     {
         InitializeComponent();
+        Closed += (_, _) =>
+        {
+            _isClosing = true;
+            DisposeRuntime();
+        };
+    }
+
+    public async Task InitializeRuntimeAsync()
+    {
+        if (_isBooting || _isClosing)
+        {
+            return;
+        }
+
+        _isBooting = true;
+        try
+        {
+            ReportBootStatus("Loading Rythmbox runtime…");
+            var viewModel = await Task.Run(() => new MainWindowViewModel(ReportBootStatus));
+
+            if (_isClosing)
+            {
+                viewModel.Dispose();
+                return;
+            }
+
+            _viewModel = viewModel;
+            DataContext = viewModel;
+            AppShell.IsVisible = true;
+            SplashOverlay.IsVisible = false;
+        }
+        catch (Exception ex)
+        {
+            ReportBootStatus($"Startup failed: {ex.Message}");
+        }
+        finally
+        {
+            _isBooting = false;
+        }
+    }
+
+    public void DisposeRuntime()
+    {
+        _viewModel?.Dispose();
+        _viewModel = null;
+    }
+
+    private void ReportBootStatus(string status)
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            SplashStatus.Text = status;
+            return;
+        }
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!_isClosing)
+            {
+                SplashStatus.Text = status;
+            }
+        });
     }
 
     private void OnWindowKeyDown(object? sender, KeyEventArgs e)

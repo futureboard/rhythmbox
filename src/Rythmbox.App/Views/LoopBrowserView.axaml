@@ -46,7 +46,7 @@
                             <Grid ColumnDefinitions="20,*,80,80,90">
                                 <Path Grid.Column="0" Data="{StaticResource IconPlay}" Width="10" Height="10" Stretch="Uniform"
                                       Fill="White" Stroke="White" StrokeThickness="0" IsVisible="{Binding IsSelected}" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="Medium" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="2" Text="{Binding HitsLabel}" Classes="dim" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="3" Text="{Binding DurationLabel}" Classes="dim" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                 <TextBlock Grid.Column="4" Text="{Binding BpmLabel}" Classes="dim" HorizontalAlignment="Right" VerticalAlignment="Center" />

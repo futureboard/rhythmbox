@@ -22,14 +22,20 @@
             </Grid>
         </Border>
 
-        <Grid ColumnDefinitions="140,*">
-            <Border Grid.Column="0" Classes="bankList" Margin="0,0,8,0">
+        <Grid ColumnDefinitions="184,*" ColumnSpacing="12">
+            <Border Grid.Column="0" Classes="bankList fileLocations">
                 <DockPanel LastChildFill="True">
-                    <TextBlock DockPanel.Dock="Top" Text="LOCATIONS" Classes="panelHeader" Margin="8,8,8,6" />
+                    <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="10,10,10,8">
+                        <TextBlock Text="LOCATIONS" Classes="dim" FontSize="9" FontWeight="Bold" LetterSpacing="1" />
+                        <TextBlock Text="DRIVES &amp; FOLDERS" Classes="panelHeader" />
+                    </StackPanel>
                     <ListBox ItemsSource="{Binding Shortcuts}" SelectedItem="{Binding SelectedShortcut}" Classes="loopList">
                         <ListBox.ItemTemplate>
                             <DataTemplate x:DataType="vm:FileShortcutViewModel">
-                                <TextBlock Text="{Binding Label}" FontSize="11" Padding="8,6" />
+                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                    <Path Data="{StaticResource IconFolder}" Classes="icon small dim" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Label}" FontSize="11" VerticalAlignment="Center" />
+                                </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -37,7 +43,7 @@
             </Border>
 
             <DockPanel Grid.Column="1" LastChildFill="True">
-                <Grid DockPanel.Dock="Top" ColumnDefinitions="*,80,120" Margin="8,0,8,6">
+                <Grid DockPanel.Dock="Top" ColumnDefinitions="*,80,120" Margin="0,2,8,8">
                     <TextBlock Grid.Column="0" Text="Name" Classes="dim" FontSize="10" />
                     <TextBlock Grid.Column="1" Text="Size" Classes="dim" FontSize="10" HorizontalAlignment="Right" />
                     <TextBlock Grid.Column="2" Text="Modified" Classes="dim" FontSize="10" HorizontalAlignment="Right" />

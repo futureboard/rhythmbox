@@ -1,9 +1,11 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Typography -->
-    <FontFamily x:Key="RythmboxUIFont">avares://Rythmbox.UI/Assets/Fonts#Anuphan</FontFamily>
-    <FontFamily x:Key="RythmboxUIMono">avares://Rythmbox.UI/Assets/Fonts#Anuphan</FontFamily>
+    <!-- Typography: Avalonia resolves these static Barlow faces by FontWeight,
+         so Light (300), Regular (400), Medium (500), and Bold (700) are real
+         font files instead of synthesized weights. Anuphan is Thai fallback. -->
+    <FontFamily x:Key="RythmboxUIFont">avares://Rythmbox.UI/Assets/Fonts#Barlow, avares://Rythmbox.UI/Assets/Fonts#Anuphan</FontFamily>
+    <FontFamily x:Key="RythmboxUIMono">avares://Rythmbox.UI/Assets/Fonts#Barlow, avares://Rythmbox.UI/Assets/Fonts#Anuphan</FontFamily>
 
     <!-- Font sizes -->
     <x:Double x:Key="RbFontAppTitle">20</x:Double>
@@ -21,82 +23,86 @@
     <x:Double x:Key="RbSpace5">24</x:Double>
 
     <!-- Surfaces (Ableton-like dark stack) -->
-    <SolidColorBrush x:Key="RythmboxBackgroundBrush" Color="#14151A" />
-    <SolidColorBrush x:Key="RythmboxPanelBrush" Color="#1B1C22" />
-    <SolidColorBrush x:Key="RythmboxPanelBorderBrush" Color="#2E2F38" />
-    <SolidColorBrush x:Key="RythmboxBorderBrush" Color="#3A3B44" />
-    <SolidColorBrush x:Key="RythmboxElevatedBrush" Color="#22232B" />
-    <SolidColorBrush x:Key="RythmboxPadBrush" Color="#26272E" />
-    <SolidColorBrush x:Key="RythmboxSelectedBrush" Color="#2A3548" />
-    <SolidColorBrush x:Key="RythmboxHoverBrush" Color="#32333C" />
-    <SolidColorBrush x:Key="RythmboxOverlayBrush" Color="#AA000000" />
+    <SolidColorBrush x:Key="RythmboxBackgroundBrush" Color="#0B0D0C" />
+    <SolidColorBrush x:Key="RythmboxPanelBrush" Color="#141715" />
+    <SolidColorBrush x:Key="RythmboxPanelBorderBrush" Color="#2B302C" />
+    <SolidColorBrush x:Key="RythmboxBorderBrush" Color="#404640" />
+    <SolidColorBrush x:Key="RythmboxElevatedBrush" Color="#1C211D" />
+    <SolidColorBrush x:Key="RythmboxPadBrush" Color="#202521" />
+    <SolidColorBrush x:Key="RythmboxSelectedBrush" Color="#28342B" />
+    <SolidColorBrush x:Key="RythmboxHoverBrush" Color="#303730" />
+    <SolidColorBrush x:Key="RythmboxOverlayBrush" Color="#C6000000" />
 
     <!-- Borders -->
-    <SolidColorBrush x:Key="RythmboxActiveBorderBrush" Color="#FF8C1A" />
+    <SolidColorBrush x:Key="RythmboxActiveBorderBrush" Color="#F5A000" />
     <SolidColorBrush x:Key="RythmboxWarningBorderBrush" Color="#E5B93B" />
     <SolidColorBrush x:Key="RythmboxDangerBorderBrush" Color="#5A3035" />
 
     <!-- Text -->
-    <SolidColorBrush x:Key="RythmboxTextBrush" Color="#EDEDEF" />
-    <SolidColorBrush x:Key="RythmboxSecondaryTextBrush" Color="#B0B1BA" />
-    <SolidColorBrush x:Key="RythmboxDimTextBrush" Color="#82838D" />
-    <SolidColorBrush x:Key="RythmboxPlaceholderBrush" Color="#5C5D68" />
-    <SolidColorBrush x:Key="RythmboxDisabledTextBrush" Color="#4A4B55" />
-    <SolidColorBrush x:Key="RythmboxOnAccentBrush" Color="#14151A" />
+    <SolidColorBrush x:Key="RythmboxTextBrush" Color="#F1F3EF" />
+    <SolidColorBrush x:Key="RythmboxSecondaryTextBrush" Color="#C1C8C0" />
+    <SolidColorBrush x:Key="RythmboxDimTextBrush" Color="#8D978E" />
+    <SolidColorBrush x:Key="RythmboxPlaceholderBrush" Color="#687169" />
+    <SolidColorBrush x:Key="RythmboxDisabledTextBrush" Color="#4C554D" />
+    <SolidColorBrush x:Key="RythmboxOnAccentBrush" Color="#17140D" />
 
     <!-- Primary accent: orange/amber — performance, pad focus, active mode -->
-    <SolidColorBrush x:Key="RythmboxAccentBrush" Color="#FF8C1A" />
-    <SolidColorBrush x:Key="RythmboxAccentHoverBrush" Color="#FFA542" />
-    <SolidColorBrush x:Key="RythmboxAccentPressedBrush" Color="#E67A10" />
-    <SolidColorBrush x:Key="RythmboxAccentMutedBrush" Color="#3D2E1A" />
+    <SolidColorBrush x:Key="RythmboxAccentBrush" Color="#F5A000" />
+    <SolidColorBrush x:Key="RythmboxAccentHoverBrush" Color="#FFB629" />
+    <SolidColorBrush x:Key="RythmboxAccentPressedBrush" Color="#CE7D00" />
+    <SolidColorBrush x:Key="RythmboxAccentMutedBrush" Color="#3D3018" />
 
     <!-- Secondary accent: purple — creative / save / export -->
     <SolidColorBrush x:Key="RythmboxCreativeBrush" Color="#8B5CF6" />
     <SolidColorBrush x:Key="RythmboxCreativeHoverBrush" Color="#9D74F7" />
-    <SolidColorBrush x:Key="RythmboxCreativeMutedBrush" Color="#2A2438" />
+    <SolidColorBrush x:Key="RythmboxCreativeMutedBrush" Color="#2E283C" />
 
     <!-- Semantic -->
     <SolidColorBrush x:Key="RythmboxRedBrush" Color="#E5453B" />
     <SolidColorBrush x:Key="RythmboxRedHoverBrush" Color="#F0685F" />
     <SolidColorBrush x:Key="RythmboxDangerSurfaceBrush" Color="#3A2325" />
     <SolidColorBrush x:Key="RythmboxDangerHoverBrush" Color="#4A2B2D" />
-    <SolidColorBrush x:Key="RythmboxGreenBrush" Color="#35D07F" />
-    <SolidColorBrush x:Key="RythmboxBlueBrush" Color="#4A7FD4" />
-    <SolidColorBrush x:Key="RythmboxBlueHoverBrush" Color="#5A8FD4" />
+    <SolidColorBrush x:Key="RythmboxGreenBrush" Color="#4DD68B" />
+    <SolidColorBrush x:Key="RythmboxPlayBrush" Color="#42C878" />
+    <SolidColorBrush x:Key="RythmboxPlayHoverBrush" Color="#62DA94" />
+    <SolidColorBrush x:Key="RythmboxPlayPressedBrush" Color="#289B59" />
+    <SolidColorBrush x:Key="RythmboxOnPlayBrush" Color="#08100A" />
+    <SolidColorBrush x:Key="RythmboxBlueBrush" Color="#62A8FF" />
+    <SolidColorBrush x:Key="RythmboxBlueHoverBrush" Color="#7DB8FF" />
     <SolidColorBrush x:Key="RythmboxSoloBrush" Color="#E5B93B" />
     <SolidColorBrush x:Key="RythmboxMeterFillBrush" Color="#3DDC84" />
-    <SolidColorBrush x:Key="RythmboxMeterTrackBrush" Color="#2A2B31" />
-    <SolidColorBrush x:Key="RythmboxPlayingBrush" Color="#1F3A28" />
-    <SolidColorBrush x:Key="RythmboxQueuedBrush" Color="#3A3020" />
+    <SolidColorBrush x:Key="RythmboxMeterTrackBrush" Color="#242B25" />
+    <SolidColorBrush x:Key="RythmboxPlayingBrush" Color="#173722" />
+    <SolidColorBrush x:Key="RythmboxQueuedBrush" Color="#41341A" />
 
     <!-- Category accents (pad tags) -->
     <SolidColorBrush x:Key="RythmboxPercAccentBrush" Color="#D97B2E" />
     <SolidColorBrush x:Key="RythmboxCymAccentBrush" Color="#8B5CF6" />
 
     <!-- Control chrome -->
-    <SolidColorBrush x:Key="RbControlBgBrush" Color="#2A2B33" />
-    <SolidColorBrush x:Key="RbControlHoverBrush" Color="#32333C" />
-    <SolidColorBrush x:Key="RbControlPressedBrush" Color="#1E1F26" />
-    <SolidColorBrush x:Key="RbControlBorderBrush" Color="#3A3B44" />
-    <SolidColorBrush x:Key="RbControlActiveBrush" Color="#2A3548" />
-    <SolidColorBrush x:Key="RbControlActiveBorderBrush" Color="#4A7FD4" />
+    <SolidColorBrush x:Key="RbControlBgBrush" Color="#232923" />
+    <SolidColorBrush x:Key="RbControlHoverBrush" Color="#323932" />
+    <SolidColorBrush x:Key="RbControlPressedBrush" Color="#121612" />
+    <SolidColorBrush x:Key="RbControlBorderBrush" Color="#3A423B" />
+    <SolidColorBrush x:Key="RbControlActiveBrush" Color="#323E30" />
+    <SolidColorBrush x:Key="RbControlActiveBorderBrush" Color="#F5A000" />
 
     <!-- Inputs (inset) -->
-    <SolidColorBrush x:Key="RbInputBgBrush" Color="#16171D" />
-    <SolidColorBrush x:Key="RbInputBorderBrush" Color="#2E2F38" />
-    <SolidColorBrush x:Key="RbInputFocusBorderBrush" Color="#FF8C1A" />
+    <SolidColorBrush x:Key="RbInputBgBrush" Color="#0D100E" />
+    <SolidColorBrush x:Key="RbInputBorderBrush" Color="#303731" />
+    <SolidColorBrush x:Key="RbInputFocusBorderBrush" Color="#F5A000" />
 
     <!-- Sliders -->
-    <SolidColorBrush x:Key="RbSliderTrackBrush" Color="#1E1F26" />
-    <SolidColorBrush x:Key="RbSliderFillBrush" Color="#FF8C1A" />
-    <SolidColorBrush x:Key="RbSliderThumbBrush" Color="#EDEDEF" />
+    <SolidColorBrush x:Key="RbSliderTrackBrush" Color="#101411" />
+    <SolidColorBrush x:Key="RbSliderFillBrush" Color="#F5A000" />
+    <SolidColorBrush x:Key="RbSliderThumbBrush" Color="#F1F3EF" />
 
     <!-- Spacing / radii -->
     <Thickness x:Key="RbPaddingControl">10,6</Thickness>
     <Thickness x:Key="RbPaddingInput">8,5</Thickness>
     <Thickness x:Key="RbPaddingCompact">6,4</Thickness>
-    <CornerRadius x:Key="RbRadiusControl">2</CornerRadius>
-    <CornerRadius x:Key="RbRadiusInput">2</CornerRadius>
+    <CornerRadius x:Key="RbRadiusControl">3</CornerRadius>
+    <CornerRadius x:Key="RbRadiusInput">3</CornerRadius>
     <CornerRadius x:Key="RbRadiusNone">0</CornerRadius>
 
 </ResourceDictionary>

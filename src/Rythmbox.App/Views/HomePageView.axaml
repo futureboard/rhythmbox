@@ -7,126 +7,125 @@
              mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="720"
              x:Class="Rythmbox.App.Views.HomePageView"
              x:DataType="vm:MainWindowViewModel">
-    <Grid ColumnDefinitions="*,320" Margin="32,28" ColumnSpacing="24">
-        <StackPanel Grid.Column="0" Spacing="24" VerticalAlignment="Center" MaxWidth="640">
-            <StackPanel Spacing="10">
-                <views:LogoView Height="48" HorizontalAlignment="Left" />
+    <Grid ColumnDefinitions="*,300" Margin="40,32" ColumnSpacing="32">
+        <StackPanel Grid.Column="0" Spacing="26" VerticalAlignment="Center" MaxWidth="700">
+            <StackPanel Spacing="8">
+                <TextBlock Text="RHYTHM WORKSTATION" Classes="dim" FontSize="10" FontWeight="Bold" LetterSpacing="1.4" />
+                <views:LogoView Height="44" HorizontalAlignment="Left" />
                 <TextBlock Text="{Binding Localization.HomeSubtitle}" Classes="dim" TextWrapping="Wrap"
-                           FontSize="13" MaxWidth="520" />
+                           FontSize="13" MaxWidth="560" />
             </StackPanel>
 
-            <!-- Primary quick actions -->
-            <StackPanel Spacing="8">
-                <TextBlock Text="QUICK ACTIONS" Classes="panelHeader" FontSize="11" />
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto"
-                      ColumnSpacing="8" RowSpacing="8">
+            <Border Classes="panel" Padding="16">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="20">
+                    <StackPanel Grid.Column="0" Spacing="4">
+                        <TextBlock Text="START A SESSION" Classes="panelHeader" />
+                        <TextBlock Text="Launch the performance surface or load a kit to begin." Classes="dim" FontSize="11" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Command="{Binding KitBrowser.BrowseLoadKitCommand}" Classes="secondary" Padding="12,7">
+                            <TextBlock Text="{Binding Localization.HomeLoadKit}" FontWeight="Medium" FontSize="11" />
+                        </Button>
+                        <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}"
+                                Classes="accent" Padding="14,7">
+                            <TextBlock Text="{Binding Localization.HomeStartPlaying}" FontWeight="Bold"
+                                       Foreground="{DynamicResource RythmboxOnAccentBrush}" FontSize="11" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <StackPanel Spacing="10">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="WORKSPACES" Classes="panelHeader" />
+                    <TextBlock Text="Choose a focused surface" Classes="dim" FontSize="10" />
+                </StackPanel>
+                <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                     <Button Grid.Row="0" Grid.Column="0"
                             Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}"
-                            Classes="accent" HorizontalAlignment="Stretch" MinHeight="40">
-                        <TextBlock Text="{Binding Localization.HomeStartPlaying}" FontWeight="Bold"
-                                   Foreground="{DynamicResource RythmboxOnAccentBrush}" HorizontalAlignment="Center" />
+                            Classes="homeTile">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding Localization.NavMachine}" FontWeight="Bold" FontSize="13" />
+                            <TextBlock Text="{Binding Localization.HomeStartPlaying}" Classes="dim" FontSize="10" TextWrapping="Wrap" />
+                        </StackPanel>
                     </Button>
                     <Button Grid.Row="0" Grid.Column="1"
-                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}"
-                            Classes="homeTile" HorizontalAlignment="Stretch" MinHeight="40" Padding="12,8">
-                        <TextBlock Text="{Binding Localization.HomeLoadStyle}" FontWeight="SemiBold" FontSize="12" />
+                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Pads}"
+                            Classes="homeTile">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding Localization.NavPads}" FontWeight="Bold" FontSize="13" />
+                            <TextBlock Text="{Binding Localization.HomePadsHint}" Classes="dim" FontSize="10" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Row="0" Grid.Column="2"
+                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Mixer}"
+                            Classes="homeTile">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding Localization.NavMixer}" FontWeight="Bold" FontSize="13" />
+                            <TextBlock Text="{Binding Localization.HomeMixerHint}" Classes="dim" FontSize="10" TextWrapping="Wrap" />
+                        </StackPanel>
                     </Button>
                     <Button Grid.Row="1" Grid.Column="0"
-                            Command="{Binding KitBrowser.BrowseLoadKitCommand}"
-                            Classes="homeTile" HorizontalAlignment="Stretch" MinHeight="40" Padding="12,8">
-                        <TextBlock Text="{Binding Localization.HomeLoadKit}" FontWeight="SemiBold" FontSize="12" />
+                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Editor}"
+                            Classes="homeTile">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding Localization.NavEditor}" FontWeight="Bold" FontSize="13" />
+                            <TextBlock Text="{Binding Localization.HomeEditorHint}" Classes="dim" FontSize="10" TextWrapping="Wrap" />
+                        </StackPanel>
                     </Button>
                     <Button Grid.Row="1" Grid.Column="1"
-                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}"
-                            Classes="homeTile" HorizontalAlignment="Stretch" MinHeight="40" Padding="12,8">
-                        <TextBlock Text="{Binding Localization.HomeOpenAudio}" FontWeight="SemiBold" FontSize="12" />
+                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Macro}"
+                            Classes="homeTile">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding Localization.NavMacro}" FontWeight="Bold" FontSize="13" />
+                            <TextBlock Text="{Binding Localization.HomeMacroHint}" Classes="dim" FontSize="10" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Button>
+                    <Button Grid.Row="1" Grid.Column="2"
+                            Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Files}"
+                            Classes="homeTile">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding Localization.NavFiles}" FontWeight="Bold" FontSize="13" />
+                            <TextBlock Text="Browse styles, kits, and samples" Classes="dim" FontSize="10" TextWrapping="Wrap" />
+                        </StackPanel>
                     </Button>
                 </Grid>
             </StackPanel>
-
-            <!-- Mode tiles -->
-            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto"
-                  ColumnSpacing="8" RowSpacing="8">
-                <Button Grid.Row="0" Grid.Column="0"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Pads}"
-                        Classes="homeTile" HorizontalAlignment="Stretch">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding Localization.NavPads}" FontWeight="Bold" FontSize="13" />
-                        <TextBlock Text="{Binding Localization.HomePadsHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Button>
-                <Button Grid.Row="0" Grid.Column="1"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Mixer}"
-                        Classes="homeTile" HorizontalAlignment="Stretch">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding Localization.NavMixer}" FontWeight="Bold" FontSize="13" />
-                        <TextBlock Text="{Binding Localization.HomeMixerHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Button>
-                <Button Grid.Row="1" Grid.Column="0"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Editor}"
-                        Classes="homeTile" HorizontalAlignment="Stretch">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding Localization.NavEditor}" FontWeight="Bold" FontSize="13" />
-                        <TextBlock Text="{Binding Localization.HomeEditorHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Button>
-                <Button Grid.Row="1" Grid.Column="1"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Macro}"
-                        Classes="homeTile" HorizontalAlignment="Stretch">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding Localization.NavMacro}" FontWeight="Bold" FontSize="13" />
-                        <TextBlock Text="{Binding Localization.HomeMacroHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Button>
-                <Button Grid.Row="2" Grid.Column="0"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Files}"
-                        Classes="homeTile" HorizontalAlignment="Stretch">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding Localization.NavFiles}" FontWeight="Bold" FontSize="13" />
-                        <TextBlock Text="Browse styles, kits, and samples" Classes="dim" FontSize="11" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Button>
-                <Button Grid.Row="2" Grid.Column="1"
-                        Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}"
-                        Classes="homeTile" HorizontalAlignment="Stretch">
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{Binding Localization.NavSettings}" FontWeight="Bold" FontSize="13" />
-                        <TextBlock Text="{Binding Localization.HomeSettingsHint}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
-                    </StackPanel>
-                </Button>
-            </Grid>
         </StackPanel>
 
-        <Border Grid.Column="1" Classes="panel" Padding="16" VerticalAlignment="Center">
-            <StackPanel Spacing="14">
-                <TextBlock Text="{Binding Localization.HomeStatusTitle}" Classes="panelHeader" />
-                <StackPanel Spacing="10">
+        <Border Grid.Column="1" Classes="panel sessionStatus" Padding="18" VerticalAlignment="Center">
+            <StackPanel Spacing="16">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="SESSION" Classes="dim" FontSize="9" FontWeight="Bold" LetterSpacing="1.2" />
+                    <TextBlock Text="{Binding Localization.HomeStatusTitle}" Classes="panelHeader" FontSize="12" />
+                </StackPanel>
+                <Border Classes="statusReadout">
+                    <StackPanel Spacing="3">
+                        <TextBlock Text="{Binding Localization.HomeTransportLabel}" Classes="dim" FontSize="9" />
+                        <TextBlock Text="{Binding Machine.TransportLabel}" Classes="mono" FontSize="18" FontWeight="Bold" />
+                    </StackPanel>
+                </Border>
+                <StackPanel Spacing="12">
                     <StackPanel Spacing="2">
-                        <TextBlock Text="{Binding Localization.HomeKitLabel}" Classes="dim" FontSize="10" />
-                        <TextBlock Text="{Binding Machine.KitLabel}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Localization.HomeKitLabel}" Classes="dim" FontSize="9" />
+                        <TextBlock Text="{Binding Machine.KitLabel}" FontSize="12" FontWeight="Medium" TextWrapping="Wrap" />
                     </StackPanel>
                     <StackPanel Spacing="2">
-                        <TextBlock Text="{Binding Localization.HomeStyleLabel}" Classes="dim" FontSize="10" />
-                        <TextBlock Text="{Binding Machine.StyleLabel}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Localization.HomeStyleLabel}" Classes="dim" FontSize="9" />
+                        <TextBlock Text="{Binding Machine.StyleLabel}" FontSize="12" FontWeight="Medium" TextWrapping="Wrap" />
                     </StackPanel>
                     <StackPanel Spacing="2">
-                        <TextBlock Text="{Binding Localization.HomePatternLabel}" Classes="dim" FontSize="10" />
-                        <TextBlock Text="{Binding Machine.PatternLabel}" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Localization.HomePatternLabel}" Classes="dim" FontSize="9" />
+                        <TextBlock Text="{Binding Machine.PatternLabel}" FontSize="12" FontWeight="Medium" />
                     </StackPanel>
                     <StackPanel Spacing="2">
-                        <TextBlock Text="{Binding Localization.HomeDeviceLabel}" Classes="dim" FontSize="10" />
-                        <TextBlock Text="{Binding Machine.DeviceLabel}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
-                    </StackPanel>
-                    <StackPanel Spacing="2">
-                        <TextBlock Text="{Binding Localization.HomeTransportLabel}" Classes="dim" FontSize="10" />
-                        <TextBlock Text="{Binding Machine.TransportLabel}" FontSize="12" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Localization.HomeDeviceLabel}" Classes="dim" FontSize="9" />
+                        <TextBlock Text="{Binding Machine.DeviceLabel}" FontSize="11" FontWeight="Medium" TextWrapping="Wrap" />
                     </StackPanel>
                 </StackPanel>
-                <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Machine}"
-                        Classes="accent" HorizontalAlignment="Stretch" Margin="0,4,0,0" MinHeight="36">
-                    <TextBlock Text="{Binding Localization.HomeStartPlaying}" FontWeight="Bold"
-                               Foreground="{DynamicResource RythmboxOnAccentBrush}" HorizontalAlignment="Center" />
+                <Button Command="{Binding NavigateCommand}" CommandParameter="{x:Static vm:AppPage.Settings}"
+                        Classes="secondary" HorizontalAlignment="Stretch" Margin="0,2,0,0">
+                    <TextBlock Text="{Binding Localization.HomeOpenAudio}" FontWeight="Medium" HorizontalAlignment="Center" />
                 </Button>
             </StackPanel>
         </Border>

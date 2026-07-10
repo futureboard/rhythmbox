@@ -10,12 +10,13 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="Rythmbox"
         Width="1150" Height="720" MinWidth="980" MinHeight="640"
-        Background="{DynamicResource RythmboxPanelBrush}"
+        Background="{DynamicResource RythmboxBackgroundBrush}"
         Focusable="True"
         KeyDown="OnWindowKeyDown"
         KeyUp="OnWindowKeyUp">
 
-    <DockPanel LastChildFill="True">
+    <Grid>
+    <DockPanel x:Name="AppShell" IsVisible="False" LastChildFill="True">
         <views:HeaderView DockPanel.Dock="Top" />
         <views:NavBarView DockPanel.Dock="Top" />
         <views:FooterView DockPanel.Dock="Bottom" />
@@ -58,4 +59,21 @@
             </Border>
         </Panel>
     </DockPanel>
+
+    <!-- The runtime initializes behind this in the same native window. -->
+    <Border x:Name="SplashOverlay" Classes="splashSurface" ZIndex="1000">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="320" Spacing="14">
+            <views:LogoView Height="34" HorizontalAlignment="Center" />
+            <StackPanel Spacing="3" HorizontalAlignment="Center">
+                <TextBlock Text="RHYTHM WORKSTATION" Classes="panelHeader" FontSize="12" HorizontalAlignment="Center" />
+                <TextBlock Text="Preparing your performance environment" Classes="dim" FontSize="11" HorizontalAlignment="Center" />
+            </StackPanel>
+            <Border Classes="splashProgressFrame">
+                <ProgressBar Classes="splashProgress" IsIndeterminate="True" />
+            </Border>
+            <TextBlock x:Name="SplashStatus" Text="Loading runtime…" Classes="splashStatus"
+                       HorizontalAlignment="Center" TextAlignment="Center" />
+        </StackPanel>
+    </Border>
+    </Grid>
 </Window>

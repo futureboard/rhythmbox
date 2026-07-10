@@ -22,7 +22,7 @@
                     VerticalAlignment="Stretch">
                 <StackPanel Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="16">
                     <TextBlock Text="Drop WAV here or click Import WAV"
-                               FontSize="13" FontWeight="SemiBold"
+                               FontSize="13" FontWeight="Medium"
                                HorizontalAlignment="Center"
                                Foreground="{DynamicResource RythmboxSecondaryTextBrush}" />
                     <TextBlock Text="Assign a sample to this pad to edit trim, gain, and pitch"

@@ -136,13 +136,15 @@ public static class WavCodec
             return [];
         }
 
-        var peaks = new WaveformPeak[peakCount];
-        var block = Math.Max(1, samples.Length / peakCount);
+        // Preserve every source range. A fixed block count could append empty
+        // peaks for short samples and drop the final remainder of a waveform.
+        var resolvedPeakCount = Math.Min(peakCount, samples.Length);
+        var peaks = new WaveformPeak[resolvedPeakCount];
 
-        for (var i = 0; i < peakCount; i++)
+        for (var i = 0; i < resolvedPeakCount; i++)
         {
-            var start = i * block;
-            var end = Math.Min(samples.Length, start + block);
+            var start = (int)((long)i * samples.Length / resolvedPeakCount);
+            var end = (int)((long)(i + 1) * samples.Length / resolvedPeakCount);
             var min = 0f;
             var max = 0f;
 

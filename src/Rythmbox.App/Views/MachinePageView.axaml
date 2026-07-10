@@ -5,7 +5,7 @@
              xmlns:views="using:Rythmbox.App.Views"
              mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="720"
              x:Class="Rythmbox.App.Views.MachinePageView">
-    <Grid RowDefinitions="*,220" ColumnDefinitions="272,*">
+    <Grid RowDefinitions="*,248" ColumnDefinitions="300,*" Background="{DynamicResource RythmboxBackgroundBrush}">
         <Grid Grid.Row="0" Grid.Column="0" RowDefinitions="*,Auto">
             <views:ArrangerLeftPanelView Grid.Row="0" />
             <views:TransportView Grid.Row="1" />

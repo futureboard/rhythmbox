@@ -6,11 +6,14 @@
              mc:Ignorable="d" d:DesignWidth="272" d:DesignHeight="420"
              x:Class="Rythmbox.App.Views.ArrangerLeftPanelView"
              x:DataType="vm:MainWindowViewModel">
-    <Border Classes="region regionRight">
-        <StackPanel Spacing="8">
-            <TextBlock Text="{Binding Localization.ArrangerTitle}" Classes="panelHeader" />
+    <Border Classes="region regionRight" Padding="12">
+        <StackPanel Spacing="10">
+            <StackPanel Spacing="2">
+                <TextBlock Text="PERFORMANCE" Classes="dim" FontSize="9" FontWeight="Bold" LetterSpacing="1" />
+                <TextBlock Text="{Binding Localization.ArrangerTitle}" Classes="panelHeader" />
+            </StackPanel>
 
-            <Border Classes="panel" Padding="8">
+            <Border Classes="panel" Padding="10">
                 <StackPanel Spacing="4">
                     <TextBlock Text="{Binding Localization.ArrangerStyle}" Classes="dim" FontSize="10" />
                     <TextBlock Text="{Binding Machine.StyleLabel}" FontWeight="Bold" FontSize="13" TextWrapping="Wrap" />
@@ -18,17 +21,17 @@
                 </StackPanel>
             </Border>
 
-            <Border Classes="panel" Padding="8">
+            <Border Classes="panel" Padding="10">
                 <StackPanel Spacing="4">
                     <TextBlock Text="{Binding Localization.ArrangerPattern}" Classes="dim" FontSize="10" />
                     <TextBlock Text="{Binding Machine.PatternLabel}" FontWeight="Bold" FontSize="13" />
                 </StackPanel>
             </Border>
 
-            <Border Classes="panel" Padding="8">
-                <StackPanel Spacing="6">
+            <Border Classes="panel" Padding="10">
+                <StackPanel Spacing="8">
                     <TextBlock Text="{Binding Localization.ArrangerMacros}" Classes="dim" FontSize="10" />
-                    <Grid ColumnDefinitions="72,*" RowDefinitions="Auto,Auto,Auto,Auto">
+                    <Grid ColumnDefinitions="84,*" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="3">
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Localization.ArrangerComplexity}" Classes="dim" VerticalAlignment="Center" />
                         <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="1" Value="{Binding Machine.Complexity}" />
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Localization.ArrangerEnergy}" Classes="dim" VerticalAlignment="Center" />
@@ -41,11 +44,11 @@
                 </StackPanel>
             </Border>
 
-            <Border Classes="panel" Padding="8" IsVisible="{Binding Machine.HasLastError}">
+            <Border Classes="panel" Padding="10" IsVisible="{Binding Machine.HasLastError}">
                 <TextBlock Text="{Binding Machine.LastError}" Foreground="{DynamicResource RythmboxRedBrush}" FontSize="11" TextWrapping="Wrap" />
             </Border>
 
-            <Border Classes="panel" Padding="8" Opacity="0.6">
+            <Border Classes="panel" Padding="10" Opacity="0.6">
                 <StackPanel Spacing="4">
                     <TextBlock Text="{Binding Localization.ArrangerSongChain}" Classes="dim" FontSize="10" />
                     <TextBlock Text="{Binding Localization.ArrangerSongChainSoon}" Classes="dim" FontSize="11" TextWrapping="Wrap" />

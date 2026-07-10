@@ -28,9 +28,6 @@ sealed class Program
     {
         var builder = AppBuilder.Configure<App>()
             .UsePlatformDetect()
-#if DEBUG
-            .WithDeveloperTools()
-#endif
             .With(new FontManagerOptions
             {
                 DefaultFamilyName = Localization.LocalizationService.BarlowAnuphanFont,

@@ -12,16 +12,19 @@
       Style/Pattern live on Machine/Home. Scan/Sub/Fullscreen live in overflow.
     -->
     <Border Classes="headerBar">
-        <Grid ColumnDefinitions="Auto,*,Auto" MinHeight="34">
+        <Grid ColumnDefinitions="Auto,*,Auto" MinHeight="38">
 
             <!-- Left: logo + mode -->
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,12,0">
-                <views:LogoView Height="11" VerticalAlignment="Center" Width="88" />
-                <Border Width="1" Height="14" Background="{DynamicResource RythmboxPanelBorderBrush}" />
-                <TextBlock Text="{Binding CurrentPageTitle}" FontSize="12" FontWeight="SemiBold"
-                           Foreground="{DynamicResource RythmboxAccentBrush}" VerticalAlignment="Center"
-                           MaxWidth="96" TextTrimming="CharacterEllipsis"
-                           ToolTip.Tip="{Binding CurrentPageTitle}" />
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="0,0,16,0">
+                <views:LogoView Height="12" VerticalAlignment="Center" Width="96" />
+                <Border Classes="headerDivider" />
+                <StackPanel Spacing="0" VerticalAlignment="Center">
+                    <TextBlock Text="WORKSTATION" Classes="dim" FontSize="8" FontWeight="Medium" LetterSpacing="1" />
+                    <TextBlock Text="{Binding CurrentPageTitle}" FontSize="11" FontWeight="Bold"
+                               Foreground="{DynamicResource RythmboxAccentBrush}"
+                               MaxWidth="108" TextTrimming="CharacterEllipsis"
+                               ToolTip.Tip="{Binding CurrentPageTitle}" />
+                </StackPanel>
             </StackPanel>
 
             <!-- Center: transport + tempo + tap + timer -->
@@ -50,21 +53,21 @@
                               ToolTip.Tip="{Binding Localization.TransportLoopTip}">
                     <StackPanel Orientation="Horizontal" Spacing="3">
                         <Path Data="{StaticResource IconRepeat}" Classes="icon small" />
-                        <TextBlock Text="{Binding Localization.TransportLoop}" FontSize="10" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding Localization.TransportLoop}" FontSize="10" FontWeight="Medium" />
                     </StackPanel>
                 </ToggleButton>
-                <Border Width="1" Height="16" Background="{DynamicResource RythmboxPanelBorderBrush}" Margin="2,0" />
-                <Button Command="{Binding Tempo.TogglePickerCommand}" Padding="6,3"
+                <Border Classes="headerDivider" Margin="4,0" />
+                <Button Command="{Binding Tempo.TogglePickerCommand}" Classes="tempoDisplay"
                         ToolTip.Tip="{Binding Localization.HeaderTempo}">
                     <StackPanel Orientation="Horizontal" Spacing="3">
                         <TextBlock Text="{Binding Localization.HeaderTempo}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding Tempo.TempoLabel}" Classes="mono" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Tempo.TempoLabel}" Classes="mono" FontSize="12" FontWeight="Medium" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
-                <Button Command="{Binding Tempo.TapTempoCommand}" Padding="6,3"
+                <Button Command="{Binding Tempo.TapTempoCommand}" Classes="compact" Padding="8,3"
                         ToolTip.Tip="{Binding Localization.HeaderTapTempo}"
                         Classes.tapActive="{Binding Tempo.IsAwaitingTap}">
-                    <TextBlock Text="{Binding Localization.HeaderTapTempo}" FontSize="10" FontWeight="SemiBold"
+                    <TextBlock Text="{Binding Localization.HeaderTapTempo}" FontSize="10" FontWeight="Medium"
                                MaxWidth="64" TextTrimming="CharacterEllipsis" />
                 </Button>
                 <StackPanel Orientation="Horizontal" Spacing="3" VerticalAlignment="Center">
@@ -73,24 +76,24 @@
                     <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led2}" />
                     <Rectangle Classes="beatLed" Opacity="{Binding BeatLeds.Led3}" />
                 </StackPanel>
-                <TextBlock Text="{Binding ClockText}" Classes="mono dim" FontSize="11" VerticalAlignment="Center" Margin="4,0,0,0" />
+                <TextBlock Text="{Binding ClockText}" Classes="mono dim" FontSize="10" VerticalAlignment="Center" Margin="6,0,0,0" />
             </StackPanel>
 
             <!-- Right: kit + audio chip + overflow -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12,0,0,0">
                 <Button Command="{Binding KitBrowser.BrowseLoadKitCommand}"
-                        Padding="8,3" MaxWidth="140" MinWidth="72"
+                        Classes="headerKit" MaxWidth="160" MinWidth="84"
                         ToolTip.Tip="{Binding Machine.KitLabel}">
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <TextBlock Text="{Binding Localization.HeaderKit}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding Machine.KitLabel}" FontSize="11" FontWeight="SemiBold"
+                        <TextBlock Text="{Binding Machine.KitLabel}" FontSize="11" FontWeight="Medium"
                                    TextTrimming="CharacterEllipsis" MaxWidth="100" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
 
                 <Border Classes="audioStatusChip"
                         ToolTip.Tip="{Binding Machine.DeviceLabel}">
-                    <TextBlock Text="{Binding Machine.AudioStatusChip}" FontSize="10" FontWeight="SemiBold"
+                    <TextBlock Text="{Binding Machine.AudioStatusChip}" FontSize="10" FontWeight="Medium"
                                MaxWidth="72" TextTrimming="CharacterEllipsis" />
                 </Border>
 

@@ -8,6 +8,10 @@ namespace Rythmbox.SampleCreator.ViewModels;
 
 public sealed partial class PadSampleViewModel : ViewModelBase
 {
+    // The canvas resamples this high-resolution envelope to the available pixels.
+    // At 32 KB per pad it stays inexpensive while retaining transient detail.
+    private const int WaveformPeakCount = 4096;
+
     private readonly SampleCreatorViewModel _creator;
     private bool _couplingTrim;
     private bool _syncingSelection;
@@ -355,7 +359,7 @@ public sealed partial class PadSampleViewModel : ViewModelBase
     {
         var buffer = ActiveBuffer;
         WaveformPeaks = buffer.Length > 0
-            ? WavCodec.BuildWaveformEnvelope(buffer, 256)
+            ? WavCodec.BuildWaveformEnvelope(buffer, WaveformPeakCount)
             : [];
         OnPropertyChanged(nameof(WaveformPeaks));
     }
