@@ -22,6 +22,7 @@ public static class KitPresetCodec
             {
                 Label = pad.Label,
                 MidiNote = pad.Note,
+                MidiNotes = [pad.Note],
                 PadIndex = pad.Index,
                 OutputGroup = GmPercussionMap.GetMixGroup(pad.Note),
             });
@@ -137,13 +138,15 @@ public static class KitPresetCodec
             var midiNote = padEl.TryGetProperty("midi_note", out var noteEl) && noteEl.ValueKind == JsonValueKind.Number
                 ? noteEl.GetInt32()
                 : -1;
+            var midiNotes = ReadMidiNotes(padEl, midiNote);
             var sample = new DrumSample
             {
                 Label = padEl.TryGetProperty("label", out var labelEl) ? labelEl.GetString() ?? "Pad" : "Pad",
                 Gain = padEl.TryGetProperty("gain", out var gainEl) && gainEl.TryGetSingle(out var g) ? g : 1f,
                 PitchSemitones = 0f,
                 Envelope = ReadEnvelope(padEl),
-                MidiNote = midiNote,
+                MidiNote = midiNotes.FirstOrDefault(midiNote),
+                MidiNotes = midiNotes,
                 PadIndex = ReadPadIndex(padEl),
                 OutputGroup = ReadOutputGroup(padEl, midiNote, sourcePadIndex),
                 ChokeGroup = padEl.TryGetProperty("choke_group", out var chokeEl) && chokeEl.ValueKind == JsonValueKind.Number
@@ -225,6 +228,7 @@ public static class KitPresetCodec
         for (var i = 0; i < kit.Pads.Count; i++)
         {
             var pad = kit.Pads[i];
+            var midiNotes = pad.ResolveMidiNotes();
             string? relativeSample = null;
             object[]? velocityLayers = null;
 
@@ -326,6 +330,7 @@ public static class KitPresetCodec
                 gain = pad.Gain,
                 pad_index = pad.PadIndex >= 0 ? pad.PadIndex : i,
                 midi_note = pad.MidiNote >= 0 ? pad.MidiNote : (int?)null,
+                midi_notes = midiNotes.Length > 0 ? midiNotes : null,
                 output_group = pad.OutputGroup.ToString(),
                 choke_group = pad.ChokeGroup > 0 ? pad.ChokeGroup : (int?)null,
                 adsr = pad.Envelope.IsDefault
@@ -384,6 +389,7 @@ public static class KitPresetCodec
             {
                 Label = pad.Label,
                 MidiNote = pad.Note,
+                MidiNotes = [pad.Note],
                 PadIndex = pad.Index,
                 OutputGroup = GmPercussionMap.GetMixGroup(pad.Note),
             });
@@ -397,6 +403,28 @@ public static class KitPresetCodec
         && index is >= 0 and < 128
             ? index
             : -1;
+
+    private static List<int> ReadMidiNotes(JsonElement pad, int legacyNote)
+    {
+        var notes = new List<int>();
+        if (pad.TryGetProperty("midi_notes", out var notesEl) && notesEl.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var noteEl in notesEl.EnumerateArray())
+            {
+                if (noteEl.TryGetInt32(out var note) && note is >= 0 and <= 127)
+                {
+                    notes.Add(note);
+                }
+            }
+        }
+
+        if (notes.Count == 0 && legacyNote is >= 0 and <= 127)
+        {
+            notes.Add(legacyNote);
+        }
+
+        return notes.Distinct().Order().ToList();
+    }
 
     private static DrumMixGroup ReadOutputGroup(JsonElement pad, int midiNote, int fallbackIndex)
     {

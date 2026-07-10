@@ -234,13 +234,39 @@
         <Setter Property="Opacity" Value="0.55" />
     </Style>
 
-    <Style Selector="Button.pad.pressed /template/ ContentPresenter">
+    <Style Selector="Button.pad.hovered /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxHoverBrush}" />
+    </Style>
+
+    <Style Selector="Button.pad.hit /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxAccentMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentBrush}" />
+    </Style>
+
+    <Style Selector="Button.pad.playing">
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxGreenBrush}" />
+    </Style>
+
+    <Style Selector="Button.pad.mouseDown /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource RythmboxAccentBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentHoverBrush}" />
     </Style>
 
-    <Style Selector="Button.pad.pressed">
+    <Style Selector="Button.pad.mouseDown">
         <Setter Property="RenderTransform" Value="scale(0.96)" />
+    </Style>
+
+    <Style Selector="Button.pad.selected /template/ ContentPresenter">
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentHoverBrush}" />
+    </Style>
+
+    <Style Selector="Button.pad.editing /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxAccentMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentHoverBrush}" />
+    </Style>
+
+    <Style Selector="Button.pad:disabled">
+        <Setter Property="Opacity" Value="0.35" />
     </Style>
 
     <Style Selector="Ellipse.padSampleDot">

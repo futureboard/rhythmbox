@@ -79,8 +79,9 @@ public sealed partial class MasterStripViewModel : ViewModelBase, IDisposable
             return;
         }
 
-        RmsLevel = Math.Clamp(_engine.MasterLevelMeter.Rms, 0f, 1f);
-        PeakLevel = Math.Clamp(_engine.MasterLevelMeter.Peak, 0f, 1f);
+        var meter = _engine.PollMasterOutputMeter();
+        RmsLevel = Math.Clamp(meter.RmsLeft, 0d, 1d);
+        PeakLevel = Math.Clamp(meter.PeakLeft, 0d, 1d);
     }
 
     public void Dispose() => _meterTimer.Stop();

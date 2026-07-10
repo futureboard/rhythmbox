@@ -7,6 +7,20 @@ public enum MixerChannelKind
     DrumVoice,
 }
 
+/// <summary>Explicitly identifies the real sample buffer a mixer VU is allowed to read.</summary>
+public abstract record MeterTap
+{
+    private MeterTap()
+    {
+    }
+
+    public sealed record PreFader(string ChannelId) : MeterTap;
+
+    public sealed record PostFader(string ChannelId) : MeterTap;
+
+    public sealed record MasterPostFader : MeterTap;
+}
+
 public enum DrumGroup
 {
     Drum,
@@ -72,6 +86,9 @@ public sealed class MixerChannel
     public bool IsSoloEnabled { get; set; } = true;
 
     public string RouteName { get; set; } = "Main";
+
+    /// <summary>Declared meter tap; it must correspond to a rendered audio buffer.</summary>
+    public MeterTap? MeterTap { get; init; }
 
     public MixerMeterState Meter { get; set; } = MixerMeterState.Disabled;
 }

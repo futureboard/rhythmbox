@@ -2,10 +2,12 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Rythmbox.App.Localization;
+using Rythmbox.Core.Audio;
 using Rythmbox.Core.Engine;
 using Rythmbox.Core.Models;
 using Rythmbox.Core.Models.Styles;
 using Rythmbox.Core.Styles;
+using SoundFlow.Structs;
 
 namespace Rythmbox.App.ViewModels;
 
@@ -96,8 +98,11 @@ public sealed partial class SettingsViewModel : ViewModelBase
     private readonly MidiInputService _midiInput;
     private readonly MidiFootSwitchController _footSwitch;
     private readonly PatternArrangerEngine _arranger;
+    private readonly PlaybackEngine _engine;
+    private readonly IAudioBackend _audioBackend;
     private readonly StatusViewModel _status;
     private readonly LocalizationService _i18n;
+    private bool _suppressDeviceChange;
 
     public SettingsViewModel(
         PadMappingService mapping,
@@ -105,6 +110,8 @@ public sealed partial class SettingsViewModel : ViewModelBase
         MidiInputService midiInput,
         MidiFootSwitchController footSwitch,
         PatternArrangerEngine arranger,
+        PlaybackEngine engine,
+        IAudioBackend audioBackend,
         StatusViewModel status,
         LocalizationService i18n)
     {
@@ -113,12 +120,15 @@ public sealed partial class SettingsViewModel : ViewModelBase
         _midiInput = midiInput;
         _footSwitch = footSwitch;
         _arranger = arranger;
+        _engine = engine;
+        _audioBackend = audioBackend;
         _status = status;
         _i18n = i18n;
 
         _i18n.LanguageChanged += (_, _) => RefreshLocalizedLabels();
 
         RefreshMappings();
+        RefreshOutputDevices();
         _padRouter.PadLearnCompleted += (_, note) =>
         {
             _status.Show(_i18n.Format("status.midiLearned", note));
@@ -127,6 +137,44 @@ public sealed partial class SettingsViewModel : ViewModelBase
     }
 
     public ObservableCollection<PadMappingEntryViewModel> Mappings { get; } = new();
+
+    public ObservableCollection<DeviceInfo> OutputDevices { get; } = new();
+
+    [ObservableProperty]
+    private DeviceInfo? _selectedOutputDevice;
+
+    public string AudioBackendLabel => _audioBackend.PlatformBackendId;
+
+    public string AudioDeviceLabel => _audioBackend.CurrentDeviceName
+        ?? SelectedOutputDevice?.Name
+        ?? _i18n["mixer.noDevice"];
+
+    public string AudioSampleRateLabel => $"{_engine.Format.SampleRate:N0} Hz";
+
+    public string AudioBufferSizeLabel => "Default buffer";
+
+    public string AudioModeLabel => "Shared";
+
+    partial void OnSelectedOutputDeviceChanged(DeviceInfo? value)
+    {
+        if (_suppressDeviceChange || value is not { } device)
+        {
+            return;
+        }
+
+        var current = _engine.CurrentDevice;
+        if (_engine.IsRunning
+            && current is { } active
+            && string.Equals(active.Name, device.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            RefreshAudioLabels();
+            return;
+        }
+
+        _engine.SetOutputDevice(device);
+        RefreshAudioLabels();
+        _status.Show($"Audio output: {device.Name}");
+    }
 
     public bool MidiEnabled
     {
@@ -214,6 +262,36 @@ public sealed partial class SettingsViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void RefreshOutputDevices()
+    {
+        _engine.RefreshDevices();
+        _audioBackend.RefreshDevices();
+
+        _suppressDeviceChange = true;
+        OutputDevices.Clear();
+        foreach (var device in _engine.PlaybackDevices)
+        {
+            OutputDevices.Add(device);
+        }
+
+        SelectedOutputDevice = _engine.CurrentDevice ?? OutputDevices.FirstOrDefault();
+        _suppressDeviceChange = false;
+        RefreshAudioLabels();
+    }
+
+    [RelayCommand]
+    private void TestAudioOutput()
+    {
+        if (SelectedOutputDevice is not { } device)
+        {
+            _status.Show(_i18n["mixer.noDevice"]);
+            return;
+        }
+
+        _status.Show($"Audio output ready: {device.Name}");
+    }
+
+    [RelayCommand]
     private void ToggleKeyboardMode()
     {
         _mapping.ToggleKeyboardMapping();
@@ -238,9 +316,19 @@ public sealed partial class SettingsViewModel : ViewModelBase
         OnPropertyChanged(nameof(KeyboardModeLabel));
         OnPropertyChanged(nameof(FootSwitchCcLabel));
         OnPropertyChanged(nameof(FootSwitchSignatureLabel));
+        RefreshAudioLabels();
         foreach (var mapping in Mappings)
         {
             mapping.RefreshLabels();
         }
+    }
+
+    public void RefreshAudioLabels()
+    {
+        OnPropertyChanged(nameof(AudioBackendLabel));
+        OnPropertyChanged(nameof(AudioDeviceLabel));
+        OnPropertyChanged(nameof(AudioSampleRateLabel));
+        OnPropertyChanged(nameof(AudioBufferSizeLabel));
+        OnPropertyChanged(nameof(AudioModeLabel));
     }
 }

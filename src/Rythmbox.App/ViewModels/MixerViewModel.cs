@@ -19,7 +19,7 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
 {
     public const int DrumStripWidth = 84;
     public const int GroupStripWidth = 96;
-    public const int MasterStripWidth = 180;
+    public const int MasterStripWidth = 112;
     public const double StripMinHeight = 340;
 
     private readonly PlaybackEngine _engine;
@@ -304,6 +304,7 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
             IsPanEnabled = false,
             IsSoloEnabled = false,
             RouteName = RouteLabel,
+            MeterTap = new MeterTap.MasterPostFader(),
             Meter = MixerMeterState.Disabled,
         };
 
@@ -334,6 +335,7 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
             Gain = 1.0,
             IsPanEnabled = false,
             IsSoloEnabled = true,
+            MeterTap = new MeterTap.PostFader($"group_{mixGroup}"),
             RouteName = mixGroup switch
             {
                 DrumMixGroup.Kick or DrumMixGroup.Snare => "DRUM",
@@ -354,10 +356,11 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
 
     private void PollMeters()
     {
-        // Read the kit's own post-master meter rather than the backend analyser.
-        // This keeps the surface alive across WASAPI device reconfiguration and
-        // makes it reflect exactly the audio path sent by KitSamplePlayer.
-        MasterChannel.UpdateMeter(_kitPlayer.PollMasterMeter());
+        // The master VU reads the post-master-fader buffer captured by the
+        // MasterMixer analyzer. Unlike the group taps below, it includes the
+        // final master gain/mute and is the normal-playback buffer bound for
+        // the output backend.
+        MasterChannel.UpdateMeter(_engine.PollMasterOutputMeter());
 
         foreach (var strip in Channels)
         {

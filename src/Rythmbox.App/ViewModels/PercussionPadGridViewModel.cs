@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Rythmbox.Core.Engine;
@@ -6,7 +7,7 @@ using Rythmbox.Core.Models;
 
 namespace Rythmbox.App.ViewModels;
 
-public sealed partial class PercussionPadGridViewModel : ViewModelBase
+public sealed partial class PercussionPadGridViewModel : ViewModelBase, IDisposable
 {
     public const int PadsPerPage = 20;
     public const int GridColumns = 4;
@@ -14,20 +15,30 @@ public sealed partial class PercussionPadGridViewModel : ViewModelBase
 
     private readonly KitSamplePlayer _kitPlayer;
     private readonly PlayerViewModel _player;
+    private readonly DispatcherTimer _runtimeTimer;
 
-    public PercussionPadGridViewModel(KitSamplePlayer kitPlayer, PlayerViewModel player)
+    public PercussionPadGridViewModel(KitSamplePlayer kitPlayer, PlayerViewModel player, PadMappingService mapping)
     {
         _kitPlayer = kitPlayer;
         _player = player;
-        Pads = GmPercussionMap.Pads.Select(pad => new PadViewModel(pad, kitPlayer)).ToList();
+        Pads = GmPercussionMap.Pads.Select(pad => new PadViewModel(pad, kitPlayer, mapping)).ToList();
         CurrentPagePads = new ObservableCollection<PadViewModel>(BuildCurrentPagePads());
         RefreshPadState();
+
+        _runtimeTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
+        _runtimeTimer.Tick += (_, _) => UpdateRuntimeState();
+        _runtimeTimer.Start();
 
         _player.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(PlayerViewModel.UsedNoteNumbers))
             {
                 RefreshUsage();
+            }
+
+            if (e.PropertyName == nameof(PlayerViewModel.IsPlaying) && !_player.IsPlaying)
+            {
+                ClearHeldRuntimeState();
             }
         };
     }
@@ -86,7 +97,48 @@ public sealed partial class PercussionPadGridViewModel : ViewModelBase
     {
         if ((uint)index < (uint)Pads.Count)
         {
-            Pads[index].AnimateHit();
+            Pads[index].OnPadTriggered(sourceNote: -1, velocity: 127);
+        }
+    }
+
+    public void HandlePadTriggered(int padIndex, int sourceNote, int velocity)
+    {
+        if ((uint)padIndex < (uint)Pads.Count)
+        {
+            Pads[padIndex].OnPadTriggered(sourceNote, velocity);
+        }
+    }
+
+    public void HandlePadReleased(int padIndex, int sourceNote)
+    {
+        if ((uint)padIndex < (uint)Pads.Count)
+        {
+            Pads[padIndex].OnPadNoteReleased(sourceNote);
+        }
+    }
+
+    public void ClearHeldRuntimeState()
+    {
+        foreach (var pad in Pads)
+        {
+            pad.ClearHeldRuntimeState();
+        }
+    }
+
+    public void ClearPointerStates()
+    {
+        foreach (var pad in Pads)
+        {
+            pad.ClearPointerState();
+        }
+    }
+
+    public void RefreshPadRouting(int padIndex)
+    {
+        if ((uint)padIndex < (uint)Pads.Count)
+        {
+            Pads[padIndex].RefreshRouting();
+            RefreshUsage();
         }
     }
 
@@ -155,7 +207,18 @@ public sealed partial class PercussionPadGridViewModel : ViewModelBase
         var used = _player.UsedNoteNumbers;
         foreach (var pad in Pads.Where(static p => !p.IsPlaceholder))
         {
-            pad.IsUsedInLoop = used.Contains(pad.MidiNote);
+            pad.IsUsedInLoop = pad.AssignedNotes.Any(used.Contains);
         }
     }
+
+    private void UpdateRuntimeState()
+    {
+        var now = DateTimeOffset.UtcNow;
+        foreach (var pad in Pads)
+        {
+            pad.UpdateRuntime(now);
+        }
+    }
+
+    public void Dispose() => _runtimeTimer.Stop();
 }

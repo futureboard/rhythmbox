@@ -66,9 +66,9 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
 
     public int StripMinWidth => Kind switch
     {
-        MixerChannelKind.Master => 180,
-        MixerChannelKind.Group => 96,
-        _ => 84,
+        MixerChannelKind.Master => MixerViewModel.MasterStripWidth,
+        MixerChannelKind.Group => MixerViewModel.GroupStripWidth,
+        _ => MixerViewModel.DrumStripWidth,
     };
 
     public bool ShowPan => Channel.IsPanEnabled;
@@ -78,6 +78,34 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
     public string RouteName => Channel.RouteName;
 
     public string SoloToolTip => ShowSolo ? "Solo" : "Solo is not available for this channel";
+
+    public bool IsDebugMeterOverlayVisible
+    {
+        get
+        {
+#if DEBUG
+            return true;
+#else
+            return false;
+#endif
+        }
+    }
+
+    public string DebugMeterOverlay
+    {
+        get
+        {
+#if DEBUG
+            var raw = Meter.PeakLeft;
+            var db = raw <= 0.000001d ? "-∞" : $"{20d * Math.Log10(raw):0.0} dB";
+            var tap = Channel.MeterTap?.ToString() ?? "undeclared";
+            var timestamp = _lastMeterUpdate == default ? "never" : _lastMeterUpdate.ToString("HH:mm:ss.fff");
+            return $"raw {raw:0.000} | {db} | shown {Meter.PeakLeft:0.000}\n{Id} | {tap} | {timestamp}";
+#else
+            return string.Empty;
+#endif
+        }
+    }
 
     [ObservableProperty]
     private bool _isSelected;
@@ -228,9 +256,17 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
     {
         Channel.Meter = state;
         Meter = MixerMeterViewModel.FromState(state, _i18n);
+#if DEBUG
+        _lastMeterUpdate = DateTimeOffset.UtcNow;
+        OnPropertyChanged(nameof(DebugMeterOverlay));
+#endif
     }
 
     public void RefreshLocalizedLabels() => Meter.RefreshLocalizedLabels();
+
+#if DEBUG
+    private DateTimeOffset _lastMeterUpdate;
+#endif
 }
 
 public sealed partial class MixerMeterViewModel : ViewModelBase

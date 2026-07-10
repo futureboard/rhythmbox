@@ -1,3 +1,6 @@
+using Rythmbox.Core.Audio;
+using Rythmbox.Core.Models;
+using Rythmbox.Core.Models.Mixer;
 using SoundFlow.Abstracts;
 using SoundFlow.Abstracts.Devices;
 using SoundFlow.Backends.MiniAudio;
@@ -37,6 +40,24 @@ public sealed class PlaybackEngine : IDisposable
     public Mixer MasterMixer => Device.MasterMixer;
 
     public LevelMeterAnalyzer MasterLevelMeter { get; private set; } = null!;
+
+    /// <summary>Post-master-fader meter for the exact normal-playback buffer bound for the device.</summary>
+    public MixerMeterState PollMasterOutputMeter() => _deviceOutputMeter?.Poll() ?? MixerMeterState.Disabled;
+
+    /// <summary>Development-only sample-path counters. Release builds leave these counters inert.</summary>
+    public AudioGraphTrace AudioGraphTrace { get; } = new(GmPercussionMap.MixGroups.Select(group => group.ToString()));
+
+    public AudioGraphTraceSnapshot GetAudioGraphTraceSnapshot()
+    {
+#if DEBUG
+        var bypassReason = RawEngine.GetSoloedComponent() is { } component
+            ? $"SoundFlow engine solo bypass: {component.Name}"
+            : string.Empty;
+        return AudioGraphTrace.Snapshot(bypassReason);
+#else
+        return AudioGraphTrace.Snapshot();
+#endif
+    }
 
     public IReadOnlyList<DeviceInfo> PlaybackDevices => _engine.PlaybackDevices;
 
@@ -88,6 +109,23 @@ public sealed class PlaybackEngine : IDisposable
     {
         MasterLevelMeter = new LevelMeterAnalyzer(Format, new NullVisualizer());
         MasterMixer.AddAnalyzer(MasterLevelMeter);
+
+        _deviceOutputMeter = new DeviceOutputMeterAnalyzer(Format, _masterOutputMeter, AudioGraphTrace);
+        MasterMixer.AddAnalyzer(_deviceOutputMeter);
+    }
+
+    /// <summary>
+    /// Development command requested by the audio truth audit. It formats a
+    /// snapshot outside the audio callback and identifies SoundFlow's only
+    /// device-level bypass: an explicit engine-solo component.
+    /// </summary>
+    public string rhythmbox_debug_audio_truth()
+    {
+#if DEBUG
+        return AudioGraphTrace.FormatTruthTable("kit_sample_player", GetAudioGraphTraceSnapshot().LastAudioBypassReason);
+#else
+        return "Audio truth tracing is available in Debug builds only.";
+#endif
     }
 
     private void StopInternal()
@@ -107,4 +145,7 @@ public sealed class PlaybackEngine : IDisposable
         StopInternal();
         _engine.Dispose();
     }
+
+    private readonly RealtimeLevelMeter _masterOutputMeter = new();
+    private DeviceOutputMeterAnalyzer? _deviceOutputMeter;
 }

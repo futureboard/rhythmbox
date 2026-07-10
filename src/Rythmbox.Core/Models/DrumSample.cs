@@ -10,6 +10,46 @@ public sealed class DrumSample
     public int MidiNote { get; set; } = -1;
 
     /// <summary>
+    /// Additional MIDI notes assigned to this physical pad. <see cref="MidiNote"/>
+    /// remains the primary legacy field so older presets keep loading unchanged.
+    /// </summary>
+    public List<int> MidiNotes { get; set; } = [];
+
+    /// <summary>
+    /// Returns the persisted/runtime assignment list while honoring the legacy
+    /// primary-note property. This keeps callers that still set only
+    /// <see cref="MidiNote"/> from silently retaining a stale default list.
+    /// </summary>
+    public int[] ResolveMidiNotes()
+    {
+        var notes = MidiNotes
+            .Where(static note => note is >= 0 and <= 127)
+            .Distinct()
+            .Order()
+            .ToList();
+
+        if (MidiNote is < 0 or > 127)
+        {
+            return notes.ToArray();
+        }
+
+        if (!notes.Contains(MidiNote))
+        {
+            // A legacy writer changed only MidiNote. Treat that as a complete
+            // single-note replacement rather than an accidental layer.
+            return [MidiNote];
+        }
+
+        if (notes[0] != MidiNote)
+        {
+            notes.Remove(MidiNote);
+            notes.Insert(0, MidiNote);
+        }
+
+        return notes.ToArray();
+    }
+
+    /// <summary>
     /// Stable physical pad slot. MIDI notes are user-editable, so they cannot
     /// be used as the identity of the sample slot when a kit is reloaded.
     /// </summary>
@@ -75,6 +115,7 @@ public sealed class DrumSample
         {
             Label = Label,
             MidiNote = MidiNote,
+            MidiNotes = [.. MidiNotes],
             PadIndex = PadIndex,
             OutputGroup = OutputGroup,
             ChokeGroup = ChokeGroup,

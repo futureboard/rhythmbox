@@ -254,6 +254,7 @@ public sealed partial class PadSampleViewModel : ViewModelBase
         }
 
         Sample.MidiNote = clamped;
+        Sample.MidiNotes = [clamped];
         _creator.NotifyKitEdited($"{Label}: MIDI {FormatMidiNote(clamped)}");
     }
 

@@ -18,11 +18,10 @@ public sealed class PadMidiRouter : IMidiControllable
     {
         _kitPlayer = kitPlayer;
         _mapping = mapping;
+        _mapping.MidiNotesChanged += OnMidiNotesChanged;
     }
 
     public bool IsEnabled { get; set; } = true;
-
-    public event Action<int, int>? PadTriggered;
 
     /// <summary>Raised for every Control Change received: (controllerNumber, value). Used for foot switches.</summary>
     public event Action<int, int>? ControlChangeReceived;
@@ -37,18 +36,25 @@ public sealed class PadMidiRouter : IMidiControllable
         if (message.Command == MidiCommand.ControlChange)
         {
             ControlChangeReceived?.Invoke(message.ControllerNumber, message.ControllerValue);
+            if (message.ControllerNumber is 120 or 123) // All Sound Off / All Notes Off
+            {
+                _kitPlayer.AllNotesOff();
+            }
+
             return;
         }
 
         var isNoteOn = message.Command == MidiCommand.NoteOn && message.Velocity > 0;
-        if (!isNoteOn)
+        var isNoteOff = message.Command == MidiCommand.NoteOff
+            || (message.Command == MidiCommand.NoteOn && message.Velocity <= 0);
+        if (!isNoteOn && !isNoteOff)
         {
             return;
         }
 
         var note = message.NoteNumber;
 
-        if (_mapping.LearnPadIndex is { } learnPad)
+        if (isNoteOn && _mapping.LearnPadIndex is { } learnPad)
         {
             _mapping.SetMidiNote(learnPad, note);
             _mapping.LearnPadIndex = null;
@@ -56,12 +62,22 @@ public sealed class PadMidiRouter : IMidiControllable
             return;
         }
 
-        if (_mapping.FindPadByMidiNote(note) is { } padIndex)
+        var mappedPads = _mapping.GetPadIndicesForMidiNote(note);
+        foreach (var padIndex in mappedPads)
         {
-            PadTriggered?.Invoke(padIndex, message.Velocity);
-            _kitPlayer.TriggerPad(padIndex, message.Velocity / 127f);
+            if (isNoteOn)
+            {
+                _kitPlayer.TriggerPad(padIndex, message.Velocity / 127f, note);
+            }
+            else
+            {
+                _kitPlayer.ReleasePad(padIndex, note);
+            }
         }
     }
 
     public event Action<int, int>? PadLearnCompleted;
+
+    private void OnMidiNotesChanged(int padIndex, IReadOnlyList<int> notes) =>
+        _kitPlayer.SetPadMidiNotesByIndex(padIndex, notes);
 }

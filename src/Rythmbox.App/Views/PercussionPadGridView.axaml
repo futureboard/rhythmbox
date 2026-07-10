@@ -46,15 +46,27 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="vm:PadViewModel">
                             <Button Command="{Binding HitCommand}" Padding="0"
-                                    IsEnabled="{Binding !IsPlaceholder}"
+                                    IsEnabled="{Binding Config.IsEnabled}"
                                     IsVisible="{Binding !IsPlaceholder}"
                                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                                     HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
                                     MinHeight="0"
                                     Classes="pad"
                                     Classes.used="{Binding IsUsedInLoop}"
-                                    Classes.pressed="{Binding IsPressed}"
-                                    Classes.empty="{Binding !HasSample}">
+                                    Classes.hovered="{Binding IsHovered}"
+                                    Classes.mouseDown="{Binding IsMouseDown}"
+                                    Classes.hit="{Binding IsHitFlashing}"
+                                    Classes.playing="{Binding IsPlaying}"
+                                    Classes.selected="{Binding IsSelected}"
+                                    Classes.editing="{Binding IsEditing}"
+                                    Classes.assigned="{Binding IsAssigned}"
+                                    Classes.empty="{Binding !IsAssigned}"
+                                    ToolTip.Tip="{Binding NoteDetail}"
+                                    PointerEntered="OnPadPointerEntered"
+                                    PointerExited="OnPadPointerExited"
+                                    PointerPressed="OnPadPointerPressed"
+                                    PointerReleased="OnPadPointerReleased"
+                                    PointerCaptureLost="OnPadPointerCaptureLost">
                                 <StackPanel Spacing="2" VerticalAlignment="Center" Margin="6,8">
                                     <TextBlock Text="{Binding Label}" Classes="padLabel" HorizontalAlignment="Center" />
                                     <TextBlock Text="{Binding SampleDetail}" Classes="padNumber" HorizontalAlignment="Center" />
@@ -62,6 +74,8 @@
                                     <Ellipse Width="5" Height="5" HorizontalAlignment="Center" Margin="0,2,0,0"
                                              Classes="padSampleDot"
                                              Classes.hasSample="{Binding HasSample}" />
+                                    <TextBlock Text="{Binding DebugPadInspector}" Classes="mono dim" FontSize="7"
+                                               TextWrapping="Wrap" IsVisible="{Binding IsDebugPadInspectorVisible}" />
                                 </StackPanel>
                             </Button>
                         </DataTemplate>

@@ -103,7 +103,9 @@ public sealed class MidiFilePlayer : IDisposable
             return;
         }
 
-        _engine.MasterMixer.RemoveComponent(_sequencer);
+        // PlaybackEngine swaps in a fresh MasterMixer on output-device changes.
+        // Re-add the sequencer to the new graph; the previous graph is already
+        // owned by the old device and may be disposed by this point.
         _engine.MasterMixer.AddComponent(_sequencer);
     }
 

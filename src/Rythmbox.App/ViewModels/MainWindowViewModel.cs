@@ -87,11 +87,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         MasterStrip = new MasterStripViewModel(_engine);
         Mixer = new MixerViewModel(_engine, _kitPlayer, _audioBackend, _localization);
         LoopBrowser = new LoopBrowserViewModel(_loopLibrary, Player);
-        PadGrid = new PercussionPadGridViewModel(_kitPlayer, Player);
+        PadGrid = new PercussionPadGridViewModel(_kitPlayer, Player, _padMapping);
         NowPlaying = new NowPlayingViewModel(LoopBrowser, Player);
         PadMixer = new PadMixerViewModel(_kitPlayer);
         BusMixer = new BusMixerViewModel(_kitPlayer);
-        Settings = new SettingsViewModel(_padMapping, _padRouter, _midiInput, _footSwitch, _arranger, Status, _localization);
+        Settings = new SettingsViewModel(_padMapping, _padRouter, _midiInput, _footSwitch, _arranger, _engine, _audioBackend, Status, _localization);
         Tempo = new TempoViewModel(_tempoPresets, Player, Status, _localization);
         SubLoops = new SubLoopViewModel(_subLoopService, Player, Status);
         BeatLeds = new BeatLedViewModel(Player);
@@ -117,7 +117,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _engine.DeviceChanged += OnDeviceChanged;
         _kitSession.LiveKitUpdated += OnKitSessionUpdated;
         _kitSession.StructureChanged += OnKitSessionUpdated;
-        _padRouter.PadTriggered += OnPadTriggered;
+        _kitPlayer.PadTriggered += OnPadTriggered;
+        _kitPlayer.PadNoteReleased += OnPadNoteReleased;
+        _kitPlayer.AllPadNotesReleased += OnAllPadNotesReleased;
+        _padMapping.MidiNotesChanged += OnPadMidiNotesChanged;
 
         // Foot switch: MIDI CC -> momentary time-signature switch. CC arrives on the MIDI thread,
         // so marshal the state change onto the UI thread before touching the arranger view models.
@@ -394,6 +397,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _midiFilePlayer.ReattachToMixer();
         Machine.RefreshAudioStatus();
         Mixer.RefreshAudioStatus();
+        Settings.RefreshAudioLabels();
     }
 
     private void OnKitSessionUpdated()
@@ -404,7 +408,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
             // hardware MIDI learn/settings aligned with its custom pad notes.
             for (var i = 0; i < _kitSession.WorkingKit.Pads.Count && i < _padMapping.PadCount; i++)
             {
-                _padMapping.SetMidiNote(i, _kitSession.WorkingKit.Pads[i].MidiNote);
+                var sample = _kitSession.WorkingKit.Pads[i];
+                _padMapping.SetMidiNotes(i, sample.ResolveMidiNotes());
             }
 
             Settings.RefreshMappings();
@@ -412,9 +417,27 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         });
     }
 
-    private void OnPadTriggered(int padIndex, int velocity)
+    private void OnPadTriggered(int padIndex, int sourceNote, int velocity)
     {
-        Dispatcher.UIThread.Post(() => PadGrid.AnimatePad(padIndex));
+        Dispatcher.UIThread.Post(() => PadGrid.HandlePadTriggered(padIndex, sourceNote, velocity));
+    }
+
+    private void OnPadNoteReleased(int padIndex, int sourceNote) =>
+        Dispatcher.UIThread.Post(() => PadGrid.HandlePadReleased(padIndex, sourceNote));
+
+    private void OnAllPadNotesReleased() =>
+        Dispatcher.UIThread.Post(PadGrid.ClearHeldRuntimeState);
+
+    private void OnPadMidiNotesChanged(int padIndex, IReadOnlyList<int> notes)
+    {
+        if ((uint)padIndex < (uint)_kitSession.WorkingKit.Pads.Count)
+        {
+            var sample = _kitSession.WorkingKit.Pads[padIndex];
+            sample.MidiNotes = [.. notes];
+            sample.MidiNote = notes.FirstOrDefault(-1);
+        }
+
+        Dispatcher.UIThread.Post(() => PadGrid.RefreshPadRouting(padIndex));
     }
 
     public void Dispose()
@@ -424,12 +447,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _engine.DeviceChanged -= OnDeviceChanged;
         _kitSession.LiveKitUpdated -= OnKitSessionUpdated;
         _kitSession.StructureChanged -= OnKitSessionUpdated;
-        _padRouter.PadTriggered -= OnPadTriggered;
+        _kitPlayer.PadTriggered -= OnPadTriggered;
+        _kitPlayer.PadNoteReleased -= OnPadNoteReleased;
+        _kitPlayer.AllPadNotesReleased -= OnAllPadNotesReleased;
+        _padMapping.MidiNotesChanged -= OnPadMidiNotesChanged;
         Machine.Dispose();
         Mixer.Dispose();
         Editor.Dispose();
         SampleCreator.Dispose();
         Player.Dispose();
+        PadGrid.Dispose();
         MasterStrip.Dispose();
         _midiFilePlayer.Dispose();
         _midiInput.Dispose();

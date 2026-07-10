@@ -117,4 +117,32 @@ public sealed class KitPresetMemoryMapTests
             }
         }
     }
+
+    [Fact]
+    public void Json_round_trip_preserves_multiple_midi_notes_for_one_pad()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"kit_multi_note_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        var presetPath = Path.Combine(directory, "routing.json");
+
+        try
+        {
+            var kit = KitPresetCodec.CreateDefaultGmKit();
+            kit.Pads[3].MidiNote = 41;
+            kit.Pads[3].MidiNotes = [41, 64, 72];
+
+            KitPresetCodec.Save(kit, presetPath, Path.Combine(directory, "SAMPLES"), exportWavs: false);
+            var loaded = KitPresetCodec.Load(presetPath);
+
+            Assert.Equal(41, loaded.Pads[3].MidiNote);
+            Assert.Equal([41, 64, 72], loaded.Pads[3].MidiNotes);
+        }
+        finally
+        {
+            if (Directory.Exists(directory))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+        }
+    }
 }

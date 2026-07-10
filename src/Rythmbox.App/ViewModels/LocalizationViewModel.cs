@@ -138,6 +138,11 @@ public sealed partial class LocalizationViewModel : ViewModelBase
     [ObservableProperty] private string _settingsAppScale = string.Empty;
     [ObservableProperty] private string _settingsAppScaleDesc = string.Empty;
     [ObservableProperty] private string _settingsAppScaleReset = string.Empty;
+    [ObservableProperty] private string _settingsAudioOutput = string.Empty;
+    [ObservableProperty] private string _settingsSampleRate = string.Empty;
+    [ObservableProperty] private string _settingsBufferSize = string.Empty;
+    [ObservableProperty] private string _settingsAudioMode = string.Empty;
+    [ObservableProperty] private string _settingsTestAudio = string.Empty;
     [ObservableProperty] private string _settingsMidiController = string.Empty;
     [ObservableProperty] private string _settingsKeyboardMapping = string.Empty;
     [ObservableProperty] private string _settingsPlayStop = string.Empty;
@@ -294,6 +299,11 @@ public sealed partial class LocalizationViewModel : ViewModelBase
         SettingsAppScale = _i18n["settings.appScale"];
         SettingsAppScaleDesc = _i18n["settings.appScaleDesc"];
         SettingsAppScaleReset = _i18n["settings.appScaleReset"];
+        SettingsAudioOutput = _i18n["settings.audioOutput"];
+        SettingsSampleRate = _i18n["settings.sampleRate"];
+        SettingsBufferSize = _i18n["settings.bufferSize"];
+        SettingsAudioMode = _i18n["settings.audioMode"];
+        SettingsTestAudio = _i18n["settings.testAudio"];
         SettingsMidiController = _i18n["settings.midiController"];
         SettingsKeyboardMapping = _i18n["settings.keyboardMapping"];
         SettingsPlayStop = _i18n["settings.playStop"];

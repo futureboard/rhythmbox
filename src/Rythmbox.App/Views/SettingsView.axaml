@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Rythmbox.App.ViewModels"
+             xmlns:structs="using:SoundFlow.Structs"
              mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="500"
              x:Class="Rythmbox.App.Views.SettingsView"
              x:DataType="vm:MainWindowViewModel">
@@ -47,6 +48,51 @@
                             <Button Content="+" Width="36" Command="{Binding IncreaseAppScaleCommand}" />
                             <Button Content="{Binding Localization.SettingsAppScaleReset}" Command="{Binding ResetAppScaleCommand}" />
                         </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="settingsPanel">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="{Binding Localization.SettingsAudioOutput}" FontWeight="Bold" />
+                        <TextBlock Text="{Binding Settings.AudioDeviceLabel}" Classes="dim" TextWrapping="Wrap" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <ComboBox Grid.Column="0"
+                                      ItemsSource="{Binding Settings.OutputDevices}"
+                                      SelectedItem="{Binding Settings.SelectedOutputDevice}"
+                                      PlaceholderText="{Binding Localization.MixerSelectOutput}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="structs:DeviceInfo">
+                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <Button Grid.Column="1"
+                                    Command="{Binding Settings.RefreshOutputDevicesCommand}"
+                                    ToolTip.Tip="{Binding Localization.MixerRefresh}">
+                                <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
+                            </Button>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                            <StackPanel Grid.Column="0" Spacing="2">
+                                <TextBlock Text="{Binding Localization.HeaderBackend}" Classes="dim" FontSize="10" />
+                                <TextBlock Text="{Binding Settings.AudioBackendLabel}" Classes="mono" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="2">
+                                <TextBlock Text="{Binding Localization.SettingsSampleRate}" Classes="dim" FontSize="10" />
+                                <TextBlock Text="{Binding Settings.AudioSampleRateLabel}" Classes="mono" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="2">
+                                <TextBlock Text="{Binding Localization.SettingsBufferSize}" Classes="dim" FontSize="10" />
+                                <TextBlock Text="{Binding Settings.AudioBufferSizeLabel}" Classes="mono" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Spacing="2">
+                                <TextBlock Text="{Binding Localization.SettingsAudioMode}" Classes="dim" FontSize="10" />
+                                <TextBlock Text="{Binding Settings.AudioModeLabel}" Classes="mono" />
+                            </StackPanel>
+                        </Grid>
+                        <Button Content="{Binding Localization.SettingsTestAudio}"
+                                Command="{Binding Settings.TestAudioOutputCommand}"
+                                HorizontalAlignment="Left" />
                     </StackPanel>
                 </Border>
 

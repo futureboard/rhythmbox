@@ -17,6 +17,7 @@ public partial class MainView : UserControl
         InitializeComponent();
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
+        LostFocus += OnLostFocus;
     }
 
     private async void OnLoaded(object? sender, RoutedEventArgs e)
@@ -30,6 +31,8 @@ public partial class MainView : UserControl
         _isClosing = true;
         DisposeRuntime();
     }
+
+    private void OnLostFocus(object? sender, RoutedEventArgs e) => _viewModel?.PadGrid.ClearPointerStates();
 
     public async Task InitializeRuntimeAsync()
     {

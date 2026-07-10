@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Rythmbox.App.ViewModels"
              xmlns:views="using:Rythmbox.App.Views"
-             xmlns:structs="using:SoundFlow.Structs"
              mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="650"
              x:Class="Rythmbox.App.Views.MixerPageView"
              x:DataType="vm:MainWindowViewModel">
@@ -31,18 +30,13 @@
                         <TextBlock Text="{Binding Localization.HeaderDevice}" Classes="dim" FontSize="10" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding Mixer.DeviceLabel}" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
-                    <ComboBox ItemsSource="{Binding Mixer.OutputDevices}" SelectedItem="{Binding Mixer.SelectedOutputDevice}"
-                              Width="220" FontSize="11" PlaceholderText="{Binding Localization.MixerSelectOutput}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate x:DataType="structs:DeviceInfo">
-                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <Button Command="{Binding Mixer.RefreshDevicesCommand}" Padding="8,4" ToolTip.Tip="Refresh output devices">
+                    <Button Command="{Binding NavigateCommand}"
+                            CommandParameter="{x:Static vm:AppPage.Settings}"
+                            Padding="8,4"
+                            ToolTip.Tip="{Binding Localization.HomeOpenAudio}">
                         <StackPanel Orientation="Horizontal" Spacing="4">
-                            <Path Data="{StaticResource IconRefreshCw}" Classes="icon small" />
-                            <TextBlock Text="{Binding Localization.MixerRefresh}" FontSize="11" />
+                            <Path Data="{StaticResource IconPlug}" Classes="icon small" />
+                            <TextBlock Text="{Binding Localization.HomeOpenAudio}" FontSize="11" />
                         </StackPanel>
                     </Button>
                     <Button Command="{Binding SubLoops.ToggleCommand}" Padding="8,4"

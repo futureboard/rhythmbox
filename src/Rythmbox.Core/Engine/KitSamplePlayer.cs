@@ -1,3 +1,4 @@
+using Rythmbox.Core.Audio;
 using Rythmbox.Core.Audio.Dsp;
 using Rythmbox.Core.Formats;
 using Rythmbox.Core.Models;
@@ -62,20 +63,15 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         public bool IsReleasing;
     }
 
-    private sealed class LevelMeter
-    {
-        public float Peak;
-        public float Rms;
-    }
-
     private readonly PlaybackEngine _engine;
     private readonly object _voiceLock = new();
     private readonly Voice[] _voices = Enumerable.Range(0, MaxVoices).Select(_ => new Voice()).ToArray();
     private readonly Dictionary<int, PadMixState> _padMix;
     private readonly Dictionary<DrumMixGroup, MixGroupState> _mixGroups;
     private readonly Dictionary<PadBus, BusMixState> _busMix;
-    private readonly int[] _drumMap = Enumerable.Repeat(-1, 128).ToArray();
-    private readonly int[] _padMidiNotes = new int[GmPercussionMap.Pads.Count];
+    private int[][] _padMidiNotes = GmPercussionMap.Pads.Select(pad => new[] { pad.Note }).ToArray();
+    private int[][] _noteToPads = CreateEmptyNoteIndex();
+    private readonly int[] _activeVoiceCounts = new int[GmPercussionMap.Pads.Count];
     private readonly int[] _chokeGroups = Enumerable.Repeat(0, GmPercussionMap.Pads.Count).ToArray();
     private readonly float[] _pitchSemitones = new float[GmPercussionMap.Pads.Count];
     private readonly float[] _padGains = Enumerable.Repeat(1f, GmPercussionMap.Pads.Count).ToArray();
@@ -90,11 +86,11 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
     private readonly Dictionary<DrumMixGroup, ChannelDspChain> _mixGroupDsp;
     private readonly ChannelDspChain _masterDsp = new();
     private readonly ReverbEffect _reverb = new();
-    private readonly LevelMeter[] _padMeters = Enumerable.Range(0, GmPercussionMap.Pads.Count).Select(_ => new LevelMeter()).ToArray();
-    private readonly Dictionary<PadBus, LevelMeter> _busMeters = Enum.GetValues<PadBus>().ToDictionary(bus => bus, _ => new LevelMeter());
-    private readonly Dictionary<DrumMixGroup, LevelMeter> _mixGroupMeters;
-    private readonly LevelMeter _masterMeter = new();
+    private readonly RealtimeLevelMeter[] _padMeters = Enumerable.Range(0, GmPercussionMap.Pads.Count).Select(_ => new RealtimeLevelMeter()).ToArray();
+    private readonly Dictionary<PadBus, RealtimeLevelMeter> _busMeters = Enum.GetValues<PadBus>().ToDictionary(bus => bus, _ => new RealtimeLevelMeter());
+    private readonly Dictionary<DrumMixGroup, RealtimeLevelMeter> _mixGroupMeters;
     private bool _anyPadSoloed;
+    private bool _anyMixGroupSoloed;
     private bool _addedToMixer;
 
     public KitSamplePlayer(PlaybackEngine engine)
@@ -109,7 +105,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
 
         _mixGroups = GmPercussionMap.MixGroups.ToDictionary(group => group, _ => new MixGroupState());
         _mixGroupDsp = GmPercussionMap.MixGroups.ToDictionary(group => group, _ => new ChannelDspChain());
-        _mixGroupMeters = GmPercussionMap.MixGroups.ToDictionary(group => group, _ => new LevelMeter());
+        _mixGroupMeters = GmPercussionMap.MixGroups.ToDictionary(group => group, _ => new RealtimeLevelMeter());
 
         _busMix = Enum.GetValues<PadBus>().ToDictionary(bus => bus, _ => new BusMixState());
 
@@ -122,12 +118,39 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
 
     public bool IsLoaded => LoadedKitPath is not null || KitName.Length > 0;
 
+    /// <summary>
+    /// True only when this component is attached to the current device's
+    /// MasterMixer. This is graph membership, not a claim that the current
+    /// block contains audible samples; the debug trace proves that separately.
+    /// </summary>
+    public bool HasMasterMixerRoute => IsAttachedToCurrentMasterMixer();
+
     public IReadOnlyList<bool> PadHasSample =>
         _padPlayback.Select(static pad => pad.HasAudio).ToArray();
 
     /// <summary>Current user-assigned MIDI note for the physical pad slot.</summary>
     public int GetPadMidiNote(int padIndex) =>
-        (uint)padIndex < (uint)_padMidiNotes.Length ? _padMidiNotes[padIndex] : -1;
+        GetPadMidiNotes(padIndex).FirstOrDefault(-1);
+
+    /// <summary>All assigned MIDI notes for a physical pad slot.</summary>
+    public IReadOnlyList<int> GetPadMidiNotes(int padIndex)
+    {
+        var notesByPad = Volatile.Read(ref _padMidiNotes);
+        return (uint)padIndex < (uint)notesByPad.Length ? notesByPad[padIndex] : Array.Empty<int>();
+    }
+
+    /// <summary>Current active audio voice count, published lock-free for UI runtime state.</summary>
+    public int GetActiveVoiceCount(int padIndex) =>
+        (uint)padIndex < (uint)_activeVoiceCounts.Length ? Volatile.Read(ref _activeVoiceCounts[padIndex]) : 0;
+
+    /// <summary>Raised when a real pad voice starts: pad index, source MIDI note (-1 for direct UI), velocity.</summary>
+    public event Action<int, int, int>? PadTriggered;
+
+    /// <summary>Raised when a note-off releases every pad mapped to that MIDI note.</summary>
+    public event Action<int, int>? PadNoteReleased;
+
+    /// <summary>Raised when all pad note holds have been cleared.</summary>
+    public event Action? AllPadNotesReleased;
 
     /// <summary>Current user-assigned mixer output for the physical pad slot.</summary>
     public DrumMixGroup GetPadOutputGroup(int padIndex) =>
@@ -175,32 +198,45 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
                 _pitchSemitones[i] = sample.PitchSemitones;
                 _padGains[i] = sample.Gain;
                 _padEnvelopes[i] = sample.Envelope.Clone();
-                _padMidiNotes[i] = sample.MidiNote is >= 0 and < 128 ? sample.MidiNote : gmPad.Note;
+                var resolvedNotes = sample.ResolveMidiNotes();
+                _padMidiNotes[i] = resolvedNotes.Length > 0
+                    ? NormalizeMidiNotes(resolvedNotes)
+                    : sample.MidiNote is >= 0 and < 128 ? [sample.MidiNote] : [gmPad.Note];
 
                 var mix = _padMix[i];
                 mix.MixGroup = sample.OutputGroup;
                 mix.Bus = GetBusForMixGroup(sample.OutputGroup);
             }
 
-            RebuildDrumMap();
+            RebuildNoteToPadIndex();
         }
 
         EnsureInMixer();
+        AllPadNotesReleased?.Invoke();
     }
 
-    private void RebuildDrumMap()
+    private void RebuildNoteToPadIndex(int[][]? sourceNotesByPad = null)
     {
-        Array.Fill(_drumMap, -1);
-
-        for (var i = 0; i < GmPercussionMap.Pads.Count; i++)
+        var buckets = Enumerable.Range(0, 128).Select(_ => new List<int>()).ToArray();
+        var notesByPad = sourceNotesByPad ?? Volatile.Read(ref _padMidiNotes);
+        for (var i = 0; i < notesByPad.Length; i++)
         {
-            var note = _padMidiNotes[i];
-            if (note is >= 0 and < 128)
+            foreach (var note in notesByPad[i])
             {
-                _drumMap[note] = i;
+                buckets[note].Add(i);
             }
         }
+
+        Volatile.Write(ref _noteToPads, buckets.Select(static bucket => bucket.ToArray()).ToArray());
     }
+
+    private static int[][] CreateEmptyNoteIndex() => Enumerable.Range(0, 128).Select(_ => Array.Empty<int>()).ToArray();
+
+    private static int[] NormalizeMidiNotes(IEnumerable<int> notes) => notes
+        .Where(static note => note is >= 0 and <= 127)
+        .Distinct()
+        .OrderBy(static note => note)
+        .ToArray();
 
     private static PadBus GetBusForMixGroup(DrumMixGroup group) => group switch
     {
@@ -211,33 +247,53 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
 
     public void ReattachToMixer()
     {
-        if (_addedToMixer)
-        {
-            _engine.MasterMixer.RemoveComponent(this);
-            _addedToMixer = false;
-        }
-
+        // Device switches create a fresh MasterMixer. The previous mixer may
+        // already be disposed, so just mark this component detached and add it
+        // to the current graph.
+        _addedToMixer = false;
         EnsureInMixer();
     }
 
     private void EnsureInMixer()
     {
-        if (!_addedToMixer)
+        if (IsAttachedToCurrentMasterMixer())
         {
-            _engine.MasterMixer.AddComponent(this);
             _addedToMixer = true;
+            return;
         }
+
+        _engine.MasterMixer.AddComponent(this);
+        _addedToMixer = true;
+
+#if DEBUG
+        if (!IsAttachedToCurrentMasterMixer())
+        {
+            throw new InvalidOperationException("Kit Sample Player was not attached to the current MasterMixer.");
+        }
+#endif
+    }
+
+    private bool IsAttachedToCurrentMasterMixer()
+    {
+        if (!_engine.IsRunning)
+        {
+            return false;
+        }
+
+        var masterMixer = _engine.MasterMixer;
+        return ReferenceEquals(Parent, masterMixer)
+            && masterMixer.Components.Any(component => ReferenceEquals(component, this));
     }
 
     public ChannelDspSettings GetPadDsp(int note)
     {
-        var padIndex = NoteToPadIndex(note);
+        var padIndex = GetPadIndicesForNote(note).FirstOrDefault(-1);
         return padIndex >= 0 ? _padDsp[padIndex].Settings.Clone() : new ChannelDspSettings();
     }
 
     public void SetPadDsp(int note, ChannelDspSettings settings)
     {
-        var padIndex = NoteToPadIndex(note);
+        var padIndex = GetPadIndicesForNote(note).FirstOrDefault(-1);
         if (padIndex >= 0)
         {
             _padDsp[padIndex].Settings = settings.Clone();
@@ -260,62 +316,74 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
 
     public MixerMeterState PollPadMeter(int note)
     {
-        var padIndex = NoteToPadIndex(note);
+        var padIndex = GetPadIndicesForNote(note).FirstOrDefault(-1);
         if (padIndex < 0)
         {
             return MixerMeterState.Disabled;
         }
 
-        return TakeMeter(_padMeters[padIndex]);
+        return _padMeters[padIndex].Poll();
     }
 
-    public MixerMeterState PollBusMeter(PadBus bus) => TakeMeter(_busMeters[bus]);
+    /// <summary>Non-consuming actual sample meter read used by the Debug pad inspector.</summary>
+    public MixerMeterState PeekPadMeter(int padIndex) =>
+        (uint)padIndex < (uint)_padMeters.Length ? _padMeters[padIndex].Peek() : MixerMeterState.Disabled;
 
-    public MixerMeterState PollMixGroupMeter(DrumMixGroup group) => TakeMeter(_mixGroupMeters[group]);
+    public AudioGraphTraceSnapshot GetAudioGraphTraceSnapshot() => _engine.GetAudioGraphTraceSnapshot();
 
-    /// <summary>Returns a held post-master reading for the UI mixer VU.</summary>
-    public MixerMeterState PollMasterMeter() => TakeMeter(_masterMeter);
+    public MixerMeterState PollBusMeter(PadBus bus) => _busMeters[bus].Poll();
 
-    private static MixerMeterState TakeMeter(LevelMeter meter)
+    /// <summary>
+    /// Post-fader group meter. The tap is fed only from the rendered audio
+    /// samples after pad/group gain, mute, solo, and group DSP.
+    /// </summary>
+    public MixerMeterState PollMixGroupMeter(DrumMixGroup group) => _mixGroupMeters[group].Poll();
+
+    private IReadOnlyList<int> GetPadIndicesForNote(int note)
     {
-        var peak = meter.Peak;
-        var rms = meter.Rms;
-        // Preserve a short hold between UI polls. Resetting peak to zero caused
-        // short drum transients to disappear before the 50 ms UI timer rendered.
-        meter.Peak *= 0.82f;
-        meter.Rms *= 0.72f;
+        var index = Volatile.Read(ref _noteToPads);
+        return note is >= 0 and < 128 ? index[note] : Array.Empty<int>();
+    }
 
-        if (peak <= 0.0001f && rms <= 0.0001f)
+    public void NoteOn(int channel, int note, int velocity)
+    {
+        if (velocity <= 0)
         {
-            return MixerMeterState.Disabled;
+            NoteOff(channel, note);
+            return;
         }
 
-        return MixerMeterState.FromMono(rms, peak, peak >= 0.98f);
-    }
-
-    private static void PushMeter(LevelMeter meter, float sample)
-    {
-        var abs = MathF.Abs(sample);
-        meter.Peak = MathF.Max(meter.Peak, abs);
-        meter.Rms = MathF.Max(meter.Rms * 0.9f, abs);
-    }
-
-    private int NoteToPadIndex(int note) => note is >= 0 and < 128 ? _drumMap[note] : -1;
-
-    public void NoteOn(int channel, int note, int velocity) =>
         TriggerByNote(note, velocity / 127f);
+    }
 
     public void NoteOff(int channel, int note)
     {
-        if (note is < 0 or >= 128 || _drumMap[note] < 0)
+        var padIndices = GetPadIndicesForNote(note);
+        if (padIndices.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var padIndex in padIndices)
+        {
+            ReleasePad(padIndex, note);
+        }
+    }
+
+    /// <summary>Releases voices for one physical pad slot without changing the audio device.</summary>
+    public void ReleasePad(int padIndex, int sourceNote = -1)
+    {
+        if ((uint)padIndex >= (uint)_padPlayback.Length)
         {
             return;
         }
 
         lock (_voiceLock)
         {
-            BeginReleaseForPad(_drumMap[note]);
+            BeginReleaseForPad(padIndex);
         }
+
+        PadNoteReleased?.Invoke(padIndex, sourceNote);
     }
 
     public void AllNotesOff()
@@ -324,20 +392,33 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         {
             StopAllVoices();
         }
+
+        AllPadNotesReleased?.Invoke();
     }
 
     public void SetPadMute(int note, bool mute)
     {
-        SetPadMuteByIndex(NoteToPadIndex(note), mute);
+        foreach (var padIndex in GetPadIndicesForNote(note))
+        {
+            SetPadMuteByIndex(padIndex, mute);
+        }
     }
 
     public void SetPadSolo(int note, bool solo)
     {
-        SetPadSoloByIndex(NoteToPadIndex(note), solo);
+        foreach (var padIndex in GetPadIndicesForNote(note))
+        {
+            SetPadSoloByIndex(padIndex, solo);
+        }
     }
 
-    public void SetPadVolume(int note, float volume) =>
-        SetPadVolumeByIndex(NoteToPadIndex(note), volume);
+    public void SetPadVolume(int note, float volume)
+    {
+        foreach (var padIndex in GetPadIndicesForNote(note))
+        {
+            SetPadVolumeByIndex(padIndex, volume);
+        }
+    }
 
     public void SetPadMuteByIndex(int padIndex, bool mute)
     {
@@ -366,6 +447,27 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         }
     }
 
+    public void SetPadMidiNoteByIndex(int padIndex, int midiNote)
+        => SetPadMidiNotesByIndex(padIndex, [midiNote]);
+
+    /// <summary>Updates the live note-to-pad index without rebuilding the audio device or kit.</summary>
+    public void SetPadMidiNotesByIndex(int padIndex, IEnumerable<int> midiNotes)
+    {
+        var notesByPad = Volatile.Read(ref _padMidiNotes);
+        if ((uint)padIndex >= (uint)notesByPad.Length)
+        {
+            return;
+        }
+
+        lock (_voiceLock)
+        {
+            var updatedNotesByPad = (int[][])notesByPad.Clone();
+            updatedNotesByPad[padIndex] = NormalizeMidiNotes(midiNotes);
+            Volatile.Write(ref _padMidiNotes, updatedNotesByPad);
+            RebuildNoteToPadIndex(updatedNotesByPad);
+        }
+    }
+
     public void SetMixGroupMute(DrumMixGroup group, bool mute)
     {
         if (_mixGroups.TryGetValue(group, out var state))
@@ -379,7 +481,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         if (_mixGroups.TryGetValue(group, out var state))
         {
             state.IsSoloed = solo;
-            _anyPadSoloed = _padMix.Values.Any(s => s.IsSoloed) || _mixGroups.Values.Any(s => s.IsSoloed);
+            _anyMixGroupSoloed = _mixGroups.Values.Any(s => s.IsSoloed);
         }
     }
 
@@ -407,65 +509,73 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
         }
     }
 
-    public void TriggerPad(int padIndex, float velocity = 1f)
+    public void TriggerPad(int padIndex, float velocity = 1f, int sourceNote = -1)
     {
         if (padIndex < 0 || padIndex >= GmPercussionMap.Pads.Count)
         {
             return;
         }
 
-        var midiVelocity = Math.Clamp((int)Math.Round(velocity * 127f), 1, 127);
-        if (!TryResolveMix(padIndex, velocity, out var gain))
-        {
-            return;
-        }
-
-        lock (_voiceLock)
-        {
-            if (StartVoice(padIndex, midiVelocity, gain * _padGains[padIndex]))
-            {
-                RegisterTriggerMeter(padIndex, gain);
-            }
-        }
+        TriggerPadByIndex(padIndex, velocity, sourceNote);
     }
 
     public void TriggerNote(int note, float velocity = 1f) => TriggerByNote(note, velocity);
 
     public void ProcessMidiMessage(MidiMessage message)
     {
-        if (message.Command != MidiCommand.NoteOn || message.Velocity <= 0)
+        if (message.Command == MidiCommand.ControlChange)
         {
+            if (message.ControllerNumber is 120 or 123) // All Sound Off / All Notes Off
+            {
+                AllNotesOff();
+            }
+
             return;
         }
 
-        TriggerByNote(message.NoteNumber, message.Velocity / 127f);
+        if (message.Command == MidiCommand.NoteOn)
+        {
+            if (message.Velocity <= 0)
+            {
+                NoteOff(message.Channel, message.NoteNumber);
+                return;
+            }
+
+            NoteOn(message.Channel, message.NoteNumber, message.Velocity);
+            return;
+        }
+
+        if (message.Command == MidiCommand.NoteOff)
+        {
+            NoteOff(message.Channel, message.NoteNumber);
+        }
     }
 
     private void TriggerByNote(int note, float velocity)
     {
-        if (note is < 0 or >= 128)
+        foreach (var padIndex in GetPadIndicesForNote(note))
         {
-            return;
+            TriggerPadByIndex(padIndex, velocity, note);
         }
+    }
 
-        var padIndex = _drumMap[note];
-        if (padIndex < 0)
-        {
-            return;
-        }
-
+    private void TriggerPadByIndex(int padIndex, float velocity, int sourceNote)
+    {
         var midiVelocity = Math.Clamp((int)Math.Round(velocity * 127f), 1, 127);
         if (!TryResolveMix(padIndex, velocity, out var gain))
         {
             return;
         }
 
+        bool started;
         lock (_voiceLock)
         {
-            if (StartVoice(padIndex, midiVelocity, gain * _padGains[padIndex]))
-            {
-                RegisterTriggerMeter(padIndex, gain);
-            }
+            started = StartVoice(padIndex, midiVelocity, gain * _padGains[padIndex]);
+        }
+
+        if (started)
+        {
+            PadTriggered?.Invoke(padIndex, sourceNote, midiVelocity);
         }
     }
 
@@ -480,33 +590,15 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
 
         var busState = _busMix[padState.Bus];
         var groupState = _mixGroups[padState.MixGroup];
-        var anyGroupSoloed = _mixGroups.Values.Any(static state => state.IsSoloed);
-        var anyPadSoloed = _padMix.Values.Any(static state => state.IsSoloed);
         if (padState.IsMuted || groupState.IsMuted || busState.IsMuted
-            || (anyGroupSoloed && !groupState.IsSoloed)
-            || (anyPadSoloed && !padState.IsSoloed))
+            || (_anyMixGroupSoloed && !groupState.IsSoloed)
+            || (_anyPadSoloed && !padState.IsSoloed))
         {
             return false;
         }
 
-        gain = velocity * padState.Volume * groupState.Volume * busState.Volume;
+        gain = velocity;
         return gain > 0.0001f;
-    }
-
-    private void RegisterTriggerMeter(int padIndex, float gain)
-    {
-        if (!_padMix.TryGetValue(padIndex, out var mix))
-        {
-            return;
-        }
-
-        // MIDI input reaches this point before the next audio callback. A small
-        // trigger tap makes every accepted note visible in its output strip;
-        // the audio-path tap below immediately replaces it with real levels.
-        var level = Math.Clamp(gain * 0.7f, 0.02f, 1f);
-        PushMeter(_padMeters[padIndex], level);
-        PushMeter(_mixGroupMeters[mix.MixGroup], level);
-        PushMeter(_masterMeter, level);
     }
 
     private bool StartVoice(int padIndex, int midiVelocity, float gain)
@@ -549,6 +641,11 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
             voice.FadeOut = 0;
             voice.Sample = null;
             voice.IsReleasing = false;
+        }
+
+        for (var i = 0; i < _activeVoiceCounts.Length; i++)
+        {
+            Volatile.Write(ref _activeVoiceCounts[i], 0);
         }
     }
 
@@ -630,7 +727,23 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
             var sampleRate = (float)WavCodec.TargetSampleRate;
             _reverb.Size = _masterDsp.Settings.ReverbSize;
             _reverb.Mix = Math.Clamp(_masterDsp.Settings.ReverbMix, 0f, 1f);
-            Span<float> busScratch = stackalloc float[Enum.GetValues<PadBus>().Length];
+            Span<float> busScratch = stackalloc float[3];
+            Span<float> padPeaks = stackalloc float[GmPercussionMap.Pads.Count];
+            Span<float> padSumSquares = stackalloc float[GmPercussionMap.Pads.Count];
+            Span<int> padSampleCounts = stackalloc int[GmPercussionMap.Pads.Count];
+            Span<float> groupPeaks = stackalloc float[GmPercussionMap.MixGroups.Count];
+            Span<float> groupSumSquares = stackalloc float[GmPercussionMap.MixGroups.Count];
+            Span<int> groupSampleCounts = stackalloc int[GmPercussionMap.MixGroups.Count];
+            Span<float> busPeaks = stackalloc float[3];
+            Span<float> busSumSquares = stackalloc float[3];
+            Span<int> busSampleCounts = stackalloc int[3];
+            var sourcePeak = 0f;
+            var sourcePadIndex = -1;
+            var sourceMidiNote = -1;
+            var mixerInputPeak = 0f;
+            var mixerOutputPeak = 0f;
+            var masterInputPeak = 0f;
+            var masterOutputPeak = 0f;
 
             for (var frame = 0; frame < frameCount; frame++)
             {
@@ -691,18 +804,54 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
                         }
                     }
 
+                    // Source tap: the voice has rendered a real sample but has
+                    // not yet entered pad/group/bus mixing or mute/solo gates.
+                    var sourceAbsolute = MathF.Abs(src);
+                    if (sourceAbsolute > sourcePeak)
+                    {
+                        sourcePeak = sourceAbsolute;
+                        sourcePadIndex = voice.PadIndex;
+                        sourceMidiNote = GetPadMidiNote(voice.PadIndex);
+                    }
                     var padMix = _padMix[voice.PadIndex];
+                    var groupState = _mixGroups[padMix.MixGroup];
+                    var busState = _busMix[padMix.Bus];
+                    if (padMix.IsMuted || groupState.IsMuted || busState.IsMuted
+                        || (_anyMixGroupSoloed && !groupState.IsSoloed)
+                        || (_anyPadSoloed && !padMix.IsSoloed))
+                    {
+                        continue;
+                    }
+
+                    src *= padMix.Volume * groupState.Volume * busState.Volume;
+                    if (MathF.Abs(src) <= 0.000001f)
+                    {
+                        continue;
+                    }
+
+                    mixerInputPeak = MathF.Max(mixerInputPeak, MathF.Abs(src));
                     _padDsp[voice.PadIndex].Process(ref src, sampleRate);
                     reverbSend += _padDsp[voice.PadIndex].ReverbSend;
+
+                    var padIndex = voice.PadIndex;
+                    var padAbsolute = MathF.Abs(src);
+                    padPeaks[padIndex] = MathF.Max(padPeaks[padIndex], padAbsolute);
+                    padSumSquares[padIndex] += src * src;
+                    padSampleCounts[padIndex]++;
 
                     var mixGroup = padMix.MixGroup;
                     _mixGroupDsp[mixGroup].Process(ref src, sampleRate);
                     reverbSend += _mixGroupDsp[mixGroup].ReverbSend;
-                    PushMeter(_mixGroupMeters[mixGroup], src);
+
+                    var groupIndex = (int)mixGroup;
+                    var groupAbsolute = MathF.Abs(src);
+                    mixerOutputPeak = MathF.Max(mixerOutputPeak, groupAbsolute);
+                    groupPeaks[groupIndex] = MathF.Max(groupPeaks[groupIndex], groupAbsolute);
+                    groupSumSquares[groupIndex] += src * src;
+                    groupSampleCounts[groupIndex]++;
 
                     var busIndex = (int)padMix.Bus;
                     busScratch[busIndex] += src;
-                    PushMeter(_padMeters[voice.PadIndex], src);
                 }
 
                 for (var busIndex = 0; busIndex < busScratch.Length; busIndex++)
@@ -716,7 +865,10 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
                     var bus = (PadBus)busIndex;
                     _busDsp[busIndex].Process(ref busSample, sampleRate);
                     reverbSend += _busDsp[busIndex].ReverbSend;
-                    PushMeter(_busMeters[bus], busSample);
+                    var busAbsolute = MathF.Abs(busSample);
+                    busPeaks[busIndex] = MathF.Max(busPeaks[busIndex], busAbsolute);
+                    busSumSquares[busIndex] += busSample * busSample;
+                    busSampleCounts[busIndex]++;
 
                     sampleL += busSample;
                     sampleR += busSample;
@@ -726,6 +878,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
                 sampleL += wet;
                 sampleR += wet;
 
+                masterInputPeak = MathF.Max(masterInputPeak, MathF.Max(MathF.Abs(sampleL), MathF.Abs(sampleR)));
                 var masterSample = (sampleL + sampleR) * 0.5f;
                 _masterDsp.Process(ref masterSample, sampleRate);
                 sampleL = masterSample;
@@ -733,7 +886,7 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
 
                 sampleL = MathF.Tanh(sampleL);
                 sampleR = MathF.Tanh(sampleR);
-                PushMeter(_masterMeter, (sampleL + sampleR) * 0.5f);
+                masterOutputPeak = MathF.Max(masterOutputPeak, MathF.Max(MathF.Abs(sampleL), MathF.Abs(sampleR)));
 
                 var baseIndex = frame * channels;
                 outputBuffer[baseIndex] += sampleL;
@@ -742,6 +895,58 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
                     outputBuffer[baseIndex + 1] += sampleR;
                 }
             }
+
+            Span<int> activeVoices = stackalloc int[GmPercussionMap.Pads.Count];
+            foreach (var voice in _voices)
+            {
+                if (voice.Active && (uint)voice.PadIndex < (uint)activeVoices.Length)
+                {
+                    activeVoices[voice.PadIndex]++;
+                }
+            }
+
+            for (var i = 0; i < activeVoices.Length; i++)
+            {
+                Volatile.Write(ref _activeVoiceCounts[i], activeVoices[i]);
+            }
+
+            for (var i = 0; i < padSampleCounts.Length; i++)
+            {
+                if (padSampleCounts[i] == 0)
+                {
+                    continue;
+                }
+
+                _padMeters[i].RecordBlock(padPeaks[i], MathF.Sqrt(padSumSquares[i] / padSampleCounts[i]));
+                _engine.AudioGraphTrace.RecordMeterTap(padPeaks[i]);
+            }
+
+            for (var i = 0; i < groupSampleCounts.Length; i++)
+            {
+                var peak = groupPeaks[i];
+                _engine.AudioGraphTrace.RecordChannelPeak(i, peak);
+                if (groupSampleCounts[i] == 0)
+                {
+                    continue;
+                }
+
+                _mixGroupMeters[(DrumMixGroup)i].RecordBlock(peak, MathF.Sqrt(groupSumSquares[i] / groupSampleCounts[i]));
+                _engine.AudioGraphTrace.RecordMeterTap(peak);
+            }
+
+            for (var i = 0; i < busSampleCounts.Length; i++)
+            {
+                if (busSampleCounts[i] > 0)
+                {
+                    _busMeters[(PadBus)i].RecordBlock(busPeaks[i], MathF.Sqrt(busSumSquares[i] / busSampleCounts[i]));
+                }
+            }
+
+            _engine.AudioGraphTrace.RecordSource(sourcePadIndex, sourceMidiNote, sourcePeak);
+            _engine.AudioGraphTrace.RecordMixerInput(mixerInputPeak);
+            _engine.AudioGraphTrace.RecordMixerOutput(mixerOutputPeak);
+            _engine.AudioGraphTrace.RecordMasterInput(masterInputPeak);
+            _engine.AudioGraphTrace.RecordMasterOutput(masterOutputPeak);
         }
     }
 
@@ -756,10 +961,11 @@ public sealed class KitSamplePlayer : SoundComponent, IMidiControllable, IDispos
             }
         }
 
-        if (_addedToMixer)
+        if (_addedToMixer && IsAttachedToCurrentMasterMixer())
         {
             _engine.MasterMixer.RemoveComponent(this);
-            _addedToMixer = false;
         }
+
+        _addedToMixer = false;
     }
 }

@@ -39,10 +39,10 @@
 
             <Border DockPanel.Dock="Top" Classes="mixerFxSlots" Padding="4,3" IsVisible="{Binding ShowFxSlots}">
                 <StackPanel Spacing="2">
-                    <ToggleButton Content="EQ" IsChecked="{Binding FxEqEnabled}" Classes="mixerFxSlot" />
-                    <ToggleButton Content="COMP" IsChecked="{Binding FxCompEnabled}" Classes="mixerFxSlot" />
-                    <ToggleButton Content="DELAY" IsChecked="{Binding FxDelayEnabled}" Classes="mixerFxSlot" />
-                    <ToggleButton Content="REVERB" IsChecked="{Binding FxReverbEnabled}" Classes="mixerFxSlot" />
+                    <ToggleButton Content="EQ" IsChecked="{Binding FxEqEnabled}" Classes="mixerFxSlot" HorizontalAlignment="Stretch" />
+                    <ToggleButton Content="COMP" IsChecked="{Binding FxCompEnabled}" Classes="mixerFxSlot" HorizontalAlignment="Stretch" />
+                    <ToggleButton Content="DELAY" IsChecked="{Binding FxDelayEnabled}" Classes="mixerFxSlot" HorizontalAlignment="Stretch" />
+                    <ToggleButton Content="REVERB" IsChecked="{Binding FxReverbEnabled}" Classes="mixerFxSlot" HorizontalAlignment="Stretch" />
                 </StackPanel>
             </Border>
 
@@ -81,7 +81,14 @@
                 <StackPanel Grid.Column="2" Margin="4,0,0,0" VerticalAlignment="Stretch" HorizontalAlignment="Center">
                     <views:MixerMeterView DataContext="{Binding Meter}" />
                     <TextBlock Text="{Binding Meter.StatusLabel}" Classes="mixerMeterHint"
-                               IsVisible="{Binding !Meter.HasSignalData}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                                IsVisible="{Binding !Meter.HasSignalData}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                    <TextBlock Text="{Binding DebugMeterOverlay}"
+                               IsVisible="{Binding IsDebugMeterOverlayVisible}"
+                               FontSize="8"
+                               Opacity="0.65"
+                               TextWrapping="Wrap"
+                               MaxWidth="150"
+                               Margin="0,4,0,0" />
                 </StackPanel>
             </Grid>
         </DockPanel>
