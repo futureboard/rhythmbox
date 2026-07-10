@@ -222,7 +222,9 @@ echo "Installing Arch packages"
 chroot_run "pacman-key --init"
 chroot_run "pacman-key --populate archlinux"
 chroot_run "pacman -Syu --noconfirm"
-chroot_run "pacman -S --needed --noconfirm base linux linux-firmware grub efibootmgr networkmanager sudo openssh git dotnet-sdk dotnet-runtime aspnet-runtime xorg-server xorg-xinit xorg-xrandr mesa libglvnd libx11 libice libsm fontconfig ttf-dejavu alsa-utils pipewire pipewire-alsa pipewire-pulse wireplumber dbus plymouth"
+# The kiosk renders directly on DRM/KMS (no X11): mesa/libglvnd provide EGL/GLES/GBM,
+# libdrm the KMS interface, libinput + libxkbcommon the input stack Avalonia uses.
+chroot_run "pacman -S --needed --noconfirm base linux linux-firmware grub efibootmgr networkmanager sudo openssh git dotnet-sdk dotnet-runtime aspnet-runtime mesa libglvnd libdrm libinput libxkbcommon fontconfig ttf-dejavu alsa-utils pipewire pipewire-alsa pipewire-pulse wireplumber dbus plymouth"
 
 chroot_run "ln -sf /usr/share/zoneinfo/UTC /etc/localtime && hwclock --systohc || true"
 chroot_run "locale-gen"
@@ -247,15 +249,17 @@ chroot_run "chown -R '${KIOSK_USER}:${KIOSK_USER}' /opt/rhythmbox"
 
 optimize_image
 
-write_file "${MOUNT_DIR}/home/${KIOSK_USER}/.xinitrc" "#!/bin/sh
-export RYTHMBOX_FULLSCREEN=1
+# DRM/KMS launcher: renders straight to the framebuffer, no X server. Plymouth owns
+# the DRM device during boot, so it must release it before the app becomes DRM master.
+write_file "${MOUNT_DIR}/opt/rhythmbox/start-kiosk.sh" "#!/bin/sh
+export RYTHMBOX_DRM=1
+export RYTHMBOX_DRM_CARD=\${RYTHMBOX_DRM_CARD:-/dev/dri/card0}
 export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
-xset -dpms
-xset s off
-exec /opt/rhythmbox/app/Rythmbox.App
+sudo -n plymouth quit --retain-splash 2>/dev/null || plymouth quit 2>/dev/null || true
+exec /opt/rhythmbox/app/Rythmbox.App --drm
 "
-chmod 0755 "${MOUNT_DIR}/home/${KIOSK_USER}/.xinitrc"
-chroot_run "chown '${KIOSK_USER}:${KIOSK_USER}' '/home/${KIOSK_USER}/.xinitrc'"
+chmod 0755 "${MOUNT_DIR}/opt/rhythmbox/start-kiosk.sh"
+chroot_run "chown '${KIOSK_USER}:${KIOSK_USER}' '/opt/rhythmbox/start-kiosk.sh'"
 
 mkdir -p "${MOUNT_DIR}/etc/systemd/system/getty@tty1.service.d"
 write_file "${MOUNT_DIR}/etc/systemd/system/getty@tty1.service.d/autologin.conf" "[Service]
@@ -264,8 +268,9 @@ ExecStart=-/usr/bin/agetty --autologin ${KIOSK_USER} --noclear %I \$TERM
 "
 
 cat > "${MOUNT_DIR}/home/${KIOSK_USER}/.bash_profile" <<'PROFILE'
-if [[ -z "${DISPLAY}" ]] && [[ "$(tty)" == /dev/tty1 ]]; then
-  exec startx
+if [[ -z "${RYTHMBOX_KIOSK}" ]] && [[ "$(tty)" == /dev/tty1 ]]; then
+  export RYTHMBOX_KIOSK=1
+  exec /opt/rhythmbox/start-kiosk.sh
 fi
 PROFILE
 chroot_run "chown '${KIOSK_USER}:${KIOSK_USER}' '/home/${KIOSK_USER}/.bash_profile'"
@@ -278,13 +283,13 @@ if [[ "${DEBUG_BOOT}" == "1" ]]; then
   USE_PLYMOUTH=0
 elif [[ "${FASTBOOT}" == "1" ]]; then
   GRUB_TIMEOUT_VALUE=0
-  KERNEL_CMDLINE="quiet splash loglevel=3 rd.udev.log_level=3 rd.systemd.show_status=false systemd.show_status=false vt.global_cursor_default=0 nowatchdog"
+  KERNEL_CMDLINE="quiet splash loglevel=3 rd.udev.log_level=3 rd.systemd.show_status=false systemd.show_status=false vt.global_cursor_default=0 consoleblank=0 nowatchdog"
   GRUB_TERMINAL_INPUT_VALUE="console"
   GRUB_TERMINAL_OUTPUT_VALUE="console"
   USE_PLYMOUTH=1
 else
   GRUB_TIMEOUT_VALUE=3
-  KERNEL_CMDLINE="quiet splash loglevel=3 rd.systemd.show_status=false systemd.show_status=false"
+  KERNEL_CMDLINE="quiet splash loglevel=3 rd.systemd.show_status=false systemd.show_status=false consoleblank=0"
   GRUB_TERMINAL_INPUT_VALUE="console"
   GRUB_TERMINAL_OUTPUT_VALUE="console"
   USE_PLYMOUTH=1
