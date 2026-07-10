@@ -24,6 +24,10 @@ public static class ApakCodec
     public const uint FlagEncrypted = 1;
 
     private const int HeaderSize = 48;
+    // Encrypted APAK v1 archives cannot expose their inner WAV assets as direct
+    // mappings. Keep this legacy path bounded until the archive format gains a
+    // streamable/mapped asset table.
+    private const long MaxLegacyArchiveBytes = 32L * 1024 * 1024;
 
     public sealed class PackOptions
     {
@@ -39,10 +43,11 @@ public static class ApakCodec
         var assets = new List<(string Name, byte[] Data)>();
         var padsArray = new JsonArray();
 
-        foreach (var pad in kit.Pads)
+        for (var padListIndex = 0; padListIndex < kit.Pads.Count; padListIndex++)
         {
+            var pad = kit.Pads[padListIndex];
             string? sampleRef = null;
-            if (pad.HasAudio)
+            if (pad.Samples.Length > 0)
             {
                 var assetName = SanitizeAssetName($"{pad.Label}_{pad.MidiNote}.wav");
                 var wavBytes = WavCodec.EncodeMono(pad.Samples, pad.SampleRate);
@@ -67,9 +72,24 @@ public static class ApakCodec
                 padObj["midi_note"] = pad.MidiNote;
             }
 
+            padObj["pad_index"] = pad.PadIndex >= 0 ? pad.PadIndex : padListIndex;
+
+            padObj["output_group"] = pad.OutputGroup.ToString();
+
             if (pad.ChokeGroup > 0)
             {
                 padObj["choke_group"] = pad.ChokeGroup;
+            }
+
+            if (!pad.Envelope.IsDefault)
+            {
+                padObj["adsr"] = new JsonObject
+                {
+                    ["attack_ms"] = pad.Envelope.AttackMs,
+                    ["decay_ms"] = pad.Envelope.DecayMs,
+                    ["sustain"] = pad.Envelope.SustainLevel,
+                    ["release_ms"] = pad.Envelope.ReleaseMs,
+                };
             }
 
             if (sampleRef is not null)
@@ -92,6 +112,17 @@ public static class ApakCodec
 
     public static KitPreset Load(string apakPath, ReadOnlySpan<byte> key32)
     {
+        var info = new FileInfo(apakPath);
+        if (!info.Exists)
+        {
+            throw new FileNotFoundException("APAK preset was not found.", apakPath);
+        }
+
+        if (info.Length > MaxLegacyArchiveBytes)
+        {
+            throw new InvalidDataException($"APAK archives larger than {MaxLegacyArchiveBytes / (1024 * 1024)} MB are not supported by the memory-safe legacy loader.");
+        }
+
         var inner = ReadInnerPayload(File.ReadAllBytes(apakPath), key32);
         return ParseInnerContainer(inner);
     }
@@ -120,9 +151,9 @@ public static class ApakCodec
         return stream.ToArray();
     }
 
-    private static KitPreset ParseInnerContainer(ReadOnlySpan<byte> inner)
+    private static KitPreset ParseInnerContainer(byte[] inner)
     {
-        using var stream = new MemoryStream(inner.ToArray());
+        using var stream = new MemoryStream(inner, writable: false);
         using var reader = new BinaryReader(stream);
 
         var jsonLength = reader.ReadInt32();
@@ -173,16 +204,21 @@ public static class ApakCodec
         }
 
         kit.Pads.Clear();
+        var sourcePadIndex = 0;
         foreach (var padEl in padsEl.EnumerateArray())
         {
+            var midiNote = padEl.TryGetProperty("midi_note", out var noteEl) && noteEl.ValueKind == JsonValueKind.Number
+                ? noteEl.GetInt32()
+                : -1;
             var sample = new DrumSample
             {
                 Label = padEl.TryGetProperty("label", out var labelEl) ? labelEl.GetString() ?? "Pad" : "Pad",
                 Gain = padEl.TryGetProperty("gain", out var gainEl) && gainEl.TryGetSingle(out var g) ? g : 1f,
                 PitchSemitones = 0f,
-                MidiNote = padEl.TryGetProperty("midi_note", out var noteEl) && noteEl.ValueKind == JsonValueKind.Number
-                    ? noteEl.GetInt32()
-                    : -1,
+                Envelope = ReadEnvelope(padEl),
+                MidiNote = midiNote,
+                PadIndex = ReadPadIndex(padEl),
+                OutputGroup = ReadOutputGroup(padEl, midiNote, sourcePadIndex),
                 ChokeGroup = padEl.TryGetProperty("choke_group", out var chokeEl) && chokeEl.ValueKind == JsonValueKind.Number
                     ? chokeEl.GetInt32()
                     : 0,
@@ -200,19 +236,47 @@ public static class ApakCodec
             }
 
             kit.Pads.Add(sample);
+            sourcePadIndex++;
         }
 
-        if (kit.Pads.Count < GmPercussionMap.Pads.Count)
+        KitPresetCodec.EnsurePadCount(kit);
+
+        return kit;
+    }
+
+    private static int ReadPadIndex(JsonElement pad) =>
+        pad.TryGetProperty("pad_index", out var indexEl)
+        && indexEl.ValueKind == JsonValueKind.Number
+        && indexEl.TryGetInt32(out var index)
+        && index is >= 0 and < 128
+            ? index
+            : -1;
+
+    private static DrumMixGroup ReadOutputGroup(JsonElement pad, int midiNote, int fallbackIndex)
+    {
+        if (pad.TryGetProperty("output_group", out var groupEl))
         {
-            while (kit.Pads.Count < GmPercussionMap.Pads.Count)
+            if (groupEl.ValueKind == JsonValueKind.String
+                && Enum.TryParse<DrumMixGroup>(groupEl.GetString(), ignoreCase: true, out var named))
             {
-                var padIndex = kit.Pads.Count;
-                var gmPad = GmPercussionMap.Pads[padIndex];
-                kit.Pads.Add(new DrumSample { Label = gmPad.Label, MidiNote = gmPad.Note });
+                return named;
+            }
+
+            if (groupEl.ValueKind == JsonValueKind.Number
+                && groupEl.TryGetInt32(out var numeric)
+                && Enum.IsDefined((DrumMixGroup)numeric))
+            {
+                return (DrumMixGroup)numeric;
             }
         }
 
-        return kit;
+        if (midiNote is >= GmPercussionMap.FirstNote and <= GmPercussionMap.LastNote)
+        {
+            return GmPercussionMap.GetMixGroup(midiNote);
+        }
+
+        var defaultPad = GmPercussionMap.Pads.ElementAtOrDefault(fallbackIndex);
+        return defaultPad is null ? DrumMixGroup.Percussion : GmPercussionMap.GetMixGroup(defaultPad.Note);
     }
 
     private static void WriteFile(string outputPath, byte[] innerPlain, PackOptions options)
@@ -294,4 +358,25 @@ public static class ApakCodec
 
         return name.Replace(' ', '_');
     }
+
+    private static PadEnvelopeSettings ReadEnvelope(JsonElement pad)
+    {
+        if (!pad.TryGetProperty("adsr", out var adsr) || adsr.ValueKind != JsonValueKind.Object)
+        {
+            return new PadEnvelopeSettings();
+        }
+
+        return new PadEnvelopeSettings
+        {
+            AttackMs = ReadEnvelopeValue(adsr, "attack_ms", 0f, 0f, 5_000f),
+            DecayMs = ReadEnvelopeValue(adsr, "decay_ms", 0f, 0f, 10_000f),
+            SustainLevel = ReadEnvelopeValue(adsr, "sustain", 1f, 0f, 1f),
+            ReleaseMs = ReadEnvelopeValue(adsr, "release_ms", 0f, 0f, 10_000f),
+        };
+    }
+
+    private static float ReadEnvelopeValue(JsonElement adsr, string property, float fallback, float min, float max) =>
+        adsr.TryGetProperty(property, out var value) && value.TryGetSingle(out var parsed)
+            ? Math.Clamp(parsed, min, max)
+            : fallback;
 }

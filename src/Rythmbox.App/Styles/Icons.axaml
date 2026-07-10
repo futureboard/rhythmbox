@@ -82,6 +82,23 @@
         <StreamGeometry>M11,12 A1,1 0 1 0 13,12 A1,1 0 1 0 11,12 Z</StreamGeometry>
         <StreamGeometry>M17,12 A1,1 0 1 0 19,12 A1,1 0 1 0 17,12 Z</StreamGeometry>
     </GeometryGroup>
+    <StreamGeometry x:Key="IconChevronDown">m6 9 6 6 6-6</StreamGeometry>
+    <GeometryGroup x:Key="IconPlus">
+        <StreamGeometry>M5 12h14</StreamGeometry>
+        <StreamGeometry>M12 5v14</StreamGeometry>
+    </GeometryGroup>
+    <GeometryGroup x:Key="IconTrash2">
+        <StreamGeometry>M3 6h18</StreamGeometry>
+        <StreamGeometry>M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6</StreamGeometry>
+        <StreamGeometry>M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2</StreamGeometry>
+        <StreamGeometry>M10 11v6</StreamGeometry>
+        <StreamGeometry>M14 11v6</StreamGeometry>
+    </GeometryGroup>
+    <GeometryGroup x:Key="IconLayers">
+        <StreamGeometry>M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z</StreamGeometry>
+        <StreamGeometry>m6.08 9.5-3.49 1.59a1 1 0 0 0 0 1.81l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9a1 1 0 0 0 0-1.83l-3.49-1.59</StreamGeometry>
+        <StreamGeometry>m6.08 14.5-3.49 1.59a1 1 0 0 0 0 1.81l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9a1 1 0 0 0 0-1.83l-3.49-1.59</StreamGeometry>
+    </GeometryGroup>
     <GeometryGroup x:Key="IconMaximize">
         <StreamGeometry>M8 3H5a2 2 0 0 0-2 2v3</StreamGeometry>
         <StreamGeometry>M21 8V5a2 2 0 0 0-2-2h-3</StreamGeometry>

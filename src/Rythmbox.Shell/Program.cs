@@ -15,6 +15,8 @@ namespace Rythmbox.Shell;
 /// touchscreen and mouse events. A software cursor is drawn by the UI itself because
 /// the framebuffer backend has no hardware/compositor pointer.
 /// </summary>
+
+
 internal static class Program
 {
     public static int Main(string[] args)

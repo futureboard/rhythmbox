@@ -8,8 +8,8 @@
              mc:Ignorable="d" d:DesignWidth="1150" d:DesignHeight="650"
              x:Class="Rythmbox.App.Views.MixerPageView"
              x:DataType="vm:MainWindowViewModel">
-    <DockPanel LastChildFill="True">
-        <Border DockPanel.Dock="Top" Classes="mixerPageHeader" Padding="14,9">
+    <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Classes="mixerPageHeader" Padding="14,9">
             <Grid ColumnDefinitions="Auto,*,Auto">
                 <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                     <Path Data="{StaticResource IconSlidersHorizontal}" Classes="icon small" />
@@ -64,10 +64,38 @@
             </Grid>
         </Border>
 
-        <views:MixerSurfaceView DataContext="{Binding Mixer}" />
+        <Grid Grid.Row="1">
+            <views:MixerSurfaceView DataContext="{Binding Mixer}" />
 
-        <views:MixerFxPanelView DockPanel.Dock="Bottom"
-                                DataContext="{Binding Mixer.SelectedChannelFx}"
-                                MaxHeight="220" />
-    </DockPanel>
+            <!-- Keep the full mixer surface available; FX opens above it like a DAW editor. -->
+            <Border IsVisible="{Binding Mixer.IsFxEditorOpen}"
+                    Background="#99090C09"
+                    ZIndex="10">
+                <Border Classes="mixerFxPopup"
+                        Width="700"
+                        MaxHeight="560"
+                        Margin="20"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top">
+                    <Grid RowDefinitions="Auto,*">
+                        <Border Grid.Row="0" Classes="mixerFxPopupHeader" Padding="14,10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="FX EDITOR" Classes="mixerFxSection" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Mixer.SelectedChannel.Name}" Classes="panelHeader" FontSize="13" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Command="{Binding Mixer.CloseFxEditorCommand}" Classes="mixerFxClose" ToolTip.Tip="Close FX editor">
+                                    <Path Data="{StaticResource IconX}" Classes="icon small" />
+                                </Button>
+                            </Grid>
+                        </Border>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <views:MixerFxPanelView DataContext="{Binding Mixer.SelectedChannelFx}" />
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Border>
+        </Grid>
+    </Grid>
 </UserControl>

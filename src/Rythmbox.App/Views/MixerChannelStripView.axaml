@@ -7,7 +7,7 @@
              mc:Ignorable="d" d:DesignWidth="84" d:DesignHeight="320"
              x:Class="Rythmbox.App.Views.MixerChannelStripView"
              x:DataType="vm:MixerChannelStripViewModel"
-             Width="{Binding StripWidth}"
+             MinWidth="{Binding StripMinWidth}"
              MinHeight="340">
     <Border Classes="mixerStrip"
             Classes.selected="{Binding IsSelected}"
@@ -38,12 +38,12 @@
             </Border>
 
             <Border DockPanel.Dock="Top" Classes="mixerFxSlots" Padding="4,3" IsVisible="{Binding ShowFxSlots}">
-                <UniformGrid Columns="4" Rows="1">
-                    <ToggleButton Content="EQ" IsChecked="{Binding FxEqEnabled}" Classes="mixerFxSlot" Margin="0,0,2,0" />
-                    <ToggleButton Content="CP" IsChecked="{Binding FxCompEnabled}" Classes="mixerFxSlot" Margin="1,0,1,0" />
-                    <ToggleButton Content="DL" IsChecked="{Binding FxDelayEnabled}" Classes="mixerFxSlot" Margin="1,0,1,0" />
-                    <ToggleButton Content="RV" IsChecked="{Binding FxReverbEnabled}" Classes="mixerFxSlot" Margin="2,0,0,0" />
-                </UniformGrid>
+                <StackPanel Spacing="2">
+                    <ToggleButton Content="EQ" IsChecked="{Binding FxEqEnabled}" Classes="mixerFxSlot" />
+                    <ToggleButton Content="COMP" IsChecked="{Binding FxCompEnabled}" Classes="mixerFxSlot" />
+                    <ToggleButton Content="DELAY" IsChecked="{Binding FxDelayEnabled}" Classes="mixerFxSlot" />
+                    <ToggleButton Content="REVERB" IsChecked="{Binding FxReverbEnabled}" Classes="mixerFxSlot" />
+                </StackPanel>
             </Border>
 
             <Border DockPanel.Dock="Bottom" Classes="mixerStripFooter" Padding="4,3">

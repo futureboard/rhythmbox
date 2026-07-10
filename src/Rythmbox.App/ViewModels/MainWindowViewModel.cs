@@ -72,8 +72,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         _arranger = new PatternArrangerEngine(_midiFilePlayer);
         _audioBackend = new MiniAudioPlaybackBackend(_engine);
 
-        _engine.DeviceChanged += OnDeviceChanged;
-
         Status = new StatusViewModel();
         Localization = new LocalizationViewModel(_localization);
         _localization.LanguageChanged += (_, _) => OnPropertyChanged(nameof(CurrentPageTitle));
@@ -84,7 +82,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         var fileDialogService = new AppFileDialogService(FileDialog);
 
         bootProgress?.Invoke("Building workspace controls…");
-        KitBrowser = new KitBrowserViewModel(_kitSession, _kitPresets, _midiInput, _padRouter, fileDialogService);
+        KitBrowser = new KitBrowserViewModel(_kitSession, _kitPresets, _midiInput, _padRouter, fileDialogService, Status);
         Player = new PlayerViewModel(_midiFilePlayer, _localization);
         MasterStrip = new MasterStripViewModel(_engine);
         Mixer = new MixerViewModel(_engine, _kitPlayer, _audioBackend, _localization);
@@ -113,6 +111,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
         Editor = new EditorViewModel(fileDialogService);
         SampleCreator = new SampleCreatorViewModel(fileDialogService, _kitSession, _engine);
 
+        // Mixer initialization may select the first output device. Subscribe
+        // only after every dependent view model exists so that initial device
+        // selection cannot call OnDeviceChanged against a half-built shell.
+        _engine.DeviceChanged += OnDeviceChanged;
         _kitSession.LiveKitUpdated += OnKitSessionUpdated;
         _kitSession.StructureChanged += OnKitSessionUpdated;
         _padRouter.PadTriggered += OnPadTriggered;
@@ -396,7 +398,18 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     private void OnKitSessionUpdated()
     {
-        Dispatcher.UIThread.Post(PadGrid.RefreshSampleState);
+        Dispatcher.UIThread.Post(() =>
+        {
+            // Kit Builder routing is the persistent source of truth. Keep live
+            // hardware MIDI learn/settings aligned with its custom pad notes.
+            for (var i = 0; i < _kitSession.WorkingKit.Pads.Count && i < _padMapping.PadCount; i++)
+            {
+                _padMapping.SetMidiNote(i, _kitSession.WorkingKit.Pads[i].MidiNote);
+            }
+
+            Settings.RefreshMappings();
+            PadGrid.RefreshPadState();
+        });
     }
 
     private void OnPadTriggered(int padIndex, int velocity)

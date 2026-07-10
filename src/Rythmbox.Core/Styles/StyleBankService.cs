@@ -35,14 +35,31 @@ public sealed class StyleBankService
         var styles = new List<StyleDefinition>();
         var categories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var styleJson in Directory.EnumerateFiles(stylesRoot, "style.json", SearchOption.AllDirectories))
+        foreach (var styleJson in EnumerateFiles(stylesRoot, "style.json"))
         {
             TryAddStyle(styles, categories, () => StyleBankCodec.Load(styleJson), styleJson);
         }
 
-        foreach (var packedStyle in Directory.EnumerateFiles(stylesRoot, $"*{RhmStyleCodec.Extension}", SearchOption.AllDirectories))
+        foreach (var packedStyle in EnumerateFiles(stylesRoot, $"*{RhmStyleCodec.Extension}"))
         {
             TryAddStyle(styles, categories, () => RhmStyleCodec.Load(packedStyle), packedStyle);
+        }
+
+        foreach (var sourcePath in EnumerateFiles(stylesRoot, "*.*")
+                     .Where(IsRawStyleSource))
+        {
+            // A manifest is authoritative for its own directory. Standalone
+            // scan remains recursive for Factory and Users trees without
+            // duplicating simple, manifest-backed style folders.
+            var sourceDirectory = Path.GetDirectoryName(sourcePath) ?? stylesRoot;
+            if (File.Exists(Path.Combine(sourceDirectory, "style.json")))
+            {
+                continue;
+            }
+
+            var style = CreateStandaloneStyle(stylesRoot, sourcePath);
+            styles.Add(style);
+            categories.Add(style.Category);
         }
 
         AllStyles = styles.OrderBy(s => s.Category).ThenBy(s => s.Name).ToList();
@@ -95,5 +112,70 @@ public sealed class StyleBankService
             Patterns = new Dictionary<string, StylePattern>(),
             ValidationErrors = [message],
         });
+    }
+
+    private static bool IsRawStyleSource(string path) =>
+        Path.GetExtension(path) is var extension
+        && (extension.Equals(".mid", StringComparison.OrdinalIgnoreCase)
+            || extension.Equals(".rhythm", StringComparison.OrdinalIgnoreCase));
+
+    private static IEnumerable<string> EnumerateFiles(string root, string pattern) =>
+        Directory.EnumerateFiles(root, pattern, new EnumerationOptions
+        {
+            RecurseSubdirectories = true,
+            IgnoreInaccessible = true,
+        });
+
+    private static StyleDefinition CreateStandaloneStyle(string stylesRoot, string sourcePath)
+    {
+        var relative = Path.GetRelativePath(stylesRoot, sourcePath);
+        var category = InferCategory(relative);
+        var name = Path.GetFileNameWithoutExtension(sourcePath);
+        var extension = Path.GetExtension(sourcePath);
+        var id = "raw_" + relative
+            .Replace(Path.DirectorySeparatorChar, '_')
+            .Replace(Path.AltDirectorySeparatorChar, '_')
+            .Replace(' ', '_');
+
+        return new StyleDefinition
+        {
+            Id = id,
+            Name = name,
+            Category = category,
+            StyleDirectory = Path.GetDirectoryName(sourcePath) ?? stylesRoot,
+            Tags = ["raw", extension.TrimStart('.').ToLowerInvariant()],
+            Patterns = new Dictionary<string, StylePattern>(StringComparer.OrdinalIgnoreCase)
+            {
+                // Raw files have no manifest. Map them to Verse A so the
+                // existing Machine pad layout can trigger them immediately.
+                ["verse_a"] = new StylePattern
+                {
+                    Id = "verse_a",
+                    Name = name,
+                    Type = PatternType.Custom,
+                    PlaybackMode = PatternPlaybackMode.Loop,
+                    MidiRelativePath = Path.GetFileName(sourcePath),
+                    ResolvedMidiPath = sourcePath,
+                },
+            },
+        };
+    }
+
+    private static string InferCategory(string relativePath)
+    {
+        var parts = relativePath.Split([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar], StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2 && parts[0].Equals("Factory", StringComparison.OrdinalIgnoreCase))
+        {
+            return parts[1] switch
+            {
+                "Funk-Soul" => "Funk / Soul",
+                "Thai-Asian" => "Thai / Asian",
+                _ => parts[1],
+            };
+        }
+
+        return parts.Length > 1 && parts[0].Equals("Users", StringComparison.OrdinalIgnoreCase)
+            ? "User Styles"
+            : "User Styles";
     }
 }

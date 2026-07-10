@@ -39,12 +39,23 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private string _title = "Rythmbox Sample Creator";
 
+    [ObservableProperty]
+    private bool _isPresetLoading;
+
+    [ObservableProperty]
+    private string _presetLoadingMessage = "Preparing kit…";
+
+    [ObservableProperty]
+    private double _presetLoadingProgress;
+
     partial void OnSelectedPadChanged(PadSampleViewModel? value)
     {
         foreach (var pad in Pads)
         {
             pad.IsSelected = ReferenceEquals(pad, value);
         }
+
+        value?.ActivateForEditing();
     }
 
     partial void OnKitNameChanged(string value)
@@ -65,6 +76,44 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
         catch (Exception ex)
         {
             StatusText = $"Open failed: {ex.Message}";
+        }
+    }
+
+    public async Task OpenPresetAsync(string path)
+    {
+        if (IsPresetLoading)
+        {
+            return;
+        }
+
+        IsPresetLoading = true;
+        PresetLoadingProgress = 0;
+        PresetLoadingMessage = $"Reading {Path.GetFileName(path)}…";
+
+        try
+        {
+            var progress = new Progress<KitLoadProgress>(update =>
+            {
+                PresetLoadingMessage = update.Message;
+                PresetLoadingProgress = update.Fraction;
+            });
+            var result = await Task.Run(() => KitPresetCodec.LoadWithDiagnostics(
+                path,
+                _kitSession.SamplesDir,
+                progress: progress));
+
+            _kitSession.LoadKitPreset(result.Kit, path);
+            StatusText = result.Warnings.Count == 0
+                ? $"Opened {Path.GetFileName(path)}"
+                : $"Opened {Path.GetFileName(path)} with {result.Warnings.Count} skipped sample(s)";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Open failed: {ex.Message}";
+        }
+        finally
+        {
+            IsPresetLoading = false;
         }
     }
 
@@ -175,7 +224,7 @@ public sealed partial class SampleCreatorViewModel : ViewModelBase, IDisposable
 
         if (path is not null)
         {
-            OpenPreset(path);
+            await OpenPresetAsync(path);
         }
     }
 

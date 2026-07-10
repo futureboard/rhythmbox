@@ -22,6 +22,13 @@ public sealed partial class RoundRobinSlotViewModel : ViewModelBase
 
     public int Index { get; }
 
+    /// <summary>Owning velocity layer — lets the sample row reach pad-level focus commands.</summary>
+    public VelocityLayerViewModel Layer => _layer;
+
+    /// <summary>Highlight flag driven by <see cref="PadSampleViewModel.SelectedRoundRobin"/>.</summary>
+    [ObservableProperty]
+    private bool _isSelected;
+
     public float[] Samples { get; private set; }
 
     public string? Path { get; private set; }

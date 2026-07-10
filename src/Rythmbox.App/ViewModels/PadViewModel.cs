@@ -42,9 +42,17 @@ public sealed partial class PadViewModel : ViewModelBase
 
     public string Label => IsPlaceholder ? string.Empty : Pad.Label;
 
-    public string NoteName => IsPlaceholder ? string.Empty : MidiNoteNames.Format(Pad.Note);
+    public int MidiNote => IsPlaceholder ? -1 : _kitPlayer?.GetPadMidiNote(Pad.Index) ?? Pad.Note;
 
-    public string NoteDetail => IsPlaceholder ? string.Empty : $"{NoteName} / {Pad.Note}";
+    public DrumMixGroup OutputGroup => IsPlaceholder
+        ? DrumMixGroup.Percussion
+        : _kitPlayer?.GetPadOutputGroup(Pad.Index) ?? GmPercussionMap.GetMixGroup(Pad.Note);
+
+    public string OutputLabel => IsPlaceholder ? string.Empty : GmPercussionMap.GetMixGroupLabel(OutputGroup);
+
+    public string NoteName => IsPlaceholder ? string.Empty : MidiNoteNames.Format(MidiNote);
+
+    public string NoteDetail => IsPlaceholder ? string.Empty : $"{NoteName} / {MidiNote}";
 
     public string SampleDetail => IsPlaceholder
         ? string.Empty
@@ -88,6 +96,16 @@ public sealed partial class PadViewModel : ViewModelBase
         }
 
         Flash();
+    }
+
+    public void RefreshRouting()
+    {
+        OnPropertyChanged(nameof(MidiNote));
+        OnPropertyChanged(nameof(OutputGroup));
+        OnPropertyChanged(nameof(OutputLabel));
+        OnPropertyChanged(nameof(NoteName));
+        OnPropertyChanged(nameof(NoteDetail));
+        OnPropertyChanged(nameof(SampleDetail));
     }
 
     [RelayCommand]

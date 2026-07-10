@@ -17,7 +17,17 @@ public static class WavCodec
 
     public static float[] LoadMono(string path, int targetSampleRate = TargetSampleRate)
     {
-        return DecodeMono(File.ReadAllBytes(path), out _, targetSampleRate);
+        return LoadMono(path, out _, targetSampleRate);
+    }
+
+    /// <summary>Loads a file through a memory map and returns its original rate for editor metadata.</summary>
+    public static float[] LoadMono(string path, out int sourceSampleRate, int targetSampleRate = TargetSampleRate)
+    {
+        // Avoid File.ReadAllBytes here: a normal editor import only needs one
+        // PCM output buffer, not a second managed copy of the complete WAV file.
+        var mapped = MemoryMappedWavSample.Open(path);
+        sourceSampleRate = mapped.SampleRate;
+        return mapped.DecodeMono(targetSampleRate);
     }
 
     public static float[] DecodeMono(ReadOnlySpan<byte> wavBytes, out int sampleRate, int targetSampleRate = TargetSampleRate)

@@ -3,7 +3,9 @@ using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Rythmbox.Core.Engine;
+using Rythmbox.Core.Formats;
 using Rythmbox.Core.Models;
+using Rythmbox.Core.Samples;
 using Rythmbox.Core.Services;
 using SoundFlow.Midi.Structs;
 
@@ -18,20 +20,25 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
     private readonly MidiInputService _midiInput;
     private readonly PadMidiRouter _padRouter;
     private readonly IFileDialogService _fileDialog;
+    private readonly StatusViewModel _status;
+    private readonly SemaphoreSlim _loadGate = new(1, 1);
     private string? _presetDir;
+    private bool _syncingFromSession;
 
     public KitBrowserViewModel(
         KitSession kitSession,
         KitPresetService presetService,
         MidiInputService midiInput,
         PadMidiRouter padRouter,
-        IFileDialogService fileDialog)
+        IFileDialogService fileDialog,
+        StatusViewModel status)
     {
         _kitSession = kitSession;
         _presetService = presetService;
         _midiInput = midiInput;
         _padRouter = padRouter;
         _fileDialog = fileDialog;
+        _status = status;
 
         var stored = KitHotloadSlotStore.Load(SlotNames);
         HotloadSlots = new ObservableCollection<KitHotloadSlotViewModel>(
@@ -69,6 +76,15 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
     private MidiDeviceInfo? _selectedMidiInput;
 
     [ObservableProperty]
+    private bool _isLoading;
+
+    [ObservableProperty]
+    private string _loadingMessage = "Preparing kit…";
+
+    [ObservableProperty]
+    private double _loadingProgress;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ConnectLabel))]
     private bool _isMidiConnected;
 
@@ -76,9 +92,9 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
 
     partial void OnSelectedKitChanged(KitPresetEntry? value)
     {
-        if (value is not null)
+        if (!_syncingFromSession && value is not null)
         {
-            LoadKit(value.FilePath);
+            _ = LoadKitAsync(value.FilePath);
         }
     }
 
@@ -88,7 +104,57 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
         Rescan();
     }
 
-    public void LoadKit(string path) => _kitSession.LoadFromFile(path);
+    public async Task LoadKitAsync(string path)
+    {
+        if (!await _loadGate.WaitAsync(0))
+        {
+            return;
+        }
+
+        IsLoading = true;
+        LoadingProgress = 0;
+        LoadingMessage = $"Reading {Path.GetFileName(path)}…";
+
+        try
+        {
+            KitLoadResult result;
+            if (string.Equals(Path.GetExtension(path), ApakCodec.Extension, StringComparison.OrdinalIgnoreCase))
+            {
+                // APAK is an encrypted legacy archive, so its payload must be
+                // decrypted before it can be read. It remains isolated to this
+                // one background operation; normal JSON presets use memory maps.
+                result = await Task.Run(() => new KitLoadResult(ApakCodec.LoadFactory(path), [], 0, 0));
+                LoadingProgress = 1;
+            }
+            else
+            {
+                var progress = new Progress<KitLoadProgress>(update =>
+                {
+                    LoadingMessage = update.Message;
+                    LoadingProgress = update.Fraction;
+                });
+
+                result = await Task.Run(() => KitPresetCodec.LoadWithDiagnostics(path, _kitSession.SamplesDir, progress: progress));
+            }
+
+            _kitSession.LoadKitPreset(result.Kit, path);
+            var mapped = result.MappedSampleCount > 0
+                ? $" ({result.MappedSampleCount} mapped samples)"
+                : string.Empty;
+            _status.Show(result.Warnings.Count == 0
+                ? $"Loaded {_kitSession.KitName}{mapped}"
+                : $"Loaded {_kitSession.KitName} with {result.Warnings.Count} skipped sample(s)");
+        }
+        catch (Exception ex)
+        {
+            _status.Show($"Could not load kit: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            _loadGate.Release();
+        }
+    }
 
     public void TryLoadDefault(string? presetDir)
     {
@@ -103,9 +169,17 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
     public void SyncFromSession()
     {
         LoadedKitName = _kitSession.KitName;
-        SelectedKit = _kitSession.PresetPath is { } loaded
-            ? Kits.FirstOrDefault(k => string.Equals(k.FilePath, loaded, StringComparison.OrdinalIgnoreCase))
-            : SelectedKit;
+        _syncingFromSession = true;
+        try
+        {
+            SelectedKit = _kitSession.PresetPath is { } loaded
+                ? Kits.FirstOrDefault(k => string.Equals(k.FilePath, loaded, StringComparison.OrdinalIgnoreCase))
+                : SelectedKit;
+        }
+        finally
+        {
+            _syncingFromSession = false;
+        }
         RefreshHotloadActiveState();
         RefreshPads();
     }
@@ -132,7 +206,7 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
 
         if (path is not null)
         {
-            LoadKit(path);
+            await LoadKitAsync(path);
         }
     }
 
@@ -184,7 +258,7 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
             return;
         }
 
-        LoadKit(slot.KitPath!);
+        await LoadKitAsync(slot.KitPath!);
     }
 
     private async Task ChangeHotloadSlot(KitHotloadSlotViewModel slot)
@@ -201,7 +275,7 @@ public sealed partial class KitBrowserViewModel : ViewModelBase
 
         slot.KitPath = path;
         PersistHotloadSlots();
-        LoadKit(path);
+        await LoadKitAsync(path);
     }
 
     private void ClearHotloadSlot(KitHotloadSlotViewModel slot)

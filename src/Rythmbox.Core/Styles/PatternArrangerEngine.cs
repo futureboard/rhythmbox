@@ -36,11 +36,32 @@ public sealed class PatternArrangerEngine
         Session.SelectedPatternId = null;
         Session.PlayingPatternId = null;
         Session.QueuedPatternId = null;
+        Session.TransportState = ArrangerTransportState.Stopped;
         Session.Macros = style.Macros.Clone();
         Session.CurrentTempo = style.DefaultTempo;
         Session.LastError = style.IsValid ? null : string.Join("; ", style.ValidationErrors);
         TimeSig.SetBase(TimeSignature.Parse(style.TimeSignature));
         TimeSig.Reset();
+
+        // Selecting a style should make the global Play button meaningful. We
+        // preload Verse A when available (or the first valid pattern) but do
+        // not start audio until the user explicitly presses Play.
+        var defaultPattern = style.Patterns.TryGetValue("verse_a", out var verse)
+            ? verse
+            : style.Patterns.Values.FirstOrDefault(static pattern => pattern.HasMidiFile);
+        if (defaultPattern is { HasMidiFile: true })
+        {
+            try
+            {
+                PreparePattern(defaultPattern);
+            }
+            catch (Exception ex)
+            {
+                Session.LastError = ex.Message;
+                Session.SelectedPatternId = null;
+            }
+        }
+
         Notify();
     }
 
@@ -196,10 +217,7 @@ public sealed class PatternArrangerEngine
             Session.TransportState = ArrangerTransportState.Loading;
             Notify();
 
-            _midiPlayer.Load(pattern.ResolvedMidiPath);
-            _midiPlayer.IsLooping = pattern.PlaybackMode == PatternPlaybackMode.Loop
-                                    && !pattern.OneShot
-                                    && pattern.Type is not PatternType.Ending;
+            PreparePattern(pattern);
             _midiPlayer.Play();
 
             Session.PlayingPatternId = pattern.Id;
@@ -213,6 +231,20 @@ public sealed class PatternArrangerEngine
         }
 
         Notify();
+    }
+
+    private void PreparePattern(StylePattern pattern)
+    {
+        if (pattern.ResolvedMidiPath is null)
+        {
+            return;
+        }
+
+        _midiPlayer.Load(pattern.ResolvedMidiPath);
+        _midiPlayer.IsLooping = pattern.PlaybackMode == PatternPlaybackMode.Loop
+                                && !pattern.OneShot
+                                && pattern.Type is not PatternType.Ending;
+        Session.SelectedPatternId = pattern.Id;
     }
 
     /// <summary>Drop a momentary <see cref="MomentarySignature"/> bar (default 2/4), then return to base.</summary>

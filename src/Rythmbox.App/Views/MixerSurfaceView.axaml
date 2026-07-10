@@ -7,28 +7,37 @@
              mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="340"
              x:Class="Rythmbox.App.Views.MixerSurfaceView"
              x:DataType="vm:MixerViewModel">
-    <Grid ColumnDefinitions="*,Auto">
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
         <Border Grid.Column="0" Classes="mixerSurfaceCanvas">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Disabled"
-                          Classes="mixerSurfaceScroll">
-                <ItemsControl ItemsSource="{Binding Channels}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="0" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="vm:MixerChannelStripViewModel">
-                            <views:MixerChannelStripView />
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
+            <ItemsControl ItemsSource="{Binding Channels}"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <!-- Six buses always share the available mixer surface. -->
+                        <UniformGrid Columns="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerTheme>
+                    <ControlTheme TargetType="ContentPresenter">
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                        <Setter Property="VerticalAlignment" Value="Stretch" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    </ControlTheme>
+                </ItemsControl.ItemContainerTheme>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:MixerChannelStripViewModel">
+                        <views:MixerChannelStripView VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Border>
 
         <views:MixerChannelStripView Grid.Column="1"
                                      DataContext="{Binding MasterChannel}"
-                                     Margin="0" />
+                                     Width="180"
+                                     Margin="0"
+                                     VerticalAlignment="Stretch" />
     </Grid>
 </UserControl>

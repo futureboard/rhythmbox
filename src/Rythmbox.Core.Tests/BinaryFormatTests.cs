@@ -23,6 +23,13 @@ public class BinaryFormatTests
                     MidiNote = 36,
                     Samples = [0.5f, 0.25f, 0f],
                     SampleRate = WavCodec.TargetSampleRate,
+                    Envelope = new PadEnvelopeSettings
+                    {
+                        AttackMs = 12,
+                        DecayMs = 80,
+                        SustainLevel = 0.65f,
+                        ReleaseMs = 120,
+                    },
                 },
             ],
         };
@@ -37,6 +44,8 @@ public class BinaryFormatTests
             Assert.Equal("Test Kit", loaded.Name);
             Assert.True(loaded.Pads[0].HasAudio);
             Assert.Equal(3, loaded.Pads[0].Samples.Length);
+            Assert.Equal(12, loaded.Pads[0].Envelope.AttackMs);
+            Assert.Equal(0.65f, loaded.Pads[0].Envelope.SustainLevel);
         }
         finally
         {

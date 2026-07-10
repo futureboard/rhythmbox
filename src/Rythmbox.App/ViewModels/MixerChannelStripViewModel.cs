@@ -64,7 +64,7 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
         _ => "OTHER",
     };
 
-    public int StripWidth => Kind switch
+    public int StripMinWidth => Kind switch
     {
         MixerChannelKind.Master => 180,
         MixerChannelKind.Group => 96,
@@ -77,7 +77,7 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
 
     public string RouteName => Channel.RouteName;
 
-    public string SoloToolTip => ShowSolo ? "Solo" : "Solo not implemented for group buses";
+    public string SoloToolTip => ShowSolo ? "Solo" : "Solo is not available for this channel";
 
     [ObservableProperty]
     private bool _isSelected;
@@ -115,7 +115,8 @@ public sealed partial class MixerChannelStripViewModel : ViewModelBase
     [ObservableProperty]
     private bool _fxReverbEnabled = true;
 
-    public bool ShowFxSlots => Kind != MixerChannelKind.Master;
+    // Every channel, including the master bus, exposes its inserts on the surface.
+    public bool ShowFxSlots => true;
 
     public string GainLabel => MixerVolume.FormatDb(FaderValue);
 

@@ -33,18 +33,18 @@ public sealed partial class PadMixerChannelViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isMuted;
 
-    partial void OnIsMutedChanged(bool value) => _kitPlayer.SetPadMute(Pad.Note, value);
+    partial void OnIsMutedChanged(bool value) => _kitPlayer.SetPadMuteByIndex(Pad.Index, value);
 
     [ObservableProperty]
     private bool _isSoloed;
 
-    partial void OnIsSoloedChanged(bool value) => _kitPlayer.SetPadSolo(Pad.Note, value);
+    partial void OnIsSoloedChanged(bool value) => _kitPlayer.SetPadSoloByIndex(Pad.Index, value);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(VolumeLabel))]
     private double _volume = 1.0;
 
-    partial void OnVolumeChanged(double value) => _kitPlayer.SetPadVolume(Pad.Note, (float)value);
+    partial void OnVolumeChanged(double value) => _kitPlayer.SetPadVolumeByIndex(Pad.Index, (float)value);
 
     /// <summary>A DR-880-style dB-ish readout derived from the linear 0..1 volume, e.g. "0.0", "-6.2".</summary>
     public string VolumeLabel => Volume <= 0.001

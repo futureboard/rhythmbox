@@ -21,7 +21,7 @@ public sealed partial class PercussionPadGridViewModel : ViewModelBase
         _player = player;
         Pads = GmPercussionMap.Pads.Select(pad => new PadViewModel(pad, kitPlayer)).ToList();
         CurrentPagePads = new ObservableCollection<PadViewModel>(BuildCurrentPagePads());
-        RefreshSampleState();
+        RefreshPadState();
 
         _player.PropertyChanged += (_, e) =>
         {
@@ -91,12 +91,19 @@ public sealed partial class PercussionPadGridViewModel : ViewModelBase
     }
 
     public void RefreshSampleState()
+        => RefreshPadState();
+
+    public void RefreshPadState()
     {
         var hasSample = _kitPlayer.PadHasSample;
         for (var i = 0; i < Pads.Count && i < hasSample.Count; i++)
         {
             Pads[i].HasSample = hasSample[i];
+            Pads[i].RefreshRouting();
         }
+
+        RefreshUsage();
+        OnPropertyChanged(nameof(PageNoteRange));
     }
 
     [RelayCommand(CanExecute = nameof(CanGoToPreviousPage))]
@@ -148,7 +155,7 @@ public sealed partial class PercussionPadGridViewModel : ViewModelBase
         var used = _player.UsedNoteNumbers;
         foreach (var pad in Pads.Where(static p => !p.IsPlaceholder))
         {
-            pad.IsUsedInLoop = used.Contains(pad.Pad.Note);
+            pad.IsUsedInLoop = used.Contains(pad.MidiNote);
         }
     }
 }

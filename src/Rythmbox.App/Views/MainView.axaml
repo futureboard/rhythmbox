@@ -61,6 +61,17 @@
                         </DockPanel>
                     </Border>
                 </Border>
+
+                <Border Classes="popupOverlay" IsVisible="{Binding KitBrowser.IsLoading}" ZIndex="500">
+                    <Border Classes="popupPanel" Width="360" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <StackPanel Spacing="12">
+                            <TextBlock Text="LOADING KIT" Classes="panelHeader" />
+                            <TextBlock Text="{Binding KitBrowser.LoadingMessage}" TextWrapping="Wrap" />
+                            <ProgressBar Minimum="0" Maximum="1" Value="{Binding KitBrowser.LoadingProgress}" />
+                            <TextBlock Text="Sample attacks are pre-warmed; longer audio stays mapped until played." Classes="dim" FontSize="10" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </Border>
             </Panel>
         </DockPanel>
     </LayoutTransformControl>

@@ -9,6 +9,18 @@ public sealed class AppPaths
     public const string ProductFolderName = "Futureboard Studio";
     public const string AppFolderName = "Rhythmbox";
 
+    public static readonly IReadOnlyList<string> FactoryStyleGenres =
+    [
+        "Pop",
+        "Rock",
+        "Funk-Soul",
+        "EDM",
+        "Hip-Hop",
+        "Latin",
+        "Jazz",
+        "Thai-Asian",
+    ];
+
     public AppPaths()
     {
         var applicationDataDir = Path.Combine(
@@ -18,10 +30,16 @@ public sealed class AppPaths
 
         ApplicationDataDir = EnsureDirectory(applicationDataDir);
         StylesDir = EnsureDirectory(Path.Combine(ApplicationDataDir, "Styles"));
+        FactoryStylesDir = EnsureDirectory(Path.Combine(StylesDir, "Factory"));
+        foreach (var genre in FactoryStyleGenres)
+        {
+            EnsureDirectory(Path.Combine(FactoryStylesDir, genre));
+        }
+
+        UserStylesDir = EnsureDirectory(Path.Combine(StylesDir, "Users"));
         PresetDir = EnsureDirectory(Path.Combine(ApplicationDataDir, "Presets"));
         SamplesDir = EnsureDirectory(Path.Combine(ApplicationDataDir, "Samplepacks"));
         KitsDir = SamplesDir;
-        UserStylesDir = StylesDir;
 
         RootDir = FindDevRootDirectory();
         if (RootDir is not null)
@@ -30,15 +48,6 @@ public sealed class AppPaths
             ContentDir = Path.Combine(RootDir, "Content");
             RythmDir = Path.Combine(SharedDir, "RYTHM");
             SubMidiDir = Path.Combine(SharedDir, "SUBMIDI");
-
-            if (!HasStyleContent(StylesDir))
-            {
-                var devStyles = Path.Combine(ContentDir, "Styles");
-                if (Directory.Exists(devStyles))
-                {
-                    StylesDir = devStyles;
-                }
-            }
 
             if (!HasPresetContent(PresetDir))
             {
@@ -86,6 +95,8 @@ public sealed class AppPaths
 
     public string StylesDir { get; }
 
+    public string FactoryStylesDir { get; }
+
     public string KitsDir { get; }
 
     public string UserStylesDir { get; }
@@ -109,7 +120,9 @@ public sealed class AppPaths
     private static bool HasStyleContent(string dir) =>
         Directory.Exists(dir)
         && (Directory.EnumerateFiles(dir, "style.json", SearchOption.AllDirectories).Any()
-            || Directory.EnumerateFiles(dir, "*.rhmsty", SearchOption.AllDirectories).Any());
+            || Directory.EnumerateFiles(dir, "*.rhmsty", SearchOption.AllDirectories).Any()
+            || Directory.EnumerateFiles(dir, "*.mid", SearchOption.AllDirectories).Any()
+            || Directory.EnumerateFiles(dir, "*.rhythm", SearchOption.AllDirectories).Any());
 
     private static bool HasPresetContent(string dir) =>
         Directory.Exists(dir)

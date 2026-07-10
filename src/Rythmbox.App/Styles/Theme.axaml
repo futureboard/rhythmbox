@@ -383,7 +383,33 @@
     <Style Selector="Border.mixerFxPanel">
         <Setter Property="Background" Value="{DynamicResource RythmboxPanelBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
-        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="Border.mixerFxPopup">
+        <Setter Property="Background" Value="#1A211B" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="5" />
+        <Setter Property="ClipToBounds" Value="True" />
+    </Style>
+
+    <Style Selector="Border.mixerFxPopupHeader">
+        <Setter Property="Background" Value="#111510" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style Selector="Button.mixerFxClose">
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="MinWidth" Value="28" />
+        <Setter Property="MinHeight" Value="26" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+    </Style>
+
+    <Style Selector="Button.mixerFxClose:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxHoverBrush}" />
     </Style>
 
     <Style Selector="TextBlock.mixerFxSection">
@@ -619,6 +645,30 @@
     </Style>
 
     <Style Selector="ToggleButton.mixerFxSlot:checked /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxAccentMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxAccentBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerFxPopupSlot">
+        <Setter Property="FontSize" Value="9" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Padding" Value="8,7" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="Background" Value="#111510" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxPlaceholderBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerFxPopupSlot:checked">
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxAccentBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentBrush}" />
+        <Setter Property="Background" Value="{DynamicResource RythmboxAccentMutedBrush}" />
+    </Style>
+
+    <Style Selector="ToggleButton.mixerFxPopupSlot:checked /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource RythmboxAccentMutedBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource RythmboxAccentBrush}" />
@@ -1178,6 +1228,159 @@
 
     <Style Selector="Button.kitImport">
         <Setter Property="MinHeight" Value="34" />
+    </Style>
+
+    <!-- ========================= Layer Engine components ========================= -->
+
+    <!-- Velocity map frame -->
+    <Style Selector="Border.leMapFrame">
+        <Setter Property="Background" Value="{DynamicResource RbInputBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Padding" Value="3" />
+    </Style>
+
+    <!-- Velocity layer card -->
+    <Style Selector="Border.leCard">
+        <Setter Property="Background" Value="#141A15" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Padding" Value="6" />
+    </Style>
+
+    <Style Selector="Border.leCard.selected">
+        <Setter Property="Background" Value="#1C2218" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentBrush}" />
+    </Style>
+
+    <Style Selector="Grid.leCardHeader">
+        <Setter Property="MinHeight" Value="30" />
+    </Style>
+
+    <!-- Round robin count badge -->
+    <Style Selector="Border.leRrBadge">
+        <Setter Property="Background" Value="{DynamicResource RbInputBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Padding" Value="7,1" />
+    </Style>
+
+    <Style Selector="Border.leRrBadge TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxDimTextBrush}" />
+    </Style>
+
+    <Style Selector="Border.leCard.selected Border.leRrBadge TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxAccentBrush}" />
+    </Style>
+
+    <!-- Flat selection buttons (card header label region, sample row body) -->
+    <Style Selector="Button.leCardSelect, Button.leRowSelect">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Padding" Value="6,4" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxTextBrush}" />
+    </Style>
+
+    <Style Selector="Button.leCardSelect:pointerover /template/ ContentPresenter, Button.leRowSelect:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxHoverBrush}" />
+    </Style>
+
+    <!-- Compact square icon buttons -->
+    <Style Selector="Button.leIconBtn">
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.leIconBtn:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxHoverBrush}" />
+    </Style>
+
+    <Style Selector="Button.leIconBtn.danger:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource RythmboxDangerSurfaceBrush}" />
+    </Style>
+
+    <Style Selector="Button.leIconBtn.danger:pointerover Path.icon">
+        <Setter Property="Stroke" Value="{DynamicResource RythmboxRedBrush}" />
+    </Style>
+
+    <!-- Hover-only actions on the card header; overflow menu covers touch -->
+    <Style Selector="StackPanel.leCardActions">
+        <Setter Property="Opacity" Value="0" />
+    </Style>
+
+    <Style Selector="Border.leCard:pointerover StackPanel.leCardActions">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <Style Selector="Border.leCard:focus-within StackPanel.leCardActions">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <!-- Round robin sample rows -->
+    <Style Selector="Grid.leRow">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="Margin" Value="0,1,0,0" />
+    </Style>
+
+    <Style Selector="Grid.leRow:pointerover">
+        <Setter Property="Background" Value="#1A201B" />
+    </Style>
+
+    <Style Selector="Grid.leRow.selected">
+        <Setter Property="Background" Value="{DynamicResource RythmboxAccentMutedBrush}" />
+    </Style>
+
+    <Style Selector="Button.leRowRemove">
+        <Setter Property="Opacity" Value="0" />
+    </Style>
+
+    <Style Selector="Grid.leRow:pointerover Button.leRowRemove">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <Style Selector="Grid.leRow.selected Button.leRowRemove">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <Style Selector="Grid.leRow:focus-within Button.leRowRemove">
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <!-- Drop zone -->
+    <Style Selector="Border.leDropZone">
+        <Setter Property="Background" Value="{DynamicResource RbInputBgBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Padding" Value="14" />
+        <Setter Property="MinHeight" Value="64" />
+        <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+
+    <Style Selector="Border.leDropZone.dragover">
+        <Setter Property="Background" Value="{DynamicResource RythmboxAccentMutedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxAccentBrush}" />
+    </Style>
+
+    <!-- Empty state -->
+    <Style Selector="Border.leEmptyState">
+        <Setter Property="Background" Value="#151A16" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Padding" Value="24" />
+        <Setter Property="MinHeight" Value="150" />
     </Style>
 
 </Styles>

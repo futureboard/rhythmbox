@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Rythmbox.SampleCreator.ViewModels"
+             xmlns:le="using:Rythmbox.SampleCreator.Views.LayerEngine"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="560" d:DesignHeight="420"
+             x:Class="Rythmbox.SampleCreator.Views.LayerEngine.LayerEngineView"
+             x:DataType="vm:PadSampleViewModel">
+    <Border Classes="kitLayerPanel">
+        <StackPanel Spacing="12">
+            <!-- Panel header + primary "Add Layer" action. -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="2">
+                    <TextBlock Text="LAYER ENGINE" Classes="dim" FontSize="9" FontWeight="Bold" LetterSpacing="1" />
+                    <TextBlock Text="VELOCITY LAYERS" Classes="panelHeader" />
+                </StackPanel>
+                <Button Grid.Column="1" Command="{Binding AddLayerCommand}" Classes="toolbarBtn"
+                        ToolTip.Tip="Add a velocity layer">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Path Data="{StaticResource IconPlus}" Classes="icon small" />
+                        <TextBlock Text="Add Layer" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <!-- Velocity map: the 1–127 range as segmented blocks. -->
+            <StackPanel Spacing="6" IsVisible="{Binding HasVelocityLayers}">
+                <TextBlock Text="VELOCITY MAP" Classes="dim" FontSize="9" FontWeight="Bold" LetterSpacing="1" />
+                <Border Classes="leMapFrame">
+                    <le:VelocityMapControl Layers="{Binding Layers}"
+                                           SelectedLayer="{Binding SelectedLayer}"
+                                           SelectionCommand="{Binding FocusLayerCommand}" />
+                </Border>
+                <TextBlock Text="Click a segment to select its layer. Dashed = gap, red = overlap."
+                           Classes="dim" FontSize="10" />
+            </StackPanel>
+
+            <!-- Velocity layer stack: each layer owns its round robins. -->
+            <ItemsControl ItemsSource="{Binding Layers}" IsVisible="{Binding HasVelocityLayers}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:VelocityLayerViewModel">
+                        <le:VelocityLayerCardView />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Empty state: pad has no velocity layers yet. -->
+            <Border Classes="leEmptyState" IsVisible="{Binding ShowLayerEmptyState}">
+                <StackPanel Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Path Data="{StaticResource IconLayers}" Classes="icon" Width="26" Height="26"
+                          HorizontalAlignment="Center" Opacity="0.6" />
+                    <TextBlock Text="Create a velocity layer to start building this pad"
+                               Classes="dim" FontSize="12" HorizontalAlignment="Center"
+                               TextAlignment="Center" TextWrapping="Wrap" MaxWidth="320" />
+                    <Button Command="{Binding AddLayerCommand}" Classes="toolbarBtn accent" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Path Data="{StaticResource IconPlus}" Classes="icon small" />
+                            <TextBlock Text="Create Velocity Layer" FontWeight="Bold"
+                                       Foreground="{DynamicResource RythmboxOnAccentBrush}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </Border>
+</UserControl>

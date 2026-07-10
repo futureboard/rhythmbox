@@ -145,6 +145,31 @@ public class WavCodecTests
         Assert.Contains(decoded, sample => Math.Abs(sample) > 0.001f);
     }
 
+    [Fact]
+    public void MemoryMappedWavSample_reads_frames_without_a_managed_pcm_buffer()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"mapped_{Guid.NewGuid():N}.wav");
+        try
+        {
+            WavCodec.SaveMono(path, [0.25f, -0.5f, 0.75f]);
+            var mapped = MemoryMappedWavSample.Open(path);
+
+            Assert.Equal(3, mapped.FrameCount);
+            Assert.Equal(WavCodec.TargetSampleRate, mapped.SampleRate);
+
+            using var source = mapped.CreatePlaybackSample();
+            Assert.InRange(source.ReadFrame(0), 0.24f, 0.26f);
+            Assert.InRange(source.ReadFrame(1), -0.51f, -0.49f);
+        }
+        finally
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+    }
+
     private static byte[] CreatePcmWav(int channels, int sampleRate, short bitsPerSample, short[]? samples = null, int[]? samples24 = null)
     {
         using var stream = new MemoryStream();

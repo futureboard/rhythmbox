@@ -58,6 +58,7 @@
                                 <StackPanel Spacing="2" VerticalAlignment="Center" Margin="6,8">
                                     <TextBlock Text="{Binding Label}" Classes="padLabel" HorizontalAlignment="Center" />
                                     <TextBlock Text="{Binding SampleDetail}" Classes="padNumber" HorizontalAlignment="Center" />
+                                    <TextBlock Text="{Binding OutputLabel}" Classes="dim" FontSize="8" HorizontalAlignment="Center" />
                                     <Ellipse Width="5" Height="5" HorizontalAlignment="Center" Margin="0,2,0,0"
                                              Classes="padSampleDot"
                                              Classes.hasSample="{Binding HasSample}" />

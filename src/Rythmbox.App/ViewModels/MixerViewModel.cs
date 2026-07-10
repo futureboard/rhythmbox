@@ -28,8 +28,7 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
     private readonly LocalizationService _i18n;
     private readonly DispatcherTimer _meterTimer;
     private readonly Dictionary<string, MixerChannelStripViewModel> _stripById = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<int, MixerChannelStripViewModel> _padStripByNote = new();
-    private readonly Dictionary<PadBus, MixerChannelStripViewModel> _busStripByBus = new();
+    private readonly Dictionary<DrumMixGroup, MixerChannelStripViewModel> _mixGroupStripByGroup = new();
     private bool _suppressDeviceChange;
 
     public MixerViewModel(PlaybackEngine engine, KitSamplePlayer kitPlayer, IAudioBackend audioBackend, LocalizationService i18n)
@@ -63,6 +62,9 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     private MixerChannelStripViewModel? _selectedChannel;
+
+    [ObservableProperty]
+    private bool _isFxEditorOpen;
 
     [ObservableProperty]
     private DeviceInfo? _selectedOutputDevice;
@@ -122,6 +124,15 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
         SelectedOutputDevice = _engine.CurrentDevice ?? OutputDevices.FirstOrDefault();
         _suppressDeviceChange = false;
 
+        // The initial assignment happens while notifications are suppressed so
+        // the ComboBox does not reopen the device repeatedly. Explicitly apply
+        // that first available output afterwards; otherwise the UI shows a
+        // speaker but the engine remains "Audio: Off".
+        if (_engine.CurrentDevice is null && SelectedOutputDevice is { } initialDevice)
+        {
+            _engine.SetOutputDevice(initialDevice);
+        }
+
         BackendLabel = _audioBackend.PlatformBackendId;
         DeviceLabel = _audioBackend.CurrentDeviceName ?? SelectedOutputDevice?.Name ?? _i18n["mixer.noDevice"];
         RouteLabel = DeviceLabel;
@@ -144,7 +155,11 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
 
         SelectedChannel = strip;
         BindFxPanel(strip);
+        IsFxEditorOpen = true;
     }
+
+    [RelayCommand]
+    private void CloseFxEditor() => IsFxEditorOpen = false;
 
     private void BindFxPanel(MixerChannelStripViewModel strip)
     {
@@ -161,22 +176,13 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
                 settings = _kitPlayer.GetMasterDsp();
                 SelectedChannelFx.Load(settings);
                 break;
-            case MixerChannelKind.Group when Enum.TryParse<PadBus>(strip.Id, out var bus):
+            case MixerChannelKind.Group when TryGetMixGroup(strip, out var mixGroup):
                 SelectedChannelFx.Bind(s =>
                 {
                     ApplyDspSettings(strip, s);
                     strip.SetFxSlots(s);
                 });
-                settings = _kitPlayer.GetBusDsp(bus);
-                SelectedChannelFx.Load(settings);
-                break;
-            case MixerChannelKind.DrumVoice when int.TryParse(strip.Id["pad_".Length..], out var note):
-                SelectedChannelFx.Bind(s =>
-                {
-                    ApplyDspSettings(strip, s);
-                    strip.SetFxSlots(s);
-                });
-                settings = _kitPlayer.GetPadDsp(note);
+                settings = _kitPlayer.GetMixGroupDsp(mixGroup);
                 SelectedChannelFx.Load(settings);
                 break;
             default:
@@ -196,15 +202,8 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
             case MixerChannelKind.Master:
                 _engine.MasterMixer.Volume = (float)gain;
                 break;
-            case MixerChannelKind.Group when _busStripByBus.Values.FirstOrDefault(s => s.Id == strip.Id) is { } groupStrip
-                && Enum.TryParse<PadBus>(strip.Id, out var bus):
-                _kitPlayer.SetBusVolume(bus, (float)gain);
-                break;
-            case MixerChannelKind.DrumVoice when _padStripByNote.Values.FirstOrDefault(s => s.Id == strip.Id) is not null:
-                if (int.TryParse(strip.Id["pad_".Length..], out var note))
-                {
-                    _kitPlayer.SetPadVolume(note, (float)Math.Clamp(gain, 0, 1));
-                }
+            case MixerChannelKind.Group when TryGetMixGroup(strip, out var mixGroup):
+                _kitPlayer.SetMixGroupVolume(mixGroup, (float)gain);
                 break;
         }
     }
@@ -216,14 +215,8 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
             case MixerChannelKind.Master:
                 _engine.MasterMixer.Mute = muted;
                 break;
-            case MixerChannelKind.Group when Enum.TryParse<PadBus>(strip.Id, out var bus):
-                _kitPlayer.SetBusMute(bus, muted);
-                break;
-            case MixerChannelKind.DrumVoice:
-                if (int.TryParse(strip.Id["pad_".Length..], out var note))
-                {
-                    _kitPlayer.SetPadMute(note, muted);
-                }
+            case MixerChannelKind.Group when TryGetMixGroup(strip, out var mixGroup):
+                _kitPlayer.SetMixGroupMute(mixGroup, muted);
                 break;
         }
     }
@@ -233,8 +226,7 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
         ChannelDspSettings settings = strip.Kind switch
         {
             MixerChannelKind.Master => _kitPlayer.GetMasterDsp(),
-            MixerChannelKind.Group when Enum.TryParse<PadBus>(strip.Id, out var bus) => _kitPlayer.GetBusDsp(bus),
-            MixerChannelKind.DrumVoice when int.TryParse(strip.Id["pad_".Length..], out var note) => _kitPlayer.GetPadDsp(note),
+            MixerChannelKind.Group when TryGetMixGroup(strip, out var mixGroup) => _kitPlayer.GetMixGroupDsp(mixGroup),
             _ => new ChannelDspSettings(),
         };
 
@@ -268,49 +260,34 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
             case MixerChannelKind.Master:
                 _kitPlayer.SetMasterDsp(settings);
                 break;
-            case MixerChannelKind.Group when Enum.TryParse<PadBus>(strip.Id, out var bus):
-                _kitPlayer.SetBusDsp(bus, settings);
-                break;
-            case MixerChannelKind.DrumVoice when int.TryParse(strip.Id["pad_".Length..], out var note):
-                _kitPlayer.SetPadDsp(note, settings);
+            case MixerChannelKind.Group when TryGetMixGroup(strip, out var mixGroup):
+                _kitPlayer.SetMixGroupDsp(mixGroup, settings);
                 break;
         }
     }
 
     private void OnSoloChanged(MixerChannelStripViewModel strip, bool solo)
     {
-        if (strip.Kind != MixerChannelKind.DrumVoice)
+        if (!TryGetMixGroup(strip, out var mixGroup))
         {
             return;
         }
 
-        if (int.TryParse(strip.Id["pad_".Length..], out var note))
-        {
-            _kitPlayer.SetPadSolo(note, solo);
-        }
+        _kitPlayer.SetMixGroupSolo(mixGroup, solo);
     }
 
     private void BuildChannels()
     {
         Channels.Clear();
         _stripById.Clear();
-        _padStripByNote.Clear();
-        _busStripByBus.Clear();
+        _mixGroupStripByGroup.Clear();
 
-        foreach (var bus in new[] { (PadBus.Drum, "DRUM"), (PadBus.Perc, "PERC"), (PadBus.Cym, "CYM") })
+        foreach (var group in GmPercussionMap.MixGroups)
         {
-            var strip = CreateGroupStrip(bus.Item1, bus.Item2);
+            var strip = CreateGroupStrip(group);
             Channels.Add(strip);
             _stripById[strip.Id] = strip;
-            _busStripByBus[bus.Item1] = strip;
-        }
-
-        foreach (var pad in GmPercussionMap.Pads)
-        {
-            var strip = CreateDrumStrip(pad);
-            Channels.Add(strip);
-            _stripById[strip.Id] = strip;
-            _padStripByNote[pad.Note] = strip;
+            _mixGroupStripByGroup[group] = strip;
         }
     }
 
@@ -339,55 +316,30 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
             onFxSlotChanged: OnFxSlotChanged);
     }
 
-    private MixerChannelStripViewModel CreateGroupStrip(PadBus bus, string label)
+    private MixerChannelStripViewModel CreateGroupStrip(DrumMixGroup mixGroup)
     {
+        var label = GmPercussionMap.GetMixGroupLabel(mixGroup);
         var channel = new MixerChannel
         {
-            Id = bus.ToString(),
+            Id = $"group_{mixGroup}",
             Name = label,
             ShortName = label,
             Kind = MixerChannelKind.Group,
-            Group = bus switch
+            Group = mixGroup switch
             {
-                PadBus.Drum => DrumGroup.Drum,
-                PadBus.Perc => DrumGroup.Percussion,
-                PadBus.Cym => DrumGroup.Cymbal,
-                _ => DrumGroup.Other,
-            },
-            Gain = 1.0,
-            IsPanEnabled = false,
-            IsSoloEnabled = false,
-            RouteName = "Sub",
-        };
-
-        return new MixerChannelStripViewModel(
-            channel,
-            _i18n,
-            onSelect: SelectChannel,
-            onGainChanged: OnGainChanged,
-            onMuteChanged: OnMuteChanged,
-            onFxSlotChanged: OnFxSlotChanged);
-    }
-
-    private MixerChannelStripViewModel CreateDrumStrip(PercussionPad pad)
-    {
-        var channel = new MixerChannel
-        {
-            Id = $"pad_{pad.Note}",
-            Name = pad.Label,
-            ShortName = pad.Label,
-            Kind = MixerChannelKind.DrumVoice,
-            Group = pad.Bus switch
-            {
-                PadBus.Drum => DrumGroup.Drum,
-                PadBus.Perc => DrumGroup.Percussion,
-                PadBus.Cym => DrumGroup.Cymbal,
-                _ => DrumGroup.Other,
+                DrumMixGroup.Kick or DrumMixGroup.Snare or DrumMixGroup.Toms => DrumGroup.Drum,
+                DrumMixGroup.HiHat or DrumMixGroup.Cymbals => DrumGroup.Cymbal,
+                _ => DrumGroup.Percussion,
             },
             Gain = 1.0,
             IsPanEnabled = false,
             IsSoloEnabled = true,
-            RouteName = pad.Bus.ToString().ToUpperInvariant(),
+            RouteName = mixGroup switch
+            {
+                DrumMixGroup.Kick or DrumMixGroup.Snare => "DRUM",
+                DrumMixGroup.Cymbals => "CYM",
+                _ => "PERC",
+            },
         };
 
         return new MixerChannelStripViewModel(
@@ -402,27 +354,29 @@ public sealed partial class MixerViewModel : ViewModelBase, IDisposable
 
     private void PollMeters()
     {
-        if (!_engine.IsRunning)
-        {
-            return;
-        }
-
-        var rms = Math.Clamp(_engine.MasterLevelMeter.Rms, 0f, 1f);
-        var peak = Math.Clamp(_engine.MasterLevelMeter.Peak, 0f, 1f);
-        MasterChannel.UpdateMeter(MixerMeterState.FromMono(rms, peak));
+        // Read the kit's own post-master meter rather than the backend analyser.
+        // This keeps the surface alive across WASAPI device reconfiguration and
+        // makes it reflect exactly the audio path sent by KitSamplePlayer.
+        MasterChannel.UpdateMeter(_kitPlayer.PollMasterMeter());
 
         foreach (var strip in Channels)
         {
             var meter = strip.Kind switch
             {
-                MixerChannelKind.Group when Enum.TryParse<PadBus>(strip.Id, out var bus)
-                    => _kitPlayer.PollBusMeter(bus),
-                MixerChannelKind.DrumVoice when int.TryParse(strip.Id["pad_".Length..], out var note)
-                    => _kitPlayer.PollPadMeter(note),
+                MixerChannelKind.Group when TryGetMixGroup(strip, out var mixGroup)
+                    => _kitPlayer.PollMixGroupMeter(mixGroup),
                 _ => MixerMeterState.Disabled,
             };
             strip.UpdateMeter(meter);
         }
+    }
+
+    private static bool TryGetMixGroup(MixerChannelStripViewModel strip, out DrumMixGroup group)
+    {
+        group = default;
+        return strip.Kind == MixerChannelKind.Group
+            && strip.Id.StartsWith("group_", StringComparison.Ordinal)
+            && Enum.TryParse(strip.Id["group_".Length..], out group);
     }
 
     private IEnumerable<MixerChannelStripViewModel> AllStrips()

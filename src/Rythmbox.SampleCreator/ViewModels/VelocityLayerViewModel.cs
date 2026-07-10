@@ -28,16 +28,34 @@ public sealed partial class VelocityLayerViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RangeLabel))]
     [NotifyPropertyChangedFor(nameof(Summary))]
+    [NotifyPropertyChangedFor(nameof(VelocityRangeDisplay))]
     private decimal _velocityLow;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RangeLabel))]
     [NotifyPropertyChangedFor(nameof(Summary))]
+    [NotifyPropertyChangedFor(nameof(VelocityRangeDisplay))]
     private decimal _velocityHigh;
+
+    /// <summary>Highlight flag driven by <see cref="PadSampleViewModel.SelectedLayer"/>.</summary>
+    [ObservableProperty]
+    private bool _isSelected;
+
+    /// <summary>Card expand/collapse state, owned by the layer stack.</summary>
+    [ObservableProperty]
+    private bool _isExpanded = true;
 
     public string RangeLabel => $"{(int)VelocityLow}–{(int)VelocityHigh}";
 
     public string Summary => $"{RangeLabel} · {RoundRobins.Count} RR";
+
+    public string LayerName => $"Layer {Index + 1}";
+
+    public string VelocityRangeDisplay => $"Vel {(int)VelocityLow}–{(int)VelocityHigh}";
+
+    public string RoundRobinCountLabel => $"RR ×{RoundRobins.Count}";
+
+    public bool HasRoundRobins => RoundRobins.Count > 0;
 
     partial void OnVelocityLowChanged(decimal value)
     {
@@ -98,7 +116,14 @@ public sealed partial class VelocityLayerViewModel : ViewModelBase
             RoundRobins.Add(new RoundRobinSlotViewModel(this, i, Layer.RoundRobinSamples[i], path));
         }
 
+        foreach (var slot in RoundRobins)
+        {
+            slot.IsSelected = ReferenceEquals(slot, Pad.SelectedRoundRobin);
+        }
+
         OnPropertyChanged(nameof(Summary));
+        OnPropertyChanged(nameof(RoundRobinCountLabel));
+        OnPropertyChanged(nameof(HasRoundRobins));
     }
 
     public void AddRoundRobin(float[] samples, string? path)
@@ -118,6 +143,10 @@ public sealed partial class VelocityLayerViewModel : ViewModelBase
         }
 
         Layer.RoundRobinSamples[slot.Index] = samples;
+        if (slot.Index < Layer.RoundRobinMappedSamples.Count)
+        {
+            Layer.RoundRobinMappedSamples[slot.Index] = null;
+        }
         while (Layer.RoundRobinPaths.Count <= slot.Index)
         {
             Layer.RoundRobinPaths.Add(string.Empty);
@@ -137,6 +166,10 @@ public sealed partial class VelocityLayerViewModel : ViewModelBase
         }
 
         Layer.RoundRobinSamples.RemoveAt(slot.Index);
+        if (slot.Index < Layer.RoundRobinMappedSamples.Count)
+        {
+            Layer.RoundRobinMappedSamples.RemoveAt(slot.Index);
+        }
         if (slot.Index < Layer.RoundRobinPaths.Count)
         {
             Layer.RoundRobinPaths.RemoveAt(slot.Index);

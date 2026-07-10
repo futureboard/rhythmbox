@@ -7,6 +7,17 @@ public enum PadCategory
     Perc,
 }
 
+/// <summary>Musical mixer channels that combine related GM percussion notes.</summary>
+public enum DrumMixGroup
+{
+    Kick,
+    Snare,
+    HiHat,
+    Toms,
+    Cymbals,
+    Percussion,
+}
+
 /// <summary>A single General MIDI percussion pad: a fixed note number on the GM percussion channel.</summary>
 public sealed record PercussionPad(int Index, string Label, int Note, PadCategory Category, PadBus Bus);
 
@@ -20,6 +31,37 @@ public static class GmPercussionMap
 
     public const int FirstNote = 35;
     public const int LastNote = 81;
+
+    /// <summary>Display order used by the mixer; each group owns several GM notes.</summary>
+    public static readonly IReadOnlyList<DrumMixGroup> MixGroups =
+    [
+        DrumMixGroup.Kick,
+        DrumMixGroup.Snare,
+        DrumMixGroup.HiHat,
+        DrumMixGroup.Toms,
+        DrumMixGroup.Cymbals,
+        DrumMixGroup.Percussion,
+    ];
+
+    public static DrumMixGroup GetMixGroup(int note) => note switch
+    {
+        35 or 36 => DrumMixGroup.Kick,
+        37 or 38 or 39 or 40 => DrumMixGroup.Snare,
+        42 or 44 or 46 => DrumMixGroup.HiHat,
+        41 or 43 or 45 or 47 or 48 or 50 => DrumMixGroup.Toms,
+        49 or 51 or 52 or 53 or 55 or 57 or 59 => DrumMixGroup.Cymbals,
+        _ => DrumMixGroup.Percussion,
+    };
+
+    public static string GetMixGroupLabel(DrumMixGroup group) => group switch
+    {
+        DrumMixGroup.Kick => "KICK",
+        DrumMixGroup.Snare => "SNARE",
+        DrumMixGroup.HiHat => "HATS / OH",
+        DrumMixGroup.Toms => "TOMS",
+        DrumMixGroup.Cymbals => "CYMBALS",
+        _ => "PERC",
+    };
 
     public static readonly IReadOnlyList<PercussionPad> Pads =
     [

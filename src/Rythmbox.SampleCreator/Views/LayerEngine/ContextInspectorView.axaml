@@ -1,0 +1,130 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Rythmbox.SampleCreator.ViewModels"
+             xmlns:views="using:Rythmbox.SampleCreator.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="308" d:DesignHeight="700"
+             x:Class="Rythmbox.SampleCreator.Views.LayerEngine.ContextInspectorView"
+             x:DataType="vm:SampleCreatorViewModel">
+    <Border Classes="kitInspector">
+        <Grid>
+            <!-- No pad selected. -->
+            <StackPanel Spacing="8" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="16"
+                        IsVisible="{Binding SelectedPad, Converter={x:Static ObjectConverters.IsNull}}">
+                <Path Data="{StaticResource IconDrum}" Classes="icon" Width="26" Height="26"
+                      HorizontalAlignment="Center" Opacity="0.5" />
+                <TextBlock Text="Select a drum cell to edit its layers" Classes="dim" FontSize="12"
+                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="240" />
+            </StackPanel>
+
+            <StackPanel Spacing="10" IsVisible="{Binding SelectedPad, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <!-- Header derives its title from the current selection focus. -->
+                <StackPanel Spacing="2">
+                    <TextBlock Text="{Binding SelectedPad.InspectorTitle}" Classes="dim" FontSize="9" FontWeight="Bold" LetterSpacing="1" />
+                    <TextBlock Text="CONTEXT" Classes="panelHeader" />
+                </StackPanel>
+
+                <!-- ============ PAD INSPECTOR ============ -->
+                <StackPanel Spacing="10" IsVisible="{Binding SelectedPad.IsPadFocus}">
+                    <Border Classes="kitInspectorReadout" DataContext="{Binding SelectedPad}">
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="SELECTED PAD" Classes="dim" FontSize="9" />
+                            <TextBlock Text="{Binding Label}" FontSize="15" FontWeight="Bold" />
+                            <TextBlock Text="{Binding FileName}" Classes="dim" FontSize="10" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Border>
+                    <Button Command="{Binding BrowseImportWavCommand}"
+                            HorizontalAlignment="Stretch" Classes="accent kitImport"
+                            ToolTip.Tip="Import a WAV into the selected pad or layer">
+                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                            <Path Data="{StaticResource IconFolderOpen}" Classes="icon small" />
+                            <TextBlock Text="Import WAV" FontWeight="Bold" Foreground="{DynamicResource RythmboxOnAccentBrush}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding SelectedPad.PreviewCommand}" HorizontalAlignment="Stretch" Classes="transportPlay"
+                            ToolTip.Tip="Preview the selected pad (Space)">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <Path Data="{StaticResource IconPlay}" Width="12" Height="12" Stretch="Uniform" Fill="{Binding $parent[Button].Foreground}" />
+                            <TextBlock Text="Preview Pad" FontWeight="Bold" Foreground="{Binding $parent[Button].Foreground}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding SelectedPad.NormalizeCommand}" HorizontalAlignment="Stretch" Classes="secondary"
+                            ToolTip.Tip="Normalize the active sample">Normalize</Button>
+                    <Button Command="{Binding SelectedPad.AddLayerCommand}" HorizontalAlignment="Stretch" Classes="secondary"
+                            ToolTip.Tip="Add a velocity layer">Create Velocity Layer</Button>
+                    <Button Command="{Binding SelectedPad.AddRoundRobinCommand}" HorizontalAlignment="Stretch" Classes="secondary"
+                            ToolTip.Tip="Add a round robin sample">Add Round Robin</Button>
+                    <Button Command="{Binding SelectedPad.ClearCommand}" HorizontalAlignment="Stretch" Classes="danger" Margin="0,6,0,0"
+                            ToolTip.Tip="Clear the selected sample">Clear Sample</Button>
+                    <Border BorderBrush="{DynamicResource RythmboxPanelBorderBrush}" BorderThickness="0,1,0,0" Padding="0,10,0,0" Margin="0,2,0,0">
+                        <Button Command="{Binding ResetAllPitchCommand}"
+                                HorizontalAlignment="Stretch" Classes="secondary"
+                                ToolTip.Tip="Reset pitch on every pad to 0 st">Reset Pitch on Kit</Button>
+                    </Border>
+                </StackPanel>
+
+                <!-- ============ LAYER INSPECTOR ============ -->
+                <StackPanel Spacing="10" IsVisible="{Binding SelectedPad.IsLayerFocus}">
+                    <Border Classes="kitInspectorReadout" DataContext="{Binding SelectedPad.SelectedLayer}">
+                        <StackPanel Spacing="8">
+                            <StackPanel Spacing="3">
+                                <TextBlock Text="SELECTED LAYER" Classes="dim" FontSize="9" />
+                                <TextBlock Text="{Binding LayerName}" FontSize="15" FontWeight="Bold" />
+                                <TextBlock Text="{Binding RoundRobinCountLabel}" Classes="dim" FontSize="10" />
+                            </StackPanel>
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="VELOCITY RANGE" Classes="dim" FontSize="9" FontWeight="Bold" />
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <NumericUpDown Minimum="1" Maximum="127" Increment="1" Value="{Binding VelocityLow, Mode=TwoWay}" Width="88" FormatString="0" />
+                                    <TextBlock Text="–" VerticalAlignment="Center" Classes="dim" />
+                                    <NumericUpDown Minimum="1" Maximum="127" Increment="1" Value="{Binding VelocityHigh, Mode=TwoWay}" Width="88" FormatString="0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Button Command="{Binding SelectedPad.ImportToLayerCommand}" CommandParameter="{Binding SelectedPad.SelectedLayer}"
+                            HorizontalAlignment="Stretch" Classes="accent kitImport"
+                            ToolTip.Tip="Add a round robin sample to this layer">
+                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                            <Path Data="{StaticResource IconPlus}" Classes="icon small" />
+                            <TextBlock Text="Add Round Robin" FontWeight="Bold" Foreground="{DynamicResource RythmboxOnAccentBrush}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding SelectedPad.SelectedLayer.RemoveCommand}" HorizontalAlignment="Stretch" Classes="danger"
+                            ToolTip.Tip="Remove this velocity layer">Remove Layer</Button>
+                    <Button Command="{Binding SelectedPad.FocusPadCommand}" HorizontalAlignment="Stretch" Classes="secondary"
+                            ToolTip.Tip="Back to pad actions">Back to Pad</Button>
+                </StackPanel>
+
+                <!-- ============ SAMPLE INSPECTOR ============ -->
+                <StackPanel Spacing="10" IsVisible="{Binding SelectedPad.IsSampleFocus}">
+                    <Border Classes="kitInspectorReadout" DataContext="{Binding SelectedPad.SelectedRoundRobin}">
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="SELECTED SAMPLE" Classes="dim" FontSize="9" />
+                            <TextBlock Text="{Binding FileName}" FontSize="13" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding DurationLabel}" Classes="mono dim" FontSize="10" />
+                        </StackPanel>
+                    </Border>
+                    <Button Command="{Binding SelectedPad.SelectedRoundRobin.PreviewCommand}" HorizontalAlignment="Stretch" Classes="transportPlay"
+                            ToolTip.Tip="Preview this round robin sample">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <Path Data="{StaticResource IconPlay}" Width="12" Height="12" Stretch="Uniform" Fill="{Binding $parent[Button].Foreground}" />
+                            <TextBlock Text="Preview Sample" FontWeight="Bold" Foreground="{Binding $parent[Button].Foreground}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding SelectedPad.NormalizeCommand}" HorizontalAlignment="Stretch" Classes="secondary"
+                            ToolTip.Tip="Normalize this sample">Normalize</Button>
+                    <Button Command="{Binding SelectedPad.ApplyTrimCommand}" HorizontalAlignment="Stretch" Classes="secondary"
+                            ToolTip.Tip="Apply the current trim to this sample">Apply Trim</Button>
+                    <Button Command="{Binding SelectedPad.ApplyPitchCommand}" HorizontalAlignment="Stretch" Classes="secondary"
+                            ToolTip.Tip="Apply the current pitch to this sample">Apply Pitch</Button>
+                    <Button Command="{Binding SelectedPad.SelectedRoundRobin.RemoveCommand}" HorizontalAlignment="Stretch" Classes="danger" Margin="0,6,0,0"
+                            ToolTip.Tip="Remove this round robin">Remove Sample</Button>
+                    <Button Command="{Binding SelectedPad.FocusPadCommand}" HorizontalAlignment="Stretch" Classes="secondary"
+                            ToolTip.Tip="Back to pad actions">Back to Pad</Button>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

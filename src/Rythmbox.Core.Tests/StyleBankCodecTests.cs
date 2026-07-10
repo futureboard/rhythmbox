@@ -130,6 +130,34 @@ public class StyleBankCodecTests
             Directory.Delete(dir, recursive: true);
         }
     }
+
+    [Fact]
+    public void Service_scans_raw_mid_and_rhythm_files_in_factory_and_users_subfolders()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "rythmbox_style_scan_" + Guid.NewGuid().ToString("N"));
+        var pop = Path.Combine(root, "Factory", "Pop", "nested");
+        var users = Path.Combine(root, "Users", "my-pack");
+        Directory.CreateDirectory(pop);
+        Directory.CreateDirectory(users);
+
+        try
+        {
+            File.WriteAllBytes(Path.Combine(pop, "groove.mid"), [0x4D, 0x54, 0x68, 0x64]);
+            File.WriteAllBytes(Path.Combine(users, "custom.rhythm"), [0x4D, 0x54, 0x68, 0x64]);
+
+            var service = new StyleBankService();
+            service.Scan(root);
+
+            Assert.Equal(2, service.AllStyles.Count);
+            Assert.Contains(service.AllStyles, style => style.Name == "groove" && style.Category == "Pop");
+            Assert.Contains(service.AllStyles, style => style.Name == "custom" && style.Category == "User Styles");
+            Assert.All(service.AllStyles, style => Assert.True(style.Patterns["verse_a"].HasMidiFile));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
 }
 
 public class ArrangerSessionTests

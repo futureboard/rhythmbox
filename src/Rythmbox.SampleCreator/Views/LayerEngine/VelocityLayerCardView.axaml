@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Rythmbox.SampleCreator.ViewModels"
+             xmlns:le="using:Rythmbox.SampleCreator.Views.LayerEngine"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="520" d:DesignHeight="200"
+             x:Class="Rythmbox.SampleCreator.Views.LayerEngine.VelocityLayerCardView"
+             x:DataType="vm:VelocityLayerViewModel">
+    <Border Classes="leCard" Classes.selected="{Binding IsSelected}">
+        <StackPanel Spacing="0">
+            <!-- Header: chevron toggles expand, the label region selects the layer,
+                 action buttons appear on hover, overflow menu stays available for touch. -->
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6" Classes="leCardHeader">
+                <Button Grid.Column="0" Classes="leIconBtn"
+                        Command="{Binding Pad.ToggleLayerExpandedCommand}" CommandParameter="{Binding}"
+                        ToolTip.Tip="Expand or collapse this layer">
+                    <Panel Width="14" Height="14">
+                        <Path Data="{StaticResource IconChevronDown}" Classes="icon small" IsVisible="{Binding IsExpanded}" />
+                        <Path Data="{StaticResource IconChevronRight}" Classes="icon small" IsVisible="{Binding !IsExpanded}" />
+                    </Panel>
+                </Button>
+
+                <Button Grid.Column="1" Classes="leCardSelect"
+                        Command="{Binding Pad.FocusLayerCommand}" CommandParameter="{Binding}"
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+                    <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="10" VerticalAlignment="Center">
+                        <TextBlock Grid.Column="0" Text="{Binding LayerName}" FontWeight="Medium" FontSize="12" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding VelocityRangeDisplay}" Classes="mono dim" FontSize="11" VerticalAlignment="Center" />
+                        <Border Grid.Column="3" Classes="leRrBadge" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding RoundRobinCountLabel}" FontSize="10" FontWeight="Medium" />
+                        </Border>
+                    </Grid>
+                </Button>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="2" Classes="leCardActions">
+                        <Button Classes="leIconBtn" Command="{Binding Pad.ImportToLayerCommand}" CommandParameter="{Binding}"
+                                ToolTip.Tip="Add round robin to this layer">
+                            <Path Data="{StaticResource IconPlus}" Classes="icon small" />
+                        </Button>
+                        <Button Classes="leIconBtn danger" Command="{Binding RemoveCommand}"
+                                ToolTip.Tip="Remove this velocity layer">
+                            <Path Data="{StaticResource IconTrash2}" Classes="icon small" />
+                        </Button>
+                    </StackPanel>
+                    <Button Classes="leIconBtn" ToolTip.Tip="Layer actions">
+                        <Path Data="{StaticResource IconMoreHorizontal}" Classes="icon small" />
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuItem Header="Add round robin"
+                                          Command="{Binding Pad.ImportToLayerCommand}" CommandParameter="{Binding}" />
+                                <MenuItem Header="Remove layer" Command="{Binding RemoveCommand}" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Collapsible body: the round robins that belong to THIS layer, or a drop zone. -->
+            <StackPanel Spacing="0" IsVisible="{Binding IsExpanded}" Margin="0,4,0,0">
+                <ItemsControl ItemsSource="{Binding RoundRobins}" IsVisible="{Binding HasRoundRobins}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:RoundRobinSlotViewModel">
+                            <Grid Classes="leRow" Classes.selected="{Binding IsSelected}"
+                                  ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8">
+                                <Button Grid.Column="0" Classes="leIconBtn play" Command="{Binding PreviewCommand}"
+                                        ToolTip.Tip="Preview this sample">
+                                    <Path Data="{StaticResource IconPlay}" Width="10" Height="10" Stretch="Uniform"
+                                          Fill="{DynamicResource RythmboxTextBrush}" />
+                                </Button>
+                                <Button Grid.Column="1" Classes="leRowSelect"
+                                        Command="{Binding Layer.Pad.FocusSampleCommand}" CommandParameter="{Binding}"
+                                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Left">
+                                    <TextBlock Text="{Binding FileName}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                                </Button>
+                                <TextBlock Grid.Column="2" Text="{Binding DurationLabel}" Classes="mono dim"
+                                           FontSize="10" VerticalAlignment="Center" MinWidth="52" TextAlignment="Right" />
+                                <Button Grid.Column="3" Classes="leIconBtn danger leRowRemove" Command="{Binding RemoveCommand}"
+                                        ToolTip.Tip="Remove this round robin">
+                                    <Path Data="{StaticResource IconX}" Classes="icon small" />
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <le:SampleDropZone DataContext="{Binding}" IsVisible="{Binding !HasRoundRobins}" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>
