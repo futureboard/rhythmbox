@@ -56,14 +56,49 @@ require_commands() {
   fi
 }
 
+# Kill any process still rooted inside the target rootfs. pacman-key --init leaves
+# gpg-agent/dirmngr running, and those keep the bind-mounted /dev busy, which is the
+# usual cause of "umount: target is busy".
+kill_chroot_processes() {
+  [[ -d "${MOUNT_DIR}" ]] || return 0
+  local mnt pid root
+  mnt="$(readlink -f "${MOUNT_DIR}" 2>/dev/null)" || return 0
+  [[ -n "${mnt}" ]] || return 0
+  for pid in /proc/[0-9]*; do
+    root="$(readlink "${pid}/root" 2>/dev/null)" || continue
+    if [[ "${root}" == "${mnt}" || "${root}" == "${mnt}/"* ]]; then
+      kill -TERM "${pid##*/}" 2>/dev/null || true
+    fi
+  done
+  sleep 1
+  for pid in /proc/[0-9]*; do
+    root="$(readlink "${pid}/root" 2>/dev/null)" || continue
+    if [[ "${root}" == "${mnt}" || "${root}" == "${mnt}/"* ]]; then
+      kill -KILL "${pid##*/}" 2>/dev/null || true
+    fi
+  done
+}
+
+# Unmount a target, retrying then falling back to a lazy detach so cleanup never wedges.
+unmount_target() {
+  local target="$1"
+  mountpoint -q "${target}" || return 0
+  umount -R "${target}" 2>/dev/null && return 0
+  sleep 1
+  umount -R "${target}" 2>/dev/null && return 0
+  umount -R -l "${target}" 2>/dev/null || true
+}
+
 cleanup() {
   set +e
-  if mountpoint -q "${MOUNT_DIR}/proc"; then umount -R "${MOUNT_DIR}/proc"; fi
-  if mountpoint -q "${MOUNT_DIR}/sys"; then umount -R "${MOUNT_DIR}/sys"; fi
-  if mountpoint -q "${MOUNT_DIR}/dev"; then umount -R "${MOUNT_DIR}/dev"; fi
-  if mountpoint -q "${MOUNT_DIR}/run"; then umount -R "${MOUNT_DIR}/run"; fi
-  if mountpoint -q "${MOUNT_DIR}/boot"; then umount -R "${MOUNT_DIR}/boot"; fi
-  if mountpoint -q "${MOUNT_DIR}"; then umount -R "${MOUNT_DIR}"; fi
+  kill_chroot_processes
+  # Deepest mounts first; /dev and /run are bind mounts of host dirs.
+  unmount_target "${MOUNT_DIR}/dev"
+  unmount_target "${MOUNT_DIR}/proc"
+  unmount_target "${MOUNT_DIR}/sys"
+  unmount_target "${MOUNT_DIR}/run"
+  unmount_target "${MOUNT_DIR}/boot"
+  unmount_target "${MOUNT_DIR}"
   if [[ -n "${LOOP_DEVICE}" ]]; then losetup -d "${LOOP_DEVICE}" >/dev/null 2>&1 || true; fi
 }
 trap cleanup EXIT
@@ -242,11 +277,21 @@ write_file "${MOUNT_DIR}/etc/sudoers.d/99-${KIOSK_USER}" "${KIOSK_USER} ALL=(ALL
 chmod 0440 "${MOUNT_DIR}/etc/sudoers.d/99-${KIOSK_USER}"
 
 mkdir -p "${MOUNT_DIR}/opt/rhythmbox/source"
+# Copy only what dotnet publish needs. Exclude build output, installers and disk
+# images (dev.vmdk, out/*.img, the image we are currently writing) so the source
+# copy can never pull a multi-GB artifact into the image and fill the disk.
 rsync -a --delete \
-  --exclude .git \
-  --exclude build \
+  --exclude '.git' \
+  --exclude 'build' \
+  --exclude 'out' \
+  --exclude 'installer' \
   --exclude 'src/**/bin' \
   --exclude 'src/**/obj' \
+  --exclude '*.img' \
+  --exclude '*.iso' \
+  --exclude '*.vmdk' \
+  --exclude '*.vhdx' \
+  --exclude '*.qcow2' \
   "${REPO_ROOT}/" "${MOUNT_DIR}/opt/rhythmbox/source/"
 
 chroot_run "cd /opt/rhythmbox/source && dotnet restore Rythmbox.slnx"
