@@ -64,8 +64,9 @@ Firmware-style silent boot — the display shows only the splash, then the app. 
 The kiosk launcher honors these environment variables (see `start-kiosk.sh`):
 
 - `RYTHMBOX_DRM=1` - use the DRM/KMS framebuffer backend (set automatically).
-- `RYTHMBOX_DRM_CARD` - DRM device node, default `/dev/dri/card0`.
+- `RYTHMBOX_DRM_CARD` - DRM device node; unset by default so Avalonia auto-detects the primary connected output (override with e.g. `/dev/dri/card1`).
 - `RYTHMBOX_DRM_SCALE` - output scaling factor, default `1.0`.
+- `RYTHMBOX_DRM_ROTATION` - screen rotation in degrees: `0`, `90`, `180`, `270` (default `0`), for portrait/rotated panels.
 
 ## No X11 / Wayland
 

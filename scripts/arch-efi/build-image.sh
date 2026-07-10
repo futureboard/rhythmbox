@@ -304,7 +304,8 @@ optimize_image
 # the DRM device during boot, so it must release it before the app becomes DRM master.
 write_file "${MOUNT_DIR}/opt/rhythmbox/start-kiosk.sh" "#!/bin/sh
 export RYTHMBOX_DRM=1
-export RYTHMBOX_DRM_CARD=\${RYTHMBOX_DRM_CARD:-/dev/dri/card0}
+# Leave RYTHMBOX_DRM_CARD unset so Avalonia auto-detects the primary connected
+# output; set it (e.g. /dev/dri/card1) only if a device needs a specific node.
 export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 sudo -n plymouth quit --retain-splash 2>/dev/null || plymouth quit 2>/dev/null || true
 exec /opt/rhythmbox/app/Rythmbox.App --drm
