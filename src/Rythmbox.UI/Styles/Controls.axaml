@@ -301,6 +301,7 @@
         <Setter Property="Foreground" Value="{DynamicResource RbSliderFillBrush}" />
         <Setter Property="Background" Value="{DynamicResource RbSliderTrackBrush}" />
         <Setter Property="MinHeight" Value="20" />
+        <Setter Property="rb:SliderBehaviors.WheelEnabled" Value="True" />
     </Style>
 
     <Style Selector="Slider /template/ Thumb#PART_Thumb">
