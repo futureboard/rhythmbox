@@ -135,7 +135,8 @@ public sealed class PatternArrangerEngine
             return;
         }
 
-        // While playing: queue for next bar boundary (TODO: bar-quantized switch).
+        // One-shots fire immediately; looping patterns are queued and swapped in
+        // at the next bar boundary (see OnBarAdvanced -> ApplyQueuedPatternIfReady).
         if (pattern.OneShot || pattern.PlaybackMode == PatternPlaybackMode.OneShot)
         {
             LoadAndPlayPattern(pattern);
@@ -160,9 +161,10 @@ public sealed class PatternArrangerEngine
             return;
         }
 
-        // TODO: gate on bar boundary using CurrentBar from beat clock.
-        LoadAndPlayPattern(pattern);
+        // Clear the queue before loading so LoadAndPlayPattern's notification
+        // reflects the now-playing pattern and drops the "queued" highlight.
         Session.QueuedPatternId = null;
+        LoadAndPlayPattern(pattern);
     }
 
     public void SelectPattern(string patternKey)
@@ -217,7 +219,13 @@ public sealed class PatternArrangerEngine
     public void TriggerMomentarySwitch() => TimeSig.TriggerMomentary(MomentarySignature);
 
     /// <summary>Called by the transport clock on each bar boundary so momentary overrides expire.</summary>
-    public void OnBarAdvanced() => TimeSig.AdvanceBar();
+    public void OnBarAdvanced()
+    {
+        // At each bar boundary, swap in any pattern queued while playing so the
+        // switch is quantized to the bar rather than cutting in mid-pattern.
+        ApplyQueuedPatternIfReady();
+        TimeSig.AdvanceBar();
+    }
 
     private void OnTimeSignatureChanged()
     {

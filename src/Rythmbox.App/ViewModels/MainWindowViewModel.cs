@@ -95,6 +95,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IDisposable
             _audioBackend,
             _styleBank,
             _paths,
+            fileDialogService,
+            Status,
             _localization,
             Tempo);
 

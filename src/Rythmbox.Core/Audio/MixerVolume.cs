@@ -32,6 +32,13 @@ public static class MixerVolume
     public static double DbToNorm(double db) =>
         Math.Clamp((db - MinDb) / (MaxDb - MinDb), 0, 1);
 
+    /// <summary>
+    /// Nudge a normalized fader value by a signed decibel delta (used by mouse-wheel
+    /// and keyboard fader adjustment), clamped to the fader's dB range.
+    /// </summary>
+    public static double NudgeDb(double norm, double deltaDb) =>
+        DbToNorm(NormToDb(norm) + deltaDb);
+
     public static string FormatDb(double norm)
     {
         var db = NormToDb(norm);

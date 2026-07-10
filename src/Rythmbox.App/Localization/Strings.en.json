@@ -142,6 +142,7 @@
   "machine.notLoaded": "No kit loaded",
   "machine.noDevice": "No device selected",
   "machine.exportMidi": "Export MIDI",
+  "machine.exportMidiTip": "Export the selected pattern as a Standard MIDI File",
 
   "style.status.invalid": "Invalid",
   "style.status.incomplete": "Incomplete",
@@ -163,6 +164,8 @@
   "status.padModeNumbers": "Pad mode: Number row 1-8+",
   "status.tapTempoKeepTapping": "Tap tempo… keep tapping",
   "status.tapTempoSet": "Tap tempo: {0:0.0} BPM",
+  "status.midiExported": "Exported {0}",
+  "status.midiExportFailed": "Export failed: {0}",
 
   "tempo.tapPreset": "Tap",
 

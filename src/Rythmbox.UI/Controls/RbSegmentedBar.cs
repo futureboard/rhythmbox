@@ -15,7 +15,7 @@ public class RbSegmentedBar : ItemsControl
 
     public RbSegmentedBar()
     {
-        ItemsPanel = new FuncTemplate<Panel>(() => new StackPanel
+        ItemsPanel = new FuncTemplate<Panel?>(() => new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 0,

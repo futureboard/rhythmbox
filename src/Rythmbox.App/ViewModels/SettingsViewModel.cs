@@ -191,7 +191,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
         if (_midiInput.ConnectPrevious(_padRouter))
         {
             RefreshLocalizedLabels();
-            _status.Show(_i18n.Format("status.portConnected", _midiInput.ConnectedDevice?.Name));
+            _status.Show(_i18n.Format("status.portConnected", _midiInput.ConnectedDevice?.Name ?? string.Empty));
         }
         else
         {
@@ -205,7 +205,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
         if (_midiInput.ConnectNext(_padRouter))
         {
             RefreshLocalizedLabels();
-            _status.Show(_i18n.Format("status.portConnected", _midiInput.ConnectedDevice?.Name));
+            _status.Show(_i18n.Format("status.portConnected", _midiInput.ConnectedDevice?.Name ?? string.Empty));
         }
         else
         {

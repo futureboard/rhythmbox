@@ -301,6 +301,7 @@
         <Setter Property="Foreground" Value="{DynamicResource RbSliderFillBrush}" />
         <Setter Property="Background" Value="{DynamicResource RbSliderTrackBrush}" />
         <Setter Property="MinHeight" Value="20" />
+        <Setter Property="rb:SliderBehaviors.WheelEnabled" Value="True" />
     </Style>
 
     <Style Selector="Slider /template/ Thumb#PART_Thumb">
@@ -378,6 +379,37 @@
 
     <Style Selector="MenuItem:pointerover /template/ ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource RbControlHoverBrush}" />
+    </Style>
+
+    <Style Selector="MenuItem:disabled">
+        <Setter Property="Opacity" Value="0.42" />
+    </Style>
+
+    <!-- Menu separators / dividers: subtle 1px rule matching the panel border -->
+    <Style Selector="MenuFlyoutPresenter Separator, ContextMenu Separator">
+        <Setter Property="Background" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Margin" Value="6,4" />
+    </Style>
+
+    <Style Selector="Separator">
+        <Setter Property="Background" Value="{DynamicResource RythmboxPanelBorderBrush}" />
+        <Setter Property="Height" Value="1" />
+    </Style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TOOLTIP — compact dark surface matching the workstation chrome
+         ═══════════════════════════════════════════════════════════════ -->
+    <Style Selector="ToolTip">
+        <Setter Property="FontFamily" Value="{StaticResource RythmboxUIFont}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{DynamicResource RythmboxTextBrush}" />
+        <Setter Property="Background" Value="{DynamicResource RythmboxElevatedBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource RbControlBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource RbRadiusControl}" />
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="MaxWidth" Value="320" />
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════
