@@ -40,4 +40,19 @@ public sealed class MixerVolumeTests
     {
         Assert.Equal("-∞", MixerVolume.FormatDb(0));
     }
+
+    [Fact]
+    public void NudgeDb_MovesByRequestedDecibels()
+    {
+        var start = MixerVolume.DbToNorm(-12.0);
+        var nudged = MixerVolume.NudgeDb(start, 3.0);
+        Assert.InRange(MixerVolume.NormToDb(nudged), -9.0 - 0.001, -9.0 + 0.001);
+    }
+
+    [Fact]
+    public void NudgeDb_ClampsAtRangeEnds()
+    {
+        Assert.Equal(1.0, MixerVolume.NudgeDb(1.0, 12.0));
+        Assert.Equal(0.0, MixerVolume.NudgeDb(0.0, -12.0));
+    }
 }

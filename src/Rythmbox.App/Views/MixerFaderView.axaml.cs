@@ -13,6 +13,12 @@ public sealed class MixerFaderView : Control
     public const double TrackWidth = 3;
     public const double HitWidth = 28;
 
+    // Fader adjustment steps, in decibels, for wheel and keyboard input.
+    private const double WheelDbStep = 1.0;
+    private const double KeyDbStep = 1.0;
+    private const double PageDbStep = 6.0;
+    private const double FineFactor = 0.25;
+
     private bool _isDragging;
     private double _dragStartNorm;
     private Point _dragStartPoint;
@@ -31,7 +37,7 @@ public sealed class MixerFaderView : Control
 
     static MixerFaderView()
     {
-        AffectsRender<MixerFaderView>(ValueProperty, IsFaderEnabledProperty);
+        AffectsRender<MixerFaderView>(ValueProperty, IsFaderEnabledProperty, IsFocusedProperty);
     }
 
     public double Value
@@ -51,12 +57,14 @@ public sealed class MixerFaderView : Control
         MinWidth = HitWidth;
         MinHeight = 130;
         Width = HitWidth;
+        Focusable = true;
         Cursor = new Cursor(StandardCursorType.SizeNorthSouth);
 
         PointerPressed += OnPointerPressed;
         PointerMoved += OnPointerMoved;
         PointerReleased += OnPointerReleased;
         PointerCaptureLost += OnPointerCaptureLost;
+        PointerWheelChanged += OnPointerWheelChanged;
 
         Loaded += (_, _) => ResolveThemeBrushes();
     }
@@ -114,6 +122,15 @@ public sealed class MixerFaderView : Control
                 new Rect(centerX - ThumbRadius + 3, thumbY - ThumbRadius + 3, ThumbRadius * 2 - 6, ThumbRadius * 2 - 6));
             context.DrawEllipse(Brushes.White, null, new Rect(centerX - 2.5, thumbY - 2.5, 5, 5));
         }
+
+        if (IsFocused && enabled)
+        {
+            using (context.PushOpacity(0.7))
+            {
+                context.DrawRectangle(null, new Pen(_accentBrush, 1),
+                    new Rect(0.5, 0.5, width - 1, height - 1), 3, 3);
+            }
+        }
     }
 
     private void ResolveThemeBrushes()
@@ -135,6 +152,7 @@ public sealed class MixerFaderView : Control
         }
 
         e.Handled = true;
+        Focus();
         var point = e.GetPosition(this);
 
         if (e.ClickCount >= 2)
@@ -179,6 +197,48 @@ public sealed class MixerFaderView : Control
     private void OnPointerReleased(object? sender, PointerReleasedEventArgs e) => _isDragging = false;
 
     private void OnPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e) => _isDragging = false;
+
+    private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        if (!IsFaderEnabled || e.Delta.Y == 0)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        var step = WheelDbStep * (e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? FineFactor : 1.0);
+        Value = MixerVolume.NudgeDb(Value, Math.Sign(e.Delta.Y) * step);
+    }
+
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (!IsFaderEnabled)
+        {
+            return;
+        }
+
+        var fine = e.KeyModifiers.HasFlag(KeyModifiers.Shift) ? FineFactor : 1.0;
+        switch (e.Key)
+        {
+            case Key.Up:
+                Value = MixerVolume.NudgeDb(Value, KeyDbStep * fine);
+                break;
+            case Key.Down:
+                Value = MixerVolume.NudgeDb(Value, -KeyDbStep * fine);
+                break;
+            case Key.PageUp:
+                Value = MixerVolume.NudgeDb(Value, PageDbStep);
+                break;
+            case Key.PageDown:
+                Value = MixerVolume.NudgeDb(Value, -PageDbStep);
+                break;
+            default:
+                return;
+        }
+
+        e.Handled = true;
+    }
 
     private bool IsNearThumb(Point point)
     {
