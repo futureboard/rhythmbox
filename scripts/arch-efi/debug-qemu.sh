@@ -24,11 +24,15 @@ DISPLAY_HEIGHT="${DISPLAY_HEIGHT:-900}"
 ALLOW_WINDOWS_QEMU="${ALLOW_WINDOWS_QEMU:-0}"
 AUTO_INSTALL="${AUTO_INSTALL:-0}"
 CHECK_ONLY="${CHECK_ONLY:-0}"
+MAXIMIZED="${MAXIMIZED:-0}"
 
 for arg in "$@"; do
   case "${arg}" in
     --check)
       CHECK_ONLY=1
+      ;;
+    --maximized|--maximize|--fullscreen)
+      MAXIMIZED=1
       ;;
   esac
 done
@@ -234,6 +238,23 @@ else
   echo "Warning: UEFI vars firmware not found; booting without persistent NVRAM vars." >&2
 fi
 
+DISPLAY_MODE="windowed"
+if [[ "${MAXIMIZED}" == "1" ]]; then
+  DISPLAY_MODE="maximized (fullscreen)"
+  case "${QEMU_DISPLAY}" in
+    gtk*)
+      # zoom-to-fit scales the guest framebuffer to fill the maximized window.
+      QEMU_DISPLAY="${QEMU_DISPLAY},full-screen=on,zoom-to-fit=on"
+      ;;
+    sdl*)
+      QEMU_DISPLAY="${QEMU_DISPLAY},full-screen=on"
+      ;;
+    *)
+      QEMU_DISPLAY="${QEMU_DISPLAY},full-screen=on"
+      ;;
+  esac
+fi
+
 SERIAL_LOG="${QEMU_WORK_DIR}/serial.log"
 DEBUGCON_LOG="${QEMU_WORK_DIR}/debugcon.log"
 QEMU_LOG="${QEMU_WORK_DIR}/qemu.log"
@@ -260,7 +281,7 @@ QEMU debug boot
   Image:      ${IMAGE_PATH}
   Memory:     ${MEMORY} MiB
   CPUs:       ${CPUS}
-  Display:    ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}
+  Display:    ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT} (${DISPLAY_MODE})
   SSH:        localhost:${SSH_PORT} -> guest:22
   Serial log: ${SERIAL_LOG}
   Debugcon:   ${DEBUGCON_LOG}

@@ -1,30 +1,34 @@
 Window.SetBackgroundTopColor(0.0, 0.0, 0.0);
 Window.SetBackgroundBottomColor(0.0, 0.0, 0.0);
 
-raw_logo_image = Image("splash.png");
+logo.image = Image("splash.png");
+logo.width = 0;
 
-fun make_logo() {
-    target_w = Window.GetWidth() * 0.38;
-    scale = target_w / raw_logo_image.GetWidth();
-    target_h = raw_logo_image.GetHeight() * scale;
+# Center the wordmark. This runs both once at load and on every refresh, but only
+# rebuilds the sprite when the screen width changes (e.g. 0 -> real width once the
+# KMS display initializes). Computing the position at load time alone would use a
+# not-yet-ready display (width 0) and leave the logo stuck in the top-left corner.
+fun place_logo() {
+    screen_width = Window.GetWidth();
+    if (screen_width == logo.width)
+        return;
+    logo.width = screen_width;
+    if (screen_width <= 0)
+        return;
 
-    logo_image = raw_logo_image.Scale(target_w, target_h);
-    logo_sprite = Sprite(logo_image);
+    screen_height = Window.GetHeight();
 
-    logo_sprite.SetX((Window.GetWidth() - logo_image.GetWidth()) / 2);
-    logo_sprite.SetY((Window.GetHeight() - logo_image.GetHeight()) / 2);
+    # Scale the wordmark to 45% of the screen width, preserving aspect ratio.
+    target_width = screen_width * 0.25;
+    scale = target_width / logo.image.GetWidth();
+    target_height = logo.image.GetHeight() * scale;
+
+    scaled = logo.image.Scale(target_width, target_height);
+    logo.sprite = Sprite(scaled);
+    logo.sprite.SetX((screen_width - target_width) / 2);
+    logo.sprite.SetY((screen_height - target_height) / 2);
+    logo.sprite.SetZ(1);
 }
 
-make_logo();
-
-fun refresh_callback() {
-}
-
-fun message_callback(text) {
-}
-
-fun display_normal_callback() {
-}
-
-fun display_password_callback(prompt, bullets) {
-}
+place_logo();
+Plymouth.SetRefreshFunction(place_logo);

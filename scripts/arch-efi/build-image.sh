@@ -141,7 +141,18 @@ DeviceTimeout=8
 }
 
 configure_plymouth_initramfs() {
-  chroot_run "grep -q plymouth /etc/mkinitcpio.conf || sed -i 's/^HOOKS=(base udev /HOOKS=(base udev plymouth /' /etc/mkinitcpio.conf"
+  # The plymouth hook must run AFTER kms so the KMS driver has initialized the
+  # display before Plymouth tries to draw on it; placed before kms it starts with no
+  # graphics device and the splash never appears. Insert it right after the kms token,
+  # falling back to right after 'base udev' only if this conf has no kms hook.
+  chroot_run "grep -q plymouth /etc/mkinitcpio.conf || sed -i -E 's/^(HOOKS=\\([^)]*\\bkms\\b)/\\1 plymouth/' /etc/mkinitcpio.conf"
+  chroot_run "grep -q plymouth /etc/mkinitcpio.conf || sed -i -E 's/^(HOOKS=\\(base udev)/\\1 plymouth/' /etc/mkinitcpio.conf"
+  # Force the KMS driver into the initramfs. The image is built in a chroot on the
+  # host, so the 'autodetect' hook would only bundle the build host's GPU driver and
+  # omit the target's. Without an early DRM device Plymouth has nothing to draw on and
+  # the splash never appears. virtio_gpu covers the QEMU virtio-vga used by
+  # debug-qemu.sh; add real-hardware drivers (i915/amdgpu/radeon) here for bare metal.
+  chroot_run "sed -i -E 's/^MODULES=\\(.*\\)/MODULES=(virtio_gpu)/' /etc/mkinitcpio.conf"
   chroot_run "plymouth-set-default-theme -R rythmbox"
 }
 
