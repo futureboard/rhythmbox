@@ -262,10 +262,17 @@ chmod 0755 "${MOUNT_DIR}/opt/rhythmbox/start-kiosk.sh"
 chroot_run "chown '${KIOSK_USER}:${KIOSK_USER}' '/opt/rhythmbox/start-kiosk.sh'"
 
 mkdir -p "${MOUNT_DIR}/etc/systemd/system/getty@tty1.service.d"
+# --autologin logs the kiosk user in with no prompt; --noclear keeps the retained
+# Plymouth splash on tty1; --noissue/--nohostname suppress the banner text.
 write_file "${MOUNT_DIR}/etc/systemd/system/getty@tty1.service.d/autologin.conf" "[Service]
 ExecStart=
-ExecStart=-/usr/bin/agetty --autologin ${KIOSK_USER} --noclear %I \$TERM
+ExecStart=-/usr/bin/agetty --autologin ${KIOSK_USER} --noclear --noissue --nohostname %I \$TERM
+TTYVTDisallocate=no
 "
+
+# Blank the login/MOTD text so nothing appears on the console before the app.
+write_file "${MOUNT_DIR}/etc/issue" ""
+write_file "${MOUNT_DIR}/etc/motd" ""
 
 cat > "${MOUNT_DIR}/home/${KIOSK_USER}/.bash_profile" <<'PROFILE'
 if [[ -z "${RYTHMBOX_KIOSK}" ]] && [[ "$(tty)" == /dev/tty1 ]]; then
@@ -276,20 +283,27 @@ PROFILE
 chroot_run "chown '${KIOSK_USER}:${KIOSK_USER}' '/home/${KIOSK_USER}/.bash_profile'"
 
 if [[ "${DEBUG_BOOT}" == "1" ]]; then
+  # Debug: show the menu and full kernel/serial logging.
   GRUB_TIMEOUT_VALUE=3
+  GRUB_TIMEOUT_STYLE_VALUE="menu"
   KERNEL_CMDLINE="console=tty0 console=ttyS0,115200n8 earlyprintk=serial,ttyS0,115200 loglevel=7 systemd.log_level=debug systemd.log_target=console"
   GRUB_TERMINAL_INPUT_VALUE="console serial"
   GRUB_TERMINAL_OUTPUT_VALUE="console serial"
   USE_PLYMOUTH=0
 elif [[ "${FASTBOOT}" == "1" ]]; then
+  # Firmware-style: no GRUB menu, no kernel/systemd text on the visible display.
+  # Kernel + service logs go to tty3 (Alt+F3 for diagnostics) so tty1 stays clean
+  # for the Plymouth splash, which is held until the app takes over the display.
   GRUB_TIMEOUT_VALUE=0
-  KERNEL_CMDLINE="quiet splash loglevel=3 rd.udev.log_level=3 rd.systemd.show_status=false systemd.show_status=false vt.global_cursor_default=0 consoleblank=0 nowatchdog"
+  GRUB_TIMEOUT_STYLE_VALUE="hidden"
+  KERNEL_CMDLINE="console=tty3 quiet splash loglevel=0 rd.udev.log_level=0 udev.log_level=0 rd.systemd.show_status=false systemd.show_status=false vt.global_cursor_default=0 consoleblank=0 nowatchdog plymouth.ignore-serial-consoles fbcon=nodefer"
   GRUB_TERMINAL_INPUT_VALUE="console"
   GRUB_TERMINAL_OUTPUT_VALUE="console"
   USE_PLYMOUTH=1
 else
-  GRUB_TIMEOUT_VALUE=3
-  KERNEL_CMDLINE="quiet splash loglevel=3 rd.systemd.show_status=false systemd.show_status=false consoleblank=0"
+  GRUB_TIMEOUT_VALUE=0
+  GRUB_TIMEOUT_STYLE_VALUE="hidden"
+  KERNEL_CMDLINE="console=tty3 quiet splash loglevel=0 rd.systemd.show_status=false systemd.show_status=false vt.global_cursor_default=0 consoleblank=0"
   GRUB_TERMINAL_INPUT_VALUE="console"
   GRUB_TERMINAL_OUTPUT_VALUE="console"
   USE_PLYMOUTH=1
@@ -297,6 +311,7 @@ fi
 
 write_file "${MOUNT_DIR}/etc/default/grub" "GRUB_DEFAULT=0
 GRUB_TIMEOUT=${GRUB_TIMEOUT_VALUE}
+GRUB_TIMEOUT_STYLE=${GRUB_TIMEOUT_STYLE_VALUE}
 GRUB_RECORDFAIL_TIMEOUT=0
 GRUB_DISTRIBUTOR=\"Rythmbox\"
 GRUB_CMDLINE_LINUX_DEFAULT=\"${KERNEL_CMDLINE}\"
@@ -304,6 +319,7 @@ GRUB_CMDLINE_LINUX=\"\"
 GRUB_TERMINAL_INPUT=\"${GRUB_TERMINAL_INPUT_VALUE}\"
 GRUB_TERMINAL_OUTPUT=\"${GRUB_TERMINAL_OUTPUT_VALUE}\"
 GRUB_SERIAL_COMMAND=\"serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1\"
+GRUB_DISABLE_OS_PROBER=true
 "
 
 mkdir -p "${MOUNT_DIR}/etc/systemd/system.conf.d" "${MOUNT_DIR}/etc/systemd/journald.conf.d"
@@ -325,6 +341,11 @@ if [[ "${USE_PLYMOUTH}" == "1" ]]; then
   echo "Installing Plymouth splash theme"
   install_plymouth_theme
   configure_plymouth_initramfs
+  # Keep the splash on screen through the whole boot: the default quit services
+  # would tear it down at multi-user, briefly exposing the console. start-kiosk.sh
+  # instead quits Plymouth with --retain-splash right before the app draws, so the
+  # splash image stays frozen on the display until the first app frame replaces it.
+  chroot_run "systemctl mask plymouth-quit.service plymouth-quit-wait.service"
 else
   chroot_run "mkinitcpio -P"
 fi
