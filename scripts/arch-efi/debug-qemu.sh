@@ -289,7 +289,7 @@ QEMU_ARGS=(
   -drive "file=${IMAGE_PATH},if=virtio,format=raw,cache=writeback"
   -netdev "user,id=net0,hostfwd=tcp::${SSH_PORT}-:22"
   -device virtio-net-pci,netdev=net0
-  -device "virtio-vga,xres=${DISPLAY_WIDTH},yres=${DISPLAY_HEIGHT}"
+  -device "virtio-vga,edid=on,xres=${DISPLAY_WIDTH},yres=${DISPLAY_HEIGHT}"
   -display "${QEMU_DISPLAY}"
   -device intel-hda
   -device hda-duplex
