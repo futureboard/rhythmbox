@@ -1,18 +1,23 @@
 Window.SetBackgroundTopColor(0.0, 0.0, 0.0);
 Window.SetBackgroundBottomColor(0.0, 0.0, 0.0);
 
-logo_image = Image("splash.png");
-logo_sprite = Sprite(logo_image);
+raw_logo_image = Image("splash.png");
 
-fun center_logo() {
-    logo_sprite.SetX(Window.GetWidth() / 4 - logo_image.GetWidth() / 4);
-    logo_sprite.SetY(Window.GetHeight() / 4 - logo_image.GetHeight() / 4);
+fun make_logo() {
+    target_w = Window.GetWidth() * 0.38;
+    scale = target_w / raw_logo_image.GetWidth();
+    target_h = raw_logo_image.GetHeight() * scale;
+
+    logo_image = raw_logo_image.Scale(target_w, target_h);
+    logo_sprite = Sprite(logo_image);
+
+    logo_sprite.SetX((Window.GetWidth() - logo_image.GetWidth()) / 2);
+    logo_sprite.SetY((Window.GetHeight() - logo_image.GetHeight()) / 2);
 }
 
-center_logo();
+make_logo();
 
 fun refresh_callback() {
-    center_logo();
 }
 
 fun message_callback(text) {
