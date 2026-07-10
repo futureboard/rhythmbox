@@ -18,7 +18,6 @@
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="12.0.4" />
     <PackageReference Include="Avalonia.Desktop" Version="12.0.4" />
-    <PackageReference Include="Avalonia.LinuxFramebuffer" Version="12.0.4" />
     <PackageReference Include="Avalonia.Win32" Version="12.0.4" Condition="$([MSBuild]::IsOSPlatform('Windows'))" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.4" />
     <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.1">

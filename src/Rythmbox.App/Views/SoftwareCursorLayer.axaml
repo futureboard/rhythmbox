@@ -1,0 +1,22 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Rythmbox.App.Views.SoftwareCursorLayer"
+             IsHitTestVisible="False"
+             Focusable="False">
+    <!-- Topmost, input-transparent overlay that draws a mouse pointer on DRM/KMS,
+         where the framebuffer backend provides no hardware/compositor cursor.
+         Only activates in embedded mode; inert (and invisible) on desktop. -->
+    <Canvas x:Name="Root" Background="Transparent">
+        <Path x:Name="Pointer"
+              IsVisible="False"
+              Fill="White"
+              Stroke="#222222"
+              StrokeThickness="1"
+              StrokeJoin="Round"
+              Data="M0,0 L0,18 L4.2,14.2 L7,20.4 L9.3,19.3 L6.5,13.3 L12,13.3 Z">
+            <Path.Effect>
+                <DropShadowEffect BlurRadius="3" OffsetX="0.5" OffsetY="1" Opacity="0.5" Color="Black" />
+            </Path.Effect>
+        </Path>
+    </Canvas>
+</UserControl>

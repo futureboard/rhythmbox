@@ -80,5 +80,8 @@
                        HorizontalAlignment="Center" TextAlignment="Center" />
         </StackPanel>
     </Border>
+
+    <!-- Software mouse cursor for the embedded DRM/KMS host (inert on desktop). -->
+    <views:SoftwareCursorLayer ZIndex="2000" />
     </Grid>
 </UserControl>

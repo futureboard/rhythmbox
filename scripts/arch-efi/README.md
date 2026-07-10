@@ -1,6 +1,6 @@
 # Arch Linux EFI image builder
 
-Builds a bootable x86_64 Arch Linux GPT/EFI disk image that auto-starts `Rythmbox.App` fullscreen on **DRM/KMS** — no X server, no Wayland compositor. The app renders directly to the framebuffer.
+Builds a bootable x86_64 Arch Linux GPT/EFI disk image that auto-starts the embedded host `Rythmbox.Shell` fullscreen on **DRM/KMS** — no X server, no Wayland compositor. It renders directly to the framebuffer with libinput for touch and mouse input.
 
 ## Host setup
 
@@ -56,14 +56,22 @@ Firmware-style silent boot — the display shows only the splash, then the app. 
 - **Fastboot** (default) shows a Plymouth splash (`scripts/arch-efi/splash.png`); kernel/systemd text is diverted to tty3 (**Alt+F3** for diagnostics), not the primary display.
 - Plymouth is held for the whole boot and handed off to the app with `--retain-splash`, so the splash stays frozen on screen until the first app frame replaces it — no flicker to a console.
 - TTY1 auto-logins as `rythmbox` (no prompt, no banner) and launches `/opt/rhythmbox/start-kiosk.sh`.
-- `start-kiosk.sh` renders on DRM/KMS: it sets `RYTHMBOX_DRM=1` and runs `Rythmbox.App --drm`.
+- `start-kiosk.sh` runs `Rythmbox.Shell`, the embedded host that renders on DRM/KMS with libinput for **touch and mouse** input.
 - Set `DEBUG_BOOT=1` to disable Plymouth and keep serial/console boot logs + a visible GRUB menu for troubleshooting.
+
+## Embedded host (`Rythmbox.Shell`)
+
+The kiosk runs a dedicated executable, `src/Rythmbox.Shell`, separate from the desktop `Rythmbox.App`:
+
+- Renders the Rythmbox UI straight to the framebuffer via **DRM/KMS + EGL** — no X11/Wayland.
+- Drives input through **libinput**, which delivers both **touchscreen** and **mouse/keyboard** events.
+- Draws its own **software mouse cursor** (the framebuffer backend has no hardware/compositor pointer). The cursor follows a physical mouse and stays hidden for touch, so a touchscreen UI is uncluttered.
+- Runs on Linux only; on any other OS it prints a message and exits. Desktop platforms use `Rythmbox.App`.
 
 ### DRM/KMS overrides
 
-The kiosk launcher honors these environment variables (see `start-kiosk.sh`):
+The embedded host honors these environment variables (see `start-kiosk.sh`):
 
-- `RYTHMBOX_DRM=1` - use the DRM/KMS framebuffer backend (set automatically).
 - `RYTHMBOX_DRM_CARD` - DRM device node; unset by default so Avalonia auto-detects the primary connected output (override with e.g. `/dev/dri/card1`).
 - `RYTHMBOX_DRM_SCALE` - output scaling factor, default `1.0`.
 - `RYTHMBOX_DRM_ROTATION` - screen rotation in degrees: `0`, `90`, `180`, `270` (default `0`), for portrait/rotated panels.

@@ -306,20 +306,20 @@ rsync -a --delete \
   "${REPO_ROOT}/" "${MOUNT_DIR}/opt/rhythmbox/source/"
 
 chroot_run "cd /opt/rhythmbox/source && dotnet restore Rythmbox.slnx"
-chroot_run "cd /opt/rhythmbox/source && dotnet publish src/Rythmbox.App/Rythmbox.App.csproj -c Release -r linux-x64 --self-contained true -o /opt/rhythmbox/app"
+chroot_run "cd /opt/rhythmbox/source && dotnet publish src/Rythmbox.Shell/Rythmbox.Shell.csproj -c Release -r linux-x64 --self-contained true -o /opt/rhythmbox/app"
 chroot_run "chown -R '${KIOSK_USER}:${KIOSK_USER}' /opt/rhythmbox"
 
 optimize_image
 
-# DRM/KMS launcher: renders straight to the framebuffer, no X server. Plymouth owns
-# the DRM device during boot, so it must release it before the app becomes DRM master.
+# DRM/KMS launcher: Rythmbox.Shell renders straight to the framebuffer (no X server)
+# with libinput for touch + mouse. Plymouth owns the DRM device during boot, so it
+# must release it before the shell becomes DRM master.
 write_file "${MOUNT_DIR}/opt/rhythmbox/start-kiosk.sh" "#!/bin/sh
-export RYTHMBOX_DRM=1
 # Leave RYTHMBOX_DRM_CARD unset so Avalonia auto-detects the primary connected
 # output; set it (e.g. /dev/dri/card1) only if a device needs a specific node.
 export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 sudo -n plymouth quit --retain-splash 2>/dev/null || plymouth quit 2>/dev/null || true
-exec /opt/rhythmbox/app/Rythmbox.App --drm
+exec /opt/rhythmbox/app/Rythmbox.Shell
 "
 chmod 0755 "${MOUNT_DIR}/opt/rhythmbox/start-kiosk.sh"
 chroot_run "chown '${KIOSK_USER}:${KIOSK_USER}' '/opt/rhythmbox/start-kiosk.sh'"
